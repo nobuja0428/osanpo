@@ -4,6 +4,7 @@
   const app = document.getElementById("app");
   const SITE_INFO = DATA.siteInfo || {};
   const img = (key) => DATA.images[key] || DATA.images.hero;
+  const areaImageKeys = new Set(["areaKoenji", "areaKichijoji", "areaAsakusa"]);
   const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
   const safeExternalUrl = (value = "") => {
     try {
@@ -44,10 +45,11 @@
     const fmt = new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" });
     return `${fmt.format(s)}〜${fmt.format(e)}`;
   };
-  const imageDisclosure = "掲載画像は、街や散歩体験の雰囲気を表現する参考イメージです。実際の街並み、店舗、施設の記録写真とは異なる場合があります。AI生成画像を使用する場合も「イメージ」と表示します。";
+  const imageDisclosure = "掲載画像には、街や散歩体験の雰囲気を表現するため、AI生成画像を使用しているものがあります。実際の街並み、店舗、施設の記録写真とは異なる場合があります。";
 
   function imageMarkup(imageKey, alt, className = "") {
-    return `<div class="${className}"><img loading="lazy" decoding="async" src="${img(imageKey)}" alt="${escapeHtml(alt)}"><span class="image-label">イメージ</span></div>`;
+    const dimensions = areaImageKeys.has(imageKey) ? ' width="1200" height="800"' : "";
+    return `<div class="${className}"><img loading="lazy" decoding="async"${dimensions} src="${img(imageKey)}" alt="${escapeHtml(alt)}"><span class="image-label">イメージ</span></div>`;
   }
 
   function header() {
@@ -116,7 +118,7 @@
   function areaCard(area) {
     return `<article class="card">
       <a href="#/area/${area.id}">
-        ${imageMarkup(area.image, `${area.name}の街並みを表現したイメージ`, "card-media")}
+        ${imageMarkup(area.image, area.imageAlt, `card-media card-media--area area-media--${area.id}`)}
         <div class="card-body">
           <span class="card-kicker">${escapeHtml(area.ward)}</span>
           <h3>${escapeHtml(area.name)}</h3>
@@ -258,7 +260,7 @@
     const spots = DATA.spots.filter((s) => s.areaId === id);
     const stories = DATA.stories.filter((s) => s.areaId === id);
     return `${header()}<main id="main">
-      <section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { href: "#/areas", label: "エリア" }, { label: area.name }])}<div class="page-hero-inner"><div><span class="eyebrow">${area.ward}</span><h1>${area.name}</h1><p>${area.description}</p><div class="card-meta"><span class="pill pill--green">${area.publicationStatus}</span><span class="pill">${area.duration}</span><span class="pill">${area.budget}</span>${area.tags.map((t) => `<span class="pill pill--green">${t}</span>`).join("")}</div><p style="margin-top:24px"><a class="btn btn--accent" href="#/map/${area.id}">地図で見る</a></p></div>${imageMarkup(area.image, `${area.name}の街並みを表現した参考イメージ`, "page-hero-media")}</div>${trustPanel(area, area.officialSources)}</div></section>
+      <section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { href: "#/areas", label: "エリア" }, { label: area.name }])}<div class="page-hero-inner"><div><span class="eyebrow">${area.ward}</span><h1>${area.name}</h1><p>${area.description}</p><div class="card-meta"><span class="pill pill--green">${area.publicationStatus}</span><span class="pill">${area.duration}</span><span class="pill">${area.budget}</span>${area.tags.map((t) => `<span class="pill pill--green">${t}</span>`).join("")}</div><p style="margin-top:24px"><a class="btn btn--accent" href="#/map/${area.id}">地図で見る</a></p></div>${imageMarkup(area.image, area.imageAlt, `page-hero-media area-media--${area.id}`)}</div>${trustPanel(area, area.officialSources)}</div></section>
       <section class="section section--surface"><div class="container"><div class="section-heading"><div><span class="eyebrow">COURSES</span><h2>${area.name}のおさんぽコース</h2></div></div><div class="grid grid--3">${courses.map(courseCard).join("")}</div></div></section>
       <section class="section"><div class="container"><div class="section-heading"><div><span class="eyebrow">SPOTS</span><h2>立ち寄りたい場所</h2></div></div><div class="grid grid--3">${spots.map(spotCard).join("")}</div></div></section>
       <section class="section section--soft"><div class="container"><div class="section-heading"><div><span class="eyebrow">STORIES</span><h2>${area.name}を読む</h2></div></div><div class="grid grid--3">${stories.map(storyCard).join("")}</div></div></section>
