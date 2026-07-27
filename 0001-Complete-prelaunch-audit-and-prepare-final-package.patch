@@ -1,0 +1,249 @@
+From 1dedb1fb383af0b0ae91d166849ddf89034aa78b Mon Sep 17 00:00:00 2001
+From: OpenAI Codex <codex@openai.invalid>
+Date: Mon, 27 Jul 2026 22:40:19 +0800
+Subject: [PATCH] Complete prelaunch audit and prepare final package
+
+---
+ README.md  | 49 +++++++++++++++++++++++++++++++++----------------
+ app.js     | 27 ++++++++++++++-------------
+ index.html |  9 +++++++--
+ styles.css | 10 ++++++++++
+ 4 files changed, 64 insertions(+), 31 deletions(-)
+
+diff --git a/README.md b/README.md
+index 9a5efaf..88ac6a1 100644
+--- a/README.md
++++ b/README.md
+@@ -11,6 +11,8 @@
+ - 街の読み物
+ - 掲載イベント情報（開催状態を日時から判定し、終了分は過去欄へ移動）
+ - Googleマップ埋め込み・ルートリンク
++- 検索（キーワード・エリア）
++- お気に入り保存・お気に入り一覧
+ - お問い合わせ（メール・外部フォーム未設定時は準備中表示）
+ - スマートフォン対応
+ - ハッシュルーティングによるGitHub Pages対応
+@@ -27,11 +29,15 @@ python -m http.server 8000
+ 
+ ## GitHub Pagesで公開
+ 
+-1. このフォルダーをGitHubリポジトリへアップロード
+-2. GitHubの `Settings` → `Pages`
+-3. `Deploy from a branch` を選択
+-4. `main` ブランチの `/ (root)` を指定
+-5. 表示されたURLへアクセス
++1. 配布ZIPを解凍
++2. ZIPの中身（`index.html`、`assets/`など）をGitHubリポジトリのルートへ配置
++3. ZIPファイル自体はGitHubへ置かない
++4. GitHubの `Settings` → `Pages`
++5. `Deploy from a branch` を選択
++6. `main` ブランチの `/ (root)` を指定
++7. 表示されたURLへアクセス
++
++`index.html`を含むフォルダーを一段深く配置しないでください。
+ 
+ ## 連絡先の設定
+ 
+@@ -46,17 +52,15 @@ window.OSANPO_CONFIG = {
+ 
+ 公開用アドレスが決まった場合だけ `contactEmail` に設定してください。Googleフォームを使う場合は `contactFormUrl` に公開URLを設定してください。空欄の間は準備中表示になります。
+ 
+-## 画像の差し替え
++## 画像
+ 
+-`data.js` の `images` を差し替えてください。現在は構成確認用の外部画像を使用しています。本番公開前に、利用権を確認した写真または制作したAI生成画像へ差し替えることを推奨します。
++画像はすべて`assets/images/`以下のローカルWebPです。掲載画像には、街や散歩体験の雰囲気を表現するために制作した生成イメージが含まれます。実際の街並み、店舗、施設、イベントの開催記録写真とは異なる場合があります。
+ 
+-```js
+-images: {
+-  koenji: "assets/images/koenji.webp",
+-}
+-```
++画像参照を更新する場合は、`data.js`の`images`と各コンテンツの`image`・`imageAlt`を対応させ、ファイル名の大文字小文字と実ファイルの存在を確認してください。
+ 
+-画像は `assets/images` に配置し、WebPまたはAVIFを推奨します。
++## お気に入り
++
++お気に入りは利用者のブラウザ内に保存されます。サーバー送信、アカウント同期、端末間同期は行いません。ブラウザのサイトデータを削除するとお気に入りも消去されます。
+ 
+ ## イベントの更新
+ 
+@@ -68,9 +72,22 @@ images: {
+ 
+ APIキーなしで使えるGoogleマップ検索埋め込みと、GoogleマップのルートURLを利用しています。高度なピン連動やルート描画を行う場合は、Google Maps JavaScript APIの契約・APIキー設定が必要です。
+ 
+-## 注意
++## 更新時に触る主なファイル
++
++- `data.js`：エリア、コース、スポット、読み物、イベント、画像参照
++- `config.js`：公開用問い合わせ先などの設定
++- `app.js`：表示・ルーティング・検索・お気に入り
++- `styles.css`：レイアウトと表示
++- `index.html`：基本meta情報と読み込み設定
++
++## 公開前チェック
+ 
+ - 店舗・施設・イベントの情報は公式情報を確認して更新してください。
+-- 外部画像のライセンスを本番公開前に確認してください。
+-- AI画像を実在店舗の記録写真として表示しないでください。
++- `informationCheckedAt`、`lastUpdated`、公式URLを確認してください。
++- コースの歩きやすさや休憩候補など、現地情報は現地確認が必要です。
++- 生成イメージを実在店舗・施設・イベントの記録写真として表示しないでください。
++- 問い合わせ先が未設定のとき、フォームと送信ボタンが表示されないことを確認してください。
++- 全内部リンク、画像パス、GoogleマップURL、検索、お気に入り、イベント状態を確認してください。
++- PCとスマートフォンで横スクロールや操作不能がないことを確認してください。
++- 個人情報、APIキー、トークン、ローカル作業パスが含まれていないことを確認してください。
+ - 現在のエリアデータは高円寺・吉祥寺・浅草の3件です。残り37エリアのページや記事は、確認済み情報が用意できるまで追加しません。
+diff --git a/app.js b/app.js
+index b97388f..4d2f632 100644
+--- a/app.js
++++ b/app.js
+@@ -34,7 +34,7 @@
+   };
+   const routeParts = () => location.hash.split("?")[0].replace(/^#\/?/, "").split("/").filter(Boolean);
+   const eventState = (event, now = Date.now()) => {
+-    if (event.status === "中止" || event.status === "延期") return event.status;
++    if (["中止", "延期", "終了", "情報更新待ち"].includes(event.status)) return event.status;
+     const start = new Date(event.start).getTime();
+     const end = new Date(event.end).getTime();
+     if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return "情報更新待ち";
+@@ -149,7 +149,8 @@
+   }
+ 
+   function header() {
+-    const current = routeParts()[0] || "home";
++    const route = routeParts()[0] || "home";
++    const current = { area: "areas", course: "courses", spot: "spots" }[route] || route;
+     const nav = [
+       ["areas", "エリアから探す"],
+       ["courses", "おさんぽコース"],
+@@ -182,14 +183,14 @@
+         <div class="container footer-inner">
+           <div><h3>おさんぽクラブ東京</h3><p>公開情報をもとに、AIによる構成・表現の補助も利用して東京の街歩きプランを編集するメディアです。${imageDisclosure}</p></div>
+           <div><h3>探す</h3><div class="footer-links"><a href="#/areas">エリア</a><a href="#/courses">コース</a><a href="#/spots">スポット</a><a href="#/events">イベント</a><a href="#/map">お散歩マップ</a><a href="#/favorites">お気に入り</a></div></div>
+-          <div><h3>運営</h3><div class="footer-links"><a href="#/operation">運営情報</a><a href="#/policy">編集方針</a><a href="#/privacy">プライバシーポリシー</a><a href="#/advertising">広告掲載</a><a href="#/contact">お問い合わせ</a><a href="README.md">GitHub版について</a></div></div>
++          <div><h3>運営</h3><div class="footer-links"><a href="#/operation">運営情報</a><a href="#/editorial-policy">編集方針</a><a href="#/privacy">プライバシーポリシー</a><a href="#/advertise">広告掲載</a><a href="#/contact">お問い合わせ</a><a href="README.md">GitHub版について</a></div></div>
+         </div>
+         <div class="container footer-bottom">© 2026 おさんぽクラブ東京</div>
+       </footer>`;
+   }
+ 
+   function breadcrumbs(items) {
+-    return `<nav class="breadcrumbs" aria-label="パンくず">${items.map((item, i) => i === items.length - 1 ? `<span>${escapeHtml(item.label)}</span>` : `<a href="${item.href}">${escapeHtml(item.label)}</a><span>›</span>`).join("")}</nav>`;
++    return `<nav class="breadcrumbs" aria-label="パンくず">${items.map((item, i) => i === items.length - 1 ? `<span aria-current="page">${escapeHtml(item.label)}</span>` : `<a href="${item.href}">${escapeHtml(item.label)}</a><span aria-hidden="true">›</span>`).join("")}</nav>`;
+   }
+ 
+   function trustPanel(record = {}, sources = []) {
+@@ -391,7 +392,7 @@
+     if (!course) return notFound();
+     const area = DATA.areas.find((a) => a.id === course.areaId);
+     return `${header()}<main id="main"><section class="article-header"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { href: "#/courses", label: "コース" }, { label: course.title }])}<span class="eyebrow">${area.name}・モデルコース</span><h1>${course.title}</h1>${favoriteButton("course", course.id, course.title, true)}<p class="article-lead">${course.summary}</p><div class="card-meta"><span class="pill">${course.distance}</span><span class="pill">${course.duration}</span><span class="pill">${course.budget}</span><span class="pill">${course.audience}</span></div><div class="article-cover article-cover--course">${imageMarkup(course.image, courseImageAlt(course, `${course.title}を表現した参考イメージ`), "")}</div>${trustPanel(course, area.officialSources)}</div></section>
+-    <section class="section section--compact"><div class="container map-layout"><div class="map-shell"><iframe loading="lazy" src="${mapsEmbedUrl(area.mapQuery)}" title="${escapeHtml(course.title)}の地図"></iframe></div><div><h2>立ち寄り地点</h2><div class="stop-list">${course.stops.map((stop, i) => `<div class="stop-card"><span class="stop-number">${i + 1}</span><div><strong>${escapeHtml(stop.name)}</strong><span>${escapeHtml(stop.category)}</span></div><a class="btn btn--small" href="${mapsPlaceUrl(stop.query)}" target="_blank" rel="noopener">地図</a></div>`).join("")}</div><p><a class="btn btn--accent" href="${courseRouteUrl(course)}" target="_blank" rel="noopener">Googleマップでルート全体を開く</a></p></div></div></section>
++    <section class="section section--compact"><div class="container map-layout"><div class="map-shell"><iframe loading="lazy" src="${mapsEmbedUrl(area.mapQuery)}" title="${escapeHtml(course.title)}の地図"></iframe></div><div><h2>立ち寄り地点</h2><div class="stop-list">${course.stops.map((stop, i) => `<div class="stop-card"><span class="stop-number">${i + 1}</span><div><strong>${escapeHtml(stop.name)}</strong><span>${escapeHtml(stop.category)}</span></div><a class="btn btn--small" href="${mapsPlaceUrl(stop.query)}" target="_blank" rel="noopener noreferrer">地図</a></div>`).join("")}</div><p><a class="btn btn--accent" href="${courseRouteUrl(course)}" target="_blank" rel="noopener noreferrer">Googleマップでルート全体を開く</a></p></div></div></section>
+     <section class="section section--soft"><div class="narrow article-body"><h2>この順番で歩く理由</h2><p>駅の近くから始め、街の特徴が切り替わる方向へ進むことで、同じ道を戻らずに歩ける構成です。営業状況や工事、混雑により変わるため、来訪前に公式情報とGoogleマップをご確認ください。</p><div class="article-note">距離と徒歩時間は地図情報をもとにした概算です。信号待ち、休憩、立ち寄り時間は含まれない場合があります。</div></div></section></main>${footer()}`;
+   }
+ 
+@@ -415,7 +416,7 @@
+   function mapPage(areaId) {
+     const selectedArea = DATA.areas.find((a) => a.id === areaId) || DATA.areas[0];
+     const course = DATA.courses.find((c) => c.areaId === selectedArea.id);
+-    return `${header()}<main id="main"><section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "お散歩マップ" }])}<span class="eyebrow">GOOGLE MAPS</span><h1>お散歩マップ</h1><p>実用地図はGoogleマップを使用します。地点番号と記事の順番を合わせ、外部地図でルート全体を開けます。</p><div class="card-meta">${DATA.areas.map((area) => `<a class="pill ${area.id === selectedArea.id ? "pill--accent" : ""}" href="#/map/${area.id}">${area.name}</a>`).join("")}</div></div></section><section class="section section--compact"><div class="container map-layout"><div class="map-shell"><iframe loading="lazy" src="${mapsEmbedUrl(selectedArea.mapQuery)}" title="${selectedArea.name}のお散歩マップ"></iframe></div><div><span class="eyebrow">${selectedArea.name}</span><h2>${course.title}</h2><p>${course.summary}</p><div class="stop-list">${course.stops.map((stop, i) => `<div class="stop-card"><span class="stop-number">${i + 1}</span><div><strong>${escapeHtml(stop.name)}</strong><span>${escapeHtml(stop.category)}</span></div><a class="btn btn--small" target="_blank" rel="noopener" href="${mapsPlaceUrl(stop.query)}">開く</a></div>`).join("")}</div><p><a class="btn btn--accent" target="_blank" rel="noopener" href="${courseRouteUrl(course)}">ルート全体をGoogleマップで開く</a></p></div></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "お散歩マップ" }])}<span class="eyebrow">GOOGLE MAPS</span><h1>お散歩マップ</h1><p>実用地図はGoogleマップを使用します。地点番号と記事の順番を合わせ、外部地図でルート全体を開けます。</p><div class="card-meta">${DATA.areas.map((area) => `<a class="pill ${area.id === selectedArea.id ? "pill--accent" : ""}" href="#/map/${area.id}">${area.name}</a>`).join("")}</div></div></section><section class="section section--compact"><div class="container map-layout"><div class="map-shell"><iframe loading="lazy" src="${mapsEmbedUrl(selectedArea.mapQuery)}" title="${selectedArea.name}のお散歩マップ"></iframe></div><div><span class="eyebrow">${selectedArea.name}</span><h2>${course.title}</h2><p>${course.summary}</p><div class="stop-list">${course.stops.map((stop, i) => `<div class="stop-card"><span class="stop-number">${i + 1}</span><div><strong>${escapeHtml(stop.name)}</strong><span>${escapeHtml(stop.category)}</span></div><a class="btn btn--small" target="_blank" rel="noopener noreferrer" href="${mapsPlaceUrl(stop.query)}">開く</a></div>`).join("")}</div><p><a class="btn btn--accent" target="_blank" rel="noopener noreferrer" href="${courseRouteUrl(course)}">ルート全体をGoogleマップで開く</a></p></div></div></section></main>${footer()}`;
+   }
+ 
+   function eventsPage() {
+@@ -425,7 +426,7 @@
+   }
+ 
+   function aboutPage() {
+-    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "はじめての方" }])}<span class="eyebrow">ABOUT</span><h1>おさんぽクラブ東京について</h1><p>公式情報、自治体、施設、地図情報などを参考に、東京の街歩きプランを編集しています。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>現在の公開範囲</h2><p>${escapeHtml(SITE_INFO.expansionMessage)} 現在は高円寺・吉祥寺・浅草の基本ガイドを公開し、その他のエリアは記事準備中です。</p><h2>来訪前の確認</h2><p>営業時間、定休日、料金、イベント内容は変更される場合があります。訪問前に必ず公式情報をご確認ください。</p><p><a class="btn btn--accent" href="#/policy">編集方針を読む</a> <a class="btn" href="#/areas">エリア一覧へ</a></p></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "はじめての方" }])}<span class="eyebrow">ABOUT</span><h1>おさんぽクラブ東京について</h1><p>公式情報、自治体、施設、地図情報などを参考に、東京の街歩きプランを編集しています。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>現在の公開範囲</h2><p>${escapeHtml(SITE_INFO.expansionMessage)} 現在は高円寺・吉祥寺・浅草の基本ガイドを公開し、その他のエリアは記事準備中です。</p><h2>来訪前の確認</h2><p>営業時間、定休日、料金、イベント内容は変更される場合があります。訪問前に必ず公式情報をご確認ください。</p><p><a class="btn btn--accent" href="#/editorial-policy">編集方針を読む</a> <a class="btn" href="#/areas">エリア一覧へ</a></p></div></section></main>${footer()}`;
+   }
+ 
+   function operationPage() {
+@@ -434,12 +435,12 @@
+   }
+ 
+   function policyPage() {
+-    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "編集方針" }])}<span class="eyebrow">EDITORIAL POLICY</span><h1>編集方針</h1><p>確認できた事実と、編集上の提案・イメージを区別します。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>情報の作成方法</h2><p>記事、エリア、コースは公開情報をもとに作成しています。現地取材は未実施で、現地の歩きやすさ、休憩候補、最新状況は今後確認予定です。</p><h2>AI利用</h2><p>文章の構成や表現の補助にAIを利用しています。未確認情報を事実として追加しない方針です。</p><h2>画像について</h2><p>${imageDisclosure}</p><p>現在の外部参考画像は、実在店舗の外観や施設の記録写真として扱いません。公開用素材としての最終確定には、利用条件の再確認が必要です。</p><h2>更新情報</h2><p>最終更新日：${escapeHtml(SITE_INFO.lastUpdated || "未記録")}。営業時間、料金、イベント内容は変更される可能性があるため、訪問前に公式情報をご確認ください。</p></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "編集方針" }])}<span class="eyebrow">EDITORIAL POLICY</span><h1>編集方針</h1><p>確認できた事実と、編集上の提案・イメージを区別します。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>情報の作成方法</h2><p>記事、エリア、コースは公開情報をもとに作成しています。現地取材は未実施で、現地の歩きやすさ、休憩候補、最新状況は今後確認予定です。</p><h2>AI利用</h2><p>文章の構成や表現の補助にAIを利用しています。未確認情報を事実として追加しない方針です。</p><h2>画像について</h2><p>${imageDisclosure}</p><p>掲載画像はローカルファイルとして管理し、実在店舗の外観や施設、イベントの開催記録写真として扱いません。</p><h2>更新情報</h2><p>最終更新日：${escapeHtml(SITE_INFO.lastUpdated || "未記録")}。営業時間、料金、イベント内容は変更される可能性があるため、訪問前に公式情報をご確認ください。</p></div></section></main>${footer()}`;
+   }
+ 
+   function privacyPage() {
+     const contactPrivacy = configuredEmail || configuredFormUrl ? "お問い合わせ時に入力した情報は、利用者が選択したメールまたは外部フォームの提供元へ送信されます。" : "現在、問い合わせフォームと送信先は未設定で、サイト上で個人情報を送信する機能は表示していません。";
+-    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "プライバシーポリシー" }])}<span class="eyebrow">PRIVACY</span><h1>プライバシーポリシー</h1><p>現在のサイト実装に合わせた情報の取り扱いを説明します。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>取得していない情報</h2><p>このコードにはアクセス解析、会員登録、決済、ブラウザの位置情報取得機能はありません。</p><h2>お気に入り情報</h2><p>お気に入り情報は利用者のブラウザ内に保存され、サーバーへ送信されません。アカウント間や端末間では同期されず、ブラウザのサイトデータを削除すると消去されます。</p><h2>外部サービス</h2><p>Googleマップの埋め込みや外部リンク、外部画像を表示する際、各サービスへ通信が発生します。各サービス側の情報取り扱いは、それぞれの規約とプライバシーポリシーをご確認ください。</p><h2>お問い合わせ</h2><p>${contactPrivacy}</p><p><a class="btn" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "プライバシーポリシー" }])}<span class="eyebrow">PRIVACY</span><h1>プライバシーポリシー</h1><p>現在のサイト実装に合わせた情報の取り扱いを説明します。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>取得していない情報</h2><p>このコードにはアクセス解析、会員登録、決済、ブラウザの位置情報取得機能はありません。</p><h2>お気に入り情報</h2><p>お気に入り情報は利用者のブラウザ内に保存され、サーバーへ送信されません。アカウント間や端末間では同期されず、ブラウザのサイトデータを削除すると消去されます。</p><h2>外部サービス</h2><p>Googleマップの埋め込みや公式情報などの外部リンクを利用した際、各サービスへ通信が発生します。掲載画像はサイト内のローカルファイルです。外部サービス側の情報取り扱いは、それぞれの規約とプライバシーポリシーをご確認ください。</p><h2>お問い合わせ</h2><p>${contactPrivacy}</p><p><a class="btn" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
+   }
+ 
+   function advertisingPage() {
+@@ -453,7 +454,7 @@
+     const contactBody = methods.length
+       ? `<div class="contact-panel"><h2>受付方法</h2><div class="form-actions">${methods.join("")}</div><p>外部サービスまたはメールアプリが開きます。送信前に宛先をご確認ください。</p></div>`
+       : `<div class="contact-panel"><h2>現在、お問い合わせ受付を準備中です</h2><p>公開用メールアドレスまたは外部フォームが未設定のため、送信フォームと送信ボタンは表示していません。</p><p>受付開始後は、このページで案内します。</p></div>`;
+-    return `${header()}<main id="main"><section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "お問い合わせ" }])}<span class="eyebrow">CONTACT</span><h1>情報訂正・お問い合わせ</h1><p>${methods.length ? "公開中の受付方法をご利用ください。" : "現在、お問い合わせ受付を準備中です。"}</p></div></section><section class="section section--compact"><div class="container">${contactBody}<div class="empty-actions"><a class="btn" href="#/">トップへ戻る</a><a class="btn" href="#/operation">運営情報</a><a class="btn" href="#/advertising">広告掲載</a></div></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "お問い合わせ" }])}<span class="eyebrow">CONTACT</span><h1>情報訂正・お問い合わせ</h1><p>${methods.length ? "公開中の受付方法をご利用ください。" : "現在、お問い合わせ受付を準備中です。"}</p></div></section><section class="section section--compact"><div class="container">${contactBody}<div class="empty-actions"><a class="btn" href="#/">トップへ戻る</a><a class="btn" href="#/operation">運営情報</a><a class="btn" href="#/advertise">広告掲載</a></div></div></section></main>${footer()}`;
+   }
+ 
+   function searchResults() {
+@@ -471,7 +472,7 @@
+   }
+ 
+   function notFound() {
+-    return `${header()}<main id="main"><section class="page-hero"><div class="narrow"><span class="eyebrow">404</span><h1>ページが見つかりません</h1><p><a class="btn btn--accent" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="narrow"><span class="eyebrow">404</span><h1>ページが見つかりません</h1><p>URLをご確認いただくか、トップまたはエリア一覧からお探しください。</p><div class="empty-actions"><a class="btn btn--accent" href="#/">トップへ戻る</a><a class="btn" href="#/areas">エリア一覧へ戻る</a></div></div></section></main>${footer()}`;
+   }
+ 
+   function render() {
+@@ -488,9 +489,9 @@
+     else if (type === "favorites") html = favoritesPage();
+     else if (type === "about") html = aboutPage();
+     else if (type === "operation") html = operationPage();
+-    else if (type === "policy") html = policyPage();
++    else if (type === "editorial-policy" || type === "policy") html = policyPage();
+     else if (type === "privacy") html = privacyPage();
+-    else if (type === "advertising") html = advertisingPage();
++    else if (type === "advertise" || type === "advertising") html = advertisingPage();
+     else if (type === "contact") html = contactPage();
+     else if (type === "search") html = searchResults();
+     else html = notFound();
+diff --git a/index.html b/index.html
+index 9c25b93..af50d13 100644
+--- a/index.html
++++ b/index.html
+@@ -8,8 +8,13 @@
+     <meta property="og:title" content="おさんぽクラブ東京" />
+     <meta property="og:description" content="東京には、歩くと楽しいまちがたくさんある。" />
+     <meta property="og:type" content="website" />
+-    <meta property="og:image" content="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1600&q=85" />
+-    <link rel="preconnect" href="https://images.unsplash.com" />
++    <meta property="og:image" content="assets/images/hero/hero-tokyo-walk.webp" />
++    <meta property="og:image:width" content="1600" />
++    <meta property="og:image:height" content="900" />
++    <meta name="twitter:card" content="summary_large_image" />
++    <meta name="twitter:title" content="おさんぽクラブ東京" />
++    <meta name="twitter:description" content="東京には、歩くと楽しいまちがたくさんある。" />
++    <meta name="twitter:image" content="assets/images/hero/hero-tokyo-walk.webp" />
+     <link rel="preconnect" href="https://www.google.com" />
+     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+     <link rel="stylesheet" href="styles.css" />
+diff --git a/styles.css b/styles.css
+index 69bc863..783a78b 100644
+--- a/styles.css
++++ b/styles.css
+@@ -420,3 +420,13 @@ textarea.form-control { min-height: 150px; padding-top: 12px; resize: vertical;
+   .btn, .site-nav a { min-height: 44px; }
+   .favorite-detail-action { max-width: 100%; }
+ }
++
++@media (prefers-reduced-motion: reduce) {
++  html { scroll-behavior: auto; }
++  *, *::before, *::after {
++    scroll-behavior: auto !important;
++    transition-duration: 0.01ms !important;
++    animation-duration: 0.01ms !important;
++    animation-iteration-count: 1 !important;
++  }
++}
+-- 
+2.51.1
+
