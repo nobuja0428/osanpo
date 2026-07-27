@@ -420,3 +420,13 @@ textarea.form-control { min-height: 150px; padding-top: 12px; resize: vertical; 
   .btn, .site-nav a { min-height: 44px; }
   .favorite-detail-action { max-width: 100%; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
