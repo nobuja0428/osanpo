@@ -46,12 +46,61 @@ python -m http.server 8000
 
 ```js
 window.OSANPO_CONFIG = {
+  siteUrl: "",
   contactEmail: "",
   contactFormUrl: "",
+  analytics: {
+    enabled: false,
+    provider: "ga4",
+    measurementId: "",
+  },
 };
 ```
 
-公開用アドレスが決まった場合だけ `contactEmail` に設定してください。Googleフォームを使う場合は `contactFormUrl` に公開URLを設定してください。空欄の間は準備中表示になります。
+公開用アドレスが決まった場合だけ `contactEmail` に設定してください。Googleフォームを使う場合は、公開したGoogleフォームのHTTPS URLを`contactFormUrl`へ設定してください。`forms.gle`または`docs.google.com/forms/`以外のURL、`example.com`・`example.jp`のメール、空欄は無効扱いとなり、準備中表示を維持します。
+
+## 公開RC2の設定とアクセス解析
+
+公開RC2では、`config.js`へ公開URL・問い合わせ先・GA4の設定欄を追加し、`analytics.js`へ解析処理を分離しました。初期状態は次のとおりで、アクセス解析と問い合わせ送信UIは動作しません。
+
+- `siteUrl: ""`
+- `contactEmail: ""`
+- `contactFormUrl: ""`
+- `analytics.enabled: false`
+- `analytics.measurementId: ""`
+
+正式な公開HTTPS URLが決まったら`siteUrl`へ設定してください。動的な`og:url`の生成と解析用の画面URLに使用します。空欄またはHTTPS以外のURLは使用されません。
+
+GA4を利用する場合は、運営者がGoogle Analytics側でプロパティを作成し、`analytics.measurementId`へ正式な`G-`から始まる英数字の測定IDを設定したうえで、`analytics.enabled`を`true`にします。`enabled`が`true`、`provider`が`ga4`、測定IDが有効、ブラウザ環境という条件がすべてそろった場合だけGA4スクリプトを読み込みます。解析無効時や無効な測定IDでは読み込まず、呼び出しはno-opになります。
+
+SPAの初回表示とハッシュ変更後に`page_view`を手動送信します。初期の自動画面表示は無効化し、同じURLでのお気に入り表示更新などは重複ページビューにしません。検索・コース絞り込みURLは、解析送信時だけ`keyword`の値を除外します。
+
+### 計測イベント
+
+| イベント | 主な送信項目 |
+| --- | --- |
+| `area_view`、`course_view`、`spot_view`、`story_view` | `content_id`、`content_type`、`area_id`、`route_name` |
+| `advertise_view`、`contact_view` | `content_type`、`route_name` |
+| `google_map_click` | `link_type`、`content_id`、`area_id`、`course_id`、`stop_order` |
+| `official_link_click` | `content_type`、`content_id`、`link_type`、`area_id` |
+| `food_link_click` | `food_id`、`course_id`、`area_id`、`link_type` |
+| `transit_link_click` | `transit_id`、`course_id`、`role`、`link_type` |
+| `favorite_change` | `content_type`、`content_id`、`action` |
+| `search_submit` | `has_keyword`、`area_id`、`result_count` |
+| `course_filter_apply`、`course_filter_remove`、`course_filter_clear` | 選択件数、各選択キー、`has_keyword`、`removed_filter` |
+| `contact_cta_click` | `method`、`source_page` |
+
+利用者が入力した検索語そのもの、氏名、メールアドレス、住所、外部URL全文、ドメイン名は解析イベントへ送信しません。お気に入りは従来どおりブラウザ内の`localStorage`だけへ保存します。
+
+## SEO基礎と外部作業
+
+画面ごとに`document.title`、meta description、OGP、Twitter Cardのタイトルと説明を更新します。`siteUrl`が有効なHTTPS URLの場合だけ`og:url`を絶対URLとして更新します。OGP画像は既存のヒーロー画像を維持しています。
+
+`robots.txt`は通常ページ、CSS、JavaScript、画像のクロールを禁止しない最小構成です。正式な公開URLが未確定のため、`sitemap.xml`は作成していません。公開URL確定後に正しいURLで作成し、運営者がGoogle Search Consoleへ登録・所有権確認・送信を行ってください。
+
+このサイトはハッシュルーティングの静的SPAです。各ハッシュ画面が検索エンジンへ独立ページとして確実に登録されるとは限らず、今回のmeta更新だけで完全なSEO対応にはなりません。検索流入を本格化する場合は、静的HTML化またはパス型ページへの移行を別段階で検討してください。
+
+GA4プロパティ作成、Googleフォーム作成、Google Search Console登録、所有権確認、`sitemap.xml`送信はコード外の作業です。Cookie同意の要否は、公開地域、法務、運用方針に応じて運営者側で確認してください。公開前の設定・外部作業は`RELEASE_CHECKLIST.md`も使用してください。
 
 ## 画像
 
