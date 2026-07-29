@@ -1,0 +1,871 @@
+From 0ad040df4b995aa8b04516c6f2801ff35c607489 Mon Sep 17 00:00:00 2001
+From: Codex <codex@local.invalid>
+Date: Wed, 29 Jul 2026 15:09:34 +0900
+Subject: [PATCH] Add measurement foundation and launch safeguards
+
+---
+ README.md            |  51 ++++++-
+ RELEASE_CHECKLIST.md |  71 ++++++++++
+ analytics.js         |  63 +++++++++
+ app.js               | 320 ++++++++++++++++++++++++++++++++++++++-----
+ config.js            |   6 +
+ index.html           |   2 +
+ robots.txt           |   2 +
+ 7 files changed, 483 insertions(+), 32 deletions(-)
+ create mode 100644 RELEASE_CHECKLIST.md
+ create mode 100644 analytics.js
+ create mode 100644 robots.txt
+
+diff --git a/README.md b/README.md
+index 9a48e3b..0ac6acf 100644
+--- a/README.md
++++ b/README.md
+@@ -46,12 +46,61 @@ python -m http.server 8000
+ 
+ ```js
+ window.OSANPO_CONFIG = {
++  siteUrl: "",
+   contactEmail: "",
+   contactFormUrl: "",
++  analytics: {
++    enabled: false,
++    provider: "ga4",
++    measurementId: "",
++  },
+ };
+ ```
+ 
+-公開用アドレスが決まった場合だけ `contactEmail` に設定してください。Googleフォームを使う場合は `contactFormUrl` に公開URLを設定してください。空欄の間は準備中表示になります。
++公開用アドレスが決まった場合だけ `contactEmail` に設定してください。Googleフォームを使う場合は、公開したGoogleフォームのHTTPS URLを`contactFormUrl`へ設定してください。`forms.gle`または`docs.google.com/forms/`以外のURL、`example.com`・`example.jp`のメール、空欄は無効扱いとなり、準備中表示を維持します。
++
++## 公開RC2の設定とアクセス解析
++
++公開RC2では、`config.js`へ公開URL・問い合わせ先・GA4の設定欄を追加し、`analytics.js`へ解析処理を分離しました。初期状態は次のとおりで、アクセス解析と問い合わせ送信UIは動作しません。
++
++- `siteUrl: ""`
++- `contactEmail: ""`
++- `contactFormUrl: ""`
++- `analytics.enabled: false`
++- `analytics.measurementId: ""`
++
++正式な公開HTTPS URLが決まったら`siteUrl`へ設定してください。動的な`og:url`の生成と解析用の画面URLに使用します。空欄またはHTTPS以外のURLは使用されません。
++
++GA4を利用する場合は、運営者がGoogle Analytics側でプロパティを作成し、`analytics.measurementId`へ正式な`G-`から始まる英数字の測定IDを設定したうえで、`analytics.enabled`を`true`にします。`enabled`が`true`、`provider`が`ga4`、測定IDが有効、ブラウザ環境という条件がすべてそろった場合だけGA4スクリプトを読み込みます。解析無効時や無効な測定IDでは読み込まず、呼び出しはno-opになります。
++
++SPAの初回表示とハッシュ変更後に`page_view`を手動送信します。初期の自動画面表示は無効化し、同じURLでのお気に入り表示更新などは重複ページビューにしません。検索・コース絞り込みURLは、解析送信時だけ`keyword`の値を除外します。
++
++### 計測イベント
++
++| イベント | 主な送信項目 |
++| --- | --- |
++| `area_view`、`course_view`、`spot_view`、`story_view` | `content_id`、`content_type`、`area_id`、`route_name` |
++| `advertise_view`、`contact_view` | `content_type`、`route_name` |
++| `google_map_click` | `link_type`、`content_id`、`area_id`、`course_id`、`stop_order` |
++| `official_link_click` | `content_type`、`content_id`、`link_type`、`area_id` |
++| `food_link_click` | `food_id`、`course_id`、`area_id`、`link_type` |
++| `transit_link_click` | `transit_id`、`course_id`、`role`、`link_type` |
++| `favorite_change` | `content_type`、`content_id`、`action` |
++| `search_submit` | `has_keyword`、`area_id`、`result_count` |
++| `course_filter_apply`、`course_filter_remove`、`course_filter_clear` | 選択件数、各選択キー、`has_keyword`、`removed_filter` |
++| `contact_cta_click` | `method`、`source_page` |
++
++利用者が入力した検索語そのもの、氏名、メールアドレス、住所、外部URL全文、ドメイン名は解析イベントへ送信しません。お気に入りは従来どおりブラウザ内の`localStorage`だけへ保存します。
++
++## SEO基礎と外部作業
++
++画面ごとに`document.title`、meta description、OGP、Twitter Cardのタイトルと説明を更新します。`siteUrl`が有効なHTTPS URLの場合だけ`og:url`を絶対URLとして更新します。OGP画像は既存のヒーロー画像を維持しています。
++
++`robots.txt`は通常ページ、CSS、JavaScript、画像のクロールを禁止しない最小構成です。正式な公開URLが未確定のため、`sitemap.xml`は作成していません。公開URL確定後に正しいURLで作成し、運営者がGoogle Search Consoleへ登録・所有権確認・送信を行ってください。
++
++このサイトはハッシュルーティングの静的SPAです。各ハッシュ画面が検索エンジンへ独立ページとして確実に登録されるとは限らず、今回のmeta更新だけで完全なSEO対応にはなりません。検索流入を本格化する場合は、静的HTML化またはパス型ページへの移行を別段階で検討してください。
++
++GA4プロパティ作成、Googleフォーム作成、Google Search Console登録、所有権確認、`sitemap.xml`送信はコード外の作業です。Cookie同意の要否は、公開地域、法務、運用方針に応じて運営者側で確認してください。公開前の設定・外部作業は`RELEASE_CHECKLIST.md`も使用してください。
+ 
+ ## 画像
+ 
+diff --git a/RELEASE_CHECKLIST.md b/RELEASE_CHECKLIST.md
+new file mode 100644
+index 0000000..c4c56a5
+--- /dev/null
++++ b/RELEASE_CHECKLIST.md
+@@ -0,0 +1,71 @@
++# 公開RC2 リリースチェックリスト
++
++## コード設定
++
++- [ ] `siteUrl`に正式な公開HTTPS URLを設定
++- [ ] `analytics.enabled`の公開時設定を確認
++- [ ] `analytics.measurementId`に正式なGA4測定IDを設定
++- [ ] `contactFormUrl`に正式なGoogleフォームURLを設定
++- [ ] `contactEmail`に公開用メールアドレスを設定
++
++## 外部サービス
++
++- [ ] GA4プロパティ作成
++- [ ] GA4リアルタイム計測確認
++- [ ] Googleフォーム作成
++- [ ] Google Search Console登録
++- [ ] 所有権確認
++- [ ] `sitemap.xml`送信
++- [ ] 公開URL確認
++
++## 表示確認
++
++- [ ] 1440px
++- [ ] 1024px
++- [ ] 768px
++- [ ] 375px
++- [ ] 320px相当
++- [ ] iPhone実機
++- [ ] Android実機
++
++## 機能確認
++
++- [ ] トップ
++- [ ] 3エリア
++- [ ] 3コース
++- [ ] 6スポット
++- [ ] 読み物
++- [ ] イベント
++- [ ] 検索
++- [ ] コース絞り込み
++- [ ] 条件の個別解除
++- [ ] 条件の全解除
++- [ ] お気に入り追加
++- [ ] お気に入り削除
++- [ ] お気に入り一覧
++- [ ] Googleマップ
++- [ ] 公式サイト
++- [ ] 問い合わせ
++- [ ] 広告掲載
++- [ ] プライバシーポリシー
++- [ ] 404
++
++## 現地・情報確認
++
++- [ ] コースの徒歩確認
++- [ ] 駅出口確認
++- [ ] 店舗営業状況
++- [ ] トイレ利用状況
++- [ ] イベント公式情報
++- [ ] 外部リンク
++- [ ] 情報確認日
++
++## セキュリティ・公開情報
++
++- [ ] APIキーなし
++- [ ] トークンなし
++- [ ] 個人メールなし
++- [ ] ローカルパスなし
++- [ ] テストデータなし
++- [ ] 架空実績なし
++- [ ] 架空料金なし
+diff --git a/analytics.js b/analytics.js
+new file mode 100644
+index 0000000..7fa4b6b
+--- /dev/null
++++ b/analytics.js
+@@ -0,0 +1,63 @@
++(() => {
++  const config = window.OSANPO_CONFIG || {};
++  const analyticsConfig = config.analytics || {};
++  const measurementId = String(analyticsConfig.measurementId || "").trim().toUpperCase();
++  const validMeasurementId = /^G-[A-Z0-9]+$/.test(measurementId);
++  const enabled = analyticsConfig.enabled === true
++    && analyticsConfig.provider === "ga4"
++    && validMeasurementId
++    && typeof document !== "undefined";
++  let lastPageKey = "";
++
++  const cleanParameters = (parameters = {}) => Object.fromEntries(
++    Object.entries(parameters).filter(([, value]) => (
++      typeof value === "string"
++        ? value.trim() !== ""
++        : typeof value === "number"
++          ? Number.isFinite(value)
++          : typeof value === "boolean"
++    )),
++  );
++
++  const send = (eventName, parameters) => {
++    if (!enabled || typeof window.gtag !== "function") return false;
++    if (!/^[a-z][a-z0-9_]{0,39}$/.test(eventName)) return false;
++    window.gtag("event", eventName, cleanParameters(parameters));
++    return true;
++  };
++
++  window.OSANPO_ANALYTICS = {
++    isEnabled: () => enabled,
++    trackEvent: (eventName, parameters = {}) => send(eventName, parameters),
++    trackPageView: ({ pageKey, pageTitle, pageLocation, routeName } = {}) => {
++      const safePageKey = String(pageKey || "");
++      if (!safePageKey || safePageKey === lastPageKey) return false;
++      lastPageKey = safePageKey;
++      return send("page_view", {
++        page_title: String(pageTitle || document.title || ""),
++        page_location: String(pageLocation || ""),
++        page_path: safePageKey,
++        route_name: String(routeName || ""),
++      });
++    },
++  };
++
++  if (!enabled) return;
++
++  window.dataLayer = window.dataLayer || [];
++  window.gtag = window.gtag || function () {
++    window.dataLayer.push(arguments);
++  };
++  window.gtag("js", new Date());
++  window.gtag("config", measurementId, {
++    send_page_view: false,
++    allow_google_signals: false,
++    allow_ad_personalization_signals: false,
++  });
++
++  const script = document.createElement("script");
++  script.async = true;
++  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
++  script.dataset.osanpoAnalytics = "ga4";
++  document.head.appendChild(script);
++})();
+diff --git a/app.js b/app.js
+index cde9ab0..976ca8f 100644
+--- a/app.js
++++ b/app.js
+@@ -1,6 +1,11 @@
+ (() => {
+   const DATA = window.OSANPO_DATA;
+-  const CONFIG = window.OSANPO_CONFIG;
++  const CONFIG = window.OSANPO_CONFIG || {};
++  const ANALYTICS = window.OSANPO_ANALYTICS || {
++    isEnabled: () => false,
++    trackEvent: () => false,
++    trackPageView: () => false,
++  };
+   const app = document.getElementById("app");
+   const SITE_INFO = DATA.siteInfo || {};
+   const img = (key) => DATA.images[key] || DATA.images.hero;
+@@ -37,6 +42,23 @@
+   const storyImageAlt = (story, fallback) => story.imageAlt || fallback;
+   const eventImageAlt = (event) => event.imageAlt || `${event.title}をイメージした画像`;
+   const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
++  const trackingAttributes = (group, values = {}) => {
++    const attributes = [`data-track-${group}="true"`];
++    Object.entries(values).forEach(([key, value]) => {
++      if (value === undefined || value === null || value === "") return;
++      const kebabKey = key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
++      attributes.push(`data-track-${group}-${kebabKey}="${escapeHtml(value)}"`);
++    });
++    return ` ${attributes.join(" ")}`;
++  };
++  const contentTypeForRecord = (record) => {
++    if (DATA.areas.includes(record)) return "area";
++    if (DATA.courses.includes(record)) return "course";
++    if (DATA.spots.includes(record)) return "spot";
++    if (DATA.stories.includes(record)) return "story";
++    if (DATA.events.includes(record)) return "event";
++    return "content";
++  };
+   const safeExternalUrl = (value = "") => {
+     try {
+       const url = new URL(value);
+@@ -45,8 +67,30 @@
+       return "";
+     }
+   };
++  const safeHttpsSiteUrl = (value = "") => {
++    try {
++      const url = new URL(value);
++      return url.protocol === "https:" ? url.href : "";
++    } catch {
++      return "";
++    }
++  };
++  const safeGoogleFormUrl = (value = "") => {
++    const url = safeExternalUrl(value);
++    if (!url) return "";
++    try {
++      const parsed = new URL(url);
++      const isGoogleForm = parsed.protocol === "https:"
++        && (parsed.hostname === "forms.gle" || (parsed.hostname === "docs.google.com" && parsed.pathname.startsWith("/forms/")));
++      return isGoogleForm ? parsed.href : "";
++    } catch {
++      return "";
++    }
++  };
+   const configuredEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(CONFIG.contactEmail || "") && !/@example\.(com|jp)$/i.test(CONFIG.contactEmail) ? CONFIG.contactEmail : "";
+-  const configuredFormUrl = safeExternalUrl(CONFIG.contactFormUrl);
++  const configuredFormUrl = safeGoogleFormUrl(CONFIG.contactFormUrl);
++  const configuredSiteUrl = safeHttpsSiteUrl(CONFIG.siteUrl);
++  const trackEvent = (eventName, parameters = {}) => ANALYTICS.trackEvent(eventName, parameters);
+   const mapsPlaceUrl = (query) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+   const mapsEmbedUrl = (query) => `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+   const mapsTransitUrl = (destination) => {
+@@ -248,7 +292,7 @@
+         <div class="container header-inner">
+           <a class="brand" href="#/" aria-label="トップページ">
+             <span class="brand-mark">歩</span>
+-            <span class="brand-copy"><strong>${escapeHtml(CONFIG.siteName)}</strong><span>${escapeHtml(CONFIG.siteSubtitle)}</span></span>
++            <span class="brand-copy"><strong>${escapeHtml(CONFIG.siteName || "おさんぽクラブ東京")}</strong><span>${escapeHtml(CONFIG.siteSubtitle || "Tokyo Sanpo Club")}</span></span>
+           </a>
+           <nav class="site-nav" id="siteNav" aria-label="メインナビゲーション">
+             ${nav.map(([path, label]) => `<a href="#/${path}" ${current === path ? 'aria-current="page"' : ""}>${label}${path === "favorites" ? `<span class="favorite-count" aria-label="${getFavoriteRecords().length}件">${getFavoriteRecords().length}</span>` : ""}</a>`).join("")}
+@@ -277,6 +321,7 @@
+ 
+   function trustPanel(record = {}, sources = []) {
+     const meta = { ...SITE_INFO, ...record };
++    const contentType = contentTypeForRecord(record);
+     const sourceLinks = sources
+       .map((source) => ({ label: source.label, url: safeExternalUrl(source.url) }))
+       .filter((source) => source.url);
+@@ -291,7 +336,7 @@
+         <div><dt>現地確認予定</dt><dd>${escapeHtml(meta.needsFieldCheck || "ルート、歩きやすさ、現地の最新状況")}</dd></div>
+       </dl>
+       <h3>参照した公式情報</h3>
+-      ${sourceLinks.length ? `<ul class="source-list">${sourceLinks.map((source) => `<li><a href="${source.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.label)}</a></li>`).join("")}</ul>` : "<p>個別の参照先は未記録です。訪問前に施設・自治体等の公式情報をご確認ください。</p>"}
++      ${sourceLinks.length ? `<ul class="source-list">${sourceLinks.map((source) => `<li><a href="${source.url}" target="_blank" rel="noopener noreferrer"${trackingAttributes("official", { contentType, contentId: record.id, linkType: "source", areaId: record.areaId || (contentType === "area" ? record.id : "") })}>${escapeHtml(source.label)}</a></li>`).join("")}</ul>` : "<p>個別の参照先は未記録です。訪問前に施設・自治体等の公式情報をご確認ください。</p>"}
+       <p class="image-disclosure">${imageDisclosure}</p>
+     </aside>`;
+   }
+@@ -360,6 +405,7 @@
+     const state = eventState(event);
+     const statusClass = state === "終了" ? "pill--ended" : state === "中止" ? "pill--cancelled" : state === "情報更新待ち" || state === "延期" ? "pill--pending" : "pill--accent";
+     const officialUrl = safeExternalUrl(event.officialUrl);
++    const areaId = DATA.areas.find((area) => area.name === event.area)?.id || "";
+     return `<article class="${compact ? "event-row" : "card"}">
+       ${compact ? `<div class="event-thumb">${imageMarkup(event.image, eventImageAlt(event), "")}</div>` : imageMarkup(event.image, eventImageAlt(event), "card-media")}
+       <div class="${compact ? "" : "card-body"}">
+@@ -370,7 +416,7 @@
+         <p class="image-disclosure">情報確認日：${escapeHtml(event.informationCheckedAt || "未記録")}／最終更新日：${escapeHtml(event.lastUpdated || "未記録")}</p>
+         <p class="image-disclosure">開催内容は変更・中止になる場合があります。最新情報は公式情報をご確認ください。</p>
+       </div>
+-      ${compact ? `<div class="event-actions">${officialUrl ? `<a class="btn btn--small" href="${officialUrl}" target="_blank" rel="noopener noreferrer">公式情報</a>` : "<span>公式URL未登録</span>"}<a class="btn btn--small" href="${mapsPlaceUrl(event.mapQuery)}" target="_blank" rel="noopener noreferrer">地図</a></div>` : ""}
++      ${compact ? `<div class="event-actions">${officialUrl ? `<a class="btn btn--small" href="${officialUrl}" target="_blank" rel="noopener noreferrer"${trackingAttributes("official", { contentType: "event", contentId: event.id, linkType: "official", areaId })}>公式情報</a>` : "<span>公式URL未登録</span>"}<a class="btn btn--small" href="${mapsPlaceUrl(event.mapQuery)}" target="_blank" rel="noopener noreferrer"${trackingAttributes("map", { linkType: "event", contentId: event.id, areaId })}>地図</a></div>` : ""}
+     </article>`;
+   }
+ 
+@@ -482,14 +528,14 @@
+       })
+       .join("");
+     const selectedPanel = selectedFilters
+-      ? `<section class="active-filters" aria-labelledby="active-course-filters-title"><h2 id="active-course-filters-title">選択中の条件</h2><div class="filter-chip-list">${selectedFilters}</div><a class="text-link" href="#/courses">条件をすべて解除する</a></section>`
++      ? `<section class="active-filters" aria-labelledby="active-course-filters-title"><h2 id="active-course-filters-title">選択中の条件</h2><div class="filter-chip-list">${selectedFilters}</div><a class="text-link" href="#/courses" data-course-filter-clear>条件をすべて解除する</a></section>`
+       : "";
+     const resultMessage = filteredCourses.length
+       ? `${filteredCourses.length}件のコースがあります`
+       : "条件に合うコースはありませんでした";
+     const results = filteredCourses.length
+       ? `<div class="grid grid--3">${filteredCourses.map(courseCard).join("")}</div>`
+-      : `<div class="empty-state"><h2>条件に合うコースはありませんでした</h2><p>条件を一つずつ解除するか、すべてのコースをご確認ください。</p><div class="empty-actions"><a class="btn btn--accent" href="#/courses">条件をすべて解除する</a><a class="btn" href="#/areas">エリア一覧へ戻る</a><a class="btn" href="#/courses">すべてのコースを見る</a></div></div>`;
++      : `<div class="empty-state"><h2>条件に合うコースはありませんでした</h2><p>条件を一つずつ解除するか、すべてのコースをご確認ください。</p><div class="empty-actions"><a class="btn btn--accent" href="#/courses" data-course-filter-clear>条件をすべて解除する</a><a class="btn" href="#/areas">エリア一覧へ戻る</a><a class="btn" href="#/courses" data-course-filter-clear>すべてのコースを見る</a></div></div>`;
+ 
+     return `${header()}<main id="main"><section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "おさんぽコース" }])}<span class="eyebrow">DISCOVER TOKYO</span><h1>おさんぽコース</h1><p>STARTからGOALまで、実在地点とGoogleマップで確認できます。</p></div></section><section class="section section--compact"><div class="container">
+       <form class="course-filter-panel" id="courseFilters">
+@@ -507,7 +553,7 @@
+             ${courseFilterSelect("mood", "気分・テーマ", "指定なし", courseFilterDefinitions.mood.options, filters.mood)}
+             ${courseFilterSelect("audience", "対象者", "指定なし", courseFilterDefinitions.audience.options, filters.audience)}
+           </div>
+-          <div class="course-filter-actions"><button class="btn btn--dark" type="submit">この条件で探す</button><a class="text-link" href="#/courses">条件をすべて解除する</a></div>
++          <div class="course-filter-actions"><button class="btn btn--dark" type="submit">この条件で探す</button><a class="text-link" href="#/courses" data-course-filter-clear>条件をすべて解除する</a></div>
+         </fieldset>
+       </form>
+       ${selectedPanel}
+@@ -551,7 +597,7 @@
+     return `<ol class="stop-list route-stop-list">${stops.map((stop) => {
+       const existingStop = course.stops[stop.order - 1];
+       const detail = stop.role === "start" ? "START" : stop.role === "goal" ? "GOAL" : existingStop?.category || "";
+-      return `<li class="stop-card"><span class="stop-number" aria-hidden="true">${stop.order}</span><div><strong>${escapeHtml(stop.name)}</strong><span>${escapeHtml(detail)}</span></div><a class="btn btn--small" href="${mapsPlaceUrl(stop.query)}" target="_blank" rel="noopener noreferrer">Googleマップで地点を開く</a></li>`;
++      return `<li class="stop-card"><span class="stop-number" aria-hidden="true">${stop.order}</span><div><strong>${escapeHtml(stop.name)}</strong><span>${escapeHtml(detail)}</span></div><a class="btn btn--small" href="${mapsPlaceUrl(stop.query)}" target="_blank" rel="noopener noreferrer"${trackingAttributes("map", { linkType: "course_stop", contentId: course.id, areaId: course.areaId, courseId: course.id, stopOrder: stop.order })}>Googleマップで地点を開く</a></li>`;
+     }).join("")}</ol>`;
+   }
+ 
+@@ -563,7 +609,8 @@
+       const destination = stops[stops.length - 1];
+       const url = courseRouteUrl(course, segment);
+       if (!origin || !destination || !url) return "";
+-      return `<div class="route-segment"><a class="btn btn--accent" href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(segment.label)}ルートをGoogleマップで開く</a><small><strong>${escapeHtml(area.name)}${escapeHtml(segment.label)}</strong><span>START：${escapeHtml(origin.name)} → GOAL：${escapeHtml(destination.name)}</span></small></div>`;
++      const linkType = segment.label === "前半" ? "course_route_first" : segment.label === "後半" ? "course_route_second" : "course_route";
++      return `<div class="route-segment"><a class="btn btn--accent" href="${url}" target="_blank" rel="noopener noreferrer"${trackingAttributes("map", { linkType, contentId: course.id, areaId: area.id, courseId: course.id, stopOrder: origin.order })}>${escapeHtml(segment.label)}ルートをGoogleマップで開く</a><small><strong>${escapeHtml(area.name)}${escapeHtml(segment.label)}</strong><span>START：${escapeHtml(origin.name)} → GOAL：${escapeHtml(destination.name)}</span></small></div>`;
+     }).join("")}</div><p class="route-notice">${escapeHtml(course.routeNotice || "Googleマップの徒歩経路は変更される場合があります。現地の案内と最新情報をご確認ください。")}</p></div>`;
+   }
+ 
+@@ -601,6 +648,7 @@
+     barrier: "バリアフリー情報",
+   };
+   const transitOperatorLinks = (access, operator, primaryTimetableUrl) => {
++    const areaId = DATA.courses.find((course) => course.id === access.courseId)?.areaId || "";
+     const candidates = [
+       { type: "station", url: operator.stationPageUrl },
+       { type: "timetable", url: operator.timetableUrl },
+@@ -618,7 +666,7 @@
+     });
+     return [...grouped.entries()].map(([url, labels]) => {
+       const label = [...new Set(labels)].join("／");
+-      return `<a href="${url}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(access.stationName)}の${escapeHtml(operator.name)}${escapeHtml(label)}を開く（外部サイト）">${escapeHtml(label)} <span aria-hidden="true">↗</span></a>`;
++      return `<a href="${url}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(access.stationName)}の${escapeHtml(operator.name)}${escapeHtml(label)}を開く（外部サイト）"${trackingAttributes("transit", { transitId: access.id, courseId: access.courseId, role: access.role, linkType: "official" })}${trackingAttributes("official", { contentType: "transit", contentId: access.id, linkType: "official", areaId })}>${escapeHtml(label)} <span aria-hidden="true">↗</span></a>`;
+     }).join("");
+   };
+   const transitOperator = (access, operator, primaryTimetableUrl) => {
+@@ -633,6 +681,7 @@
+   const transitAlternativeStations = (access) => {
+     const alternatives = Array.isArray(access.alternativeStations) ? access.alternativeStations : [];
+     if (!alternatives.length) return "";
++    const areaId = DATA.courses.find((course) => course.id === access.courseId)?.areaId || "";
+     return `<section class="transit-alternatives" aria-labelledby="transit-alternatives-${escapeHtml(access.id)}">
+       <h5 id="transit-alternatives-${escapeHtml(access.id)}">その他のアクセス</h5>
+       <p>浅草には場所の異なる複数の「浅草駅」があります。利用する鉄道会社と駅位置をご確認ください。</p>
+@@ -640,20 +689,21 @@
+         const stationUrl = safeExternalUrl(station.stationPageUrl || "");
+         const mapUrl = safeExternalUrl(mapsPlaceUrl(station.mapQuery || ""));
+         const code = station.stationCode ? ` <span>${escapeHtml(station.stationCode)}</span>` : "";
+-        return `<li><div><strong>${escapeHtml(station.stationName)}</strong>${code}<small>${escapeHtml(station.operatorName || "")}</small></div><div>${stationUrl ? `<a href="${stationUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(station.stationName)}の公式駅情報を開く（外部サイト）">公式駅情報 <span aria-hidden="true">↗</span></a>` : ""}${mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(station.stationName)}をGoogleマップで開く（外部サイト）">Googleマップ <span aria-hidden="true">↗</span></a>` : ""}</div></li>`;
++        return `<li><div><strong>${escapeHtml(station.stationName)}</strong>${code}<small>${escapeHtml(station.operatorName || "")}</small></div><div>${stationUrl ? `<a href="${stationUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(station.stationName)}の公式駅情報を開く（外部サイト）"${trackingAttributes("transit", { transitId: access.id, courseId: access.courseId, role: access.role, linkType: "alternative_official" })}${trackingAttributes("official", { contentType: "transit", contentId: access.id, linkType: "alternative_station", areaId })}>公式駅情報 <span aria-hidden="true">↗</span></a>` : ""}${mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(station.stationName)}をGoogleマップで開く（外部サイト）"${trackingAttributes("map", { linkType: "alternative_station", contentId: access.id, areaId, courseId: access.courseId })}${trackingAttributes("transit", { transitId: access.id, courseId: access.courseId, role: access.role, linkType: "map" })}>Googleマップ <span aria-hidden="true">↗</span></a>` : ""}</div></li>`;
+       }).join("")}</ul>
+     </section>`;
+   };
+   function transitCard(access) {
+     const operators = Array.isArray(access.operators) ? access.operators : [];
++    const areaId = DATA.courses.find((course) => course.id === access.courseId)?.areaId || "";
+     const mapUrl = safeExternalUrl(mapsPlaceUrl(access.mapQuery || ""));
+     const transitUrl = access.role === "arrival" ? safeExternalUrl(mapsTransitUrl(access.mapQuery || "")) : "";
+     const primaryTimetableUrl = access.role === "return"
+       ? safeExternalUrl(operators.find((operator) => safeExternalUrl(operator.timetableUrl || ""))?.timetableUrl || "")
+       : "";
+     const primaryAction = access.role === "arrival"
+-      ? transitUrl && `<a class="btn btn--accent transit-primary-action" href="${transitUrl}" target="_blank" rel="noopener noreferrer" aria-label="現在地から${escapeHtml(access.stationName)}までの公共交通経路をGoogleマップで調べる（外部サイト）">現在地から電車経路を調べる <span aria-hidden="true">↗</span></a>`
+-      : primaryTimetableUrl && `<a class="btn btn--accent transit-primary-action" href="${primaryTimetableUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(access.stationName)}の公式時刻表を開く（外部サイト）">公式時刻表を見る <span aria-hidden="true">↗</span></a>`;
++      ? transitUrl && `<a class="btn btn--accent transit-primary-action" href="${transitUrl}" target="_blank" rel="noopener noreferrer" aria-label="現在地から${escapeHtml(access.stationName)}までの公共交通経路をGoogleマップで調べる（外部サイト）"${trackingAttributes("map", { linkType: "transit_route", contentId: access.id, areaId, courseId: access.courseId })}${trackingAttributes("transit", { transitId: access.id, courseId: access.courseId, role: access.role, linkType: "route" })}>現在地から電車経路を調べる <span aria-hidden="true">↗</span></a>`
++      : primaryTimetableUrl && `<a class="btn btn--accent transit-primary-action" href="${primaryTimetableUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(access.stationName)}の公式時刻表を開く（外部サイト）"${trackingAttributes("transit", { transitId: access.id, courseId: access.courseId, role: access.role, linkType: "timetable" })}${trackingAttributes("official", { contentType: "transit", contentId: access.id, linkType: "timetable", areaId })}>公式時刻表を見る <span aria-hidden="true">↗</span></a>`;
+     const exitText = access.exitVerified === true && access.recommendedExit
+       ? `<p class="transit-exit"><span>おすすめ出口</span><strong>${escapeHtml(access.recommendedExit)}</strong></p>`
+       : `<p class="transit-exit transit-exit--unverified"><span>出口案内</span><strong>出口は公式構内図をご確認ください</strong></p>`;
+@@ -665,7 +715,7 @@
+       <h4 id="transit-${escapeHtml(access.id)}">${escapeHtml(access.stationName)}${access.stationCode ? `<span>${escapeHtml(access.stationCode)}</span>` : ""}</h4>
+       <p class="transit-connection">${escapeHtml(access.routeConnection || "")}</p>
+       ${exitText}
+-      <div class="transit-actions">${primaryAction || ""}${mapUrl ? `<a class="btn" href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(access.stationName)}をGoogleマップで開く（外部サイト）">駅をGoogleマップで開く <span aria-hidden="true">↗</span></a>` : ""}</div>
++      <div class="transit-actions">${primaryAction || ""}${mapUrl ? `<a class="btn" href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(access.stationName)}をGoogleマップで開く（外部サイト）"${trackingAttributes("map", { linkType: "station", contentId: access.id, areaId, courseId: access.courseId })}${trackingAttributes("transit", { transitId: access.id, courseId: access.courseId, role: access.role, linkType: "map" })}>駅をGoogleマップで開く <span aria-hidden="true">↗</span></a>` : ""}</div>
+       <div class="transit-official">
+         <h5>駅の公式情報</h5>
+         ${operators.map((operator) => transitOperator(access, operator, primaryTimetableUrl)).join("")}
+@@ -687,6 +737,7 @@
+   };
+ 
+   function toiletCard(toilet) {
++    const areaId = DATA.courses.find((course) => course.id === toilet.courseId)?.areaId || "";
+     const mapUrl = safeExternalUrl(mapsPlaceUrl(toilet.mapQuery || ""));
+     const sourceUrl = safeExternalUrl(toilet.sourceUrl || toilet.officialUrl || "");
+     const datasetUrl = safeExternalUrl(toilet.datasetUrl || "");
+@@ -698,7 +749,7 @@
+     const usageNote = toilet.usageNote ? `<p class="toilet-usage-note">${escapeHtml(toilet.usageNote)}</p>` : "";
+     const attributionNote = toilet.sourceAttributionNote ? `<p>${escapeHtml(toilet.sourceAttributionNote)}</p>` : "";
+     const datasetLink = datasetUrl && datasetUrl !== sourceUrl
+-      ? `<a href="${datasetUrl}" target="_blank" rel="noopener noreferrer">元データを見る（外部サイト）</a>`
++      ? `<a href="${datasetUrl}" target="_blank" rel="noopener noreferrer"${trackingAttributes("official", { contentType: "toilet", contentId: toilet.id, linkType: "dataset", areaId })}>元データを見る（外部サイト）</a>`
+       : "";
+     return `<li class="toilet-card">
+       <article aria-labelledby="toilet-${escapeHtml(toilet.id)}">
+@@ -709,7 +760,7 @@
+         <h4 id="toilet-${escapeHtml(toilet.id)}">${escapeHtml(toilet.name)}</h4>
+         <p class="toilet-location"><strong>コース${escapeHtml(toilet.nearStopOrder)}番・${escapeHtml(toilet.nearStopName)}付近</strong><span>${escapeHtml(toilet.locationNote || "位置補足は情報なし")}</span></p>
+         <p class="toilet-route-part">${escapeHtml(routePart)}</p>
+-        ${mapUrl ? `<a class="btn btn--accent toilet-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(toilet.name)}をGoogleマップで開く（外部サイト）">Googleマップで開く <span aria-hidden="true">↗</span></a>` : ""}
++        ${mapUrl ? `<a class="btn btn--accent toilet-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(toilet.name)}をGoogleマップで開く（外部サイト）"${trackingAttributes("map", { linkType: "toilet", contentId: toilet.id, areaId, courseId: toilet.courseId, stopOrder: toilet.nearStopOrder })}>Googleマップで開く <span aria-hidden="true">↗</span></a>` : ""}
+         <dl class="toilet-facts">
+           <div><dt>所在地</dt><dd>${escapeHtml(toilet.address || "情報なし")}</dd></div>
+           <div><dt>利用時間</dt><dd>${escapeHtml(toiletAvailableTime(toilet))}</dd></div>
+@@ -725,7 +776,7 @@
+           <p>ライセンス：${escapeHtml(toilet.sourceLicense || "情報なし")}</p>
+           <p>データ更新日：${escapeHtml(practicalInfoDate(toilet.sourceUpdatedAt))}／サイト確認日：${escapeHtml(practicalInfoDate(toilet.informationCheckedAt))}</p>
+           ${attributionNote}
+-          <div>${sourceUrl ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">公式情報・出典を見る（外部サイト）</a>` : "<span>公式情報URL：情報なし</span>"}${datasetLink}</div>
++          <div>${sourceUrl ? `<a href="${sourceUrl}" target="_blank" rel="noopener noreferrer"${trackingAttributes("official", { contentType: "toilet", contentId: toilet.id, linkType: "source", areaId })}>公式情報・出典を見る（外部サイト）</a>` : "<span>公式情報URL：情報なし</span>"}${datasetLink}</div>
+         </div>
+       </article>
+     </li>`;
+@@ -761,6 +812,7 @@
+   };
+ 
+   function foodBreakCard(food) {
++    const areaId = DATA.courses.find((course) => course.id === food.courseId)?.areaId || "";
+     const mapUrl = safeExternalUrl(mapsPlaceUrl(food.mapQuery || ""));
+     const officialUrl = safeExternalUrl(food.officialUrl || "");
+     const menuUrl = safeExternalUrl(food.menuUrl || "");
+@@ -786,7 +838,7 @@
+         <p class="food-break-category">${escapeHtml(food.category || "ジャンル情報なし")}</p>
+         <p class="food-break-location"><strong>コース${escapeHtml(food.nearStopOrder)}番・${escapeHtml(food.nearStopName)}付近</strong><span>${escapeHtml(food.locationNote || "位置補足は情報なし")}</span></p>
+         <p class="food-break-editorial">${escapeHtml(food.editorialNote || "公式情報を確認できる立ち寄り候補です。")}</p>
+-        ${mapUrl ? `<a class="btn btn--accent food-break-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}をGoogleマップで開く（外部サイト）">Googleマップで開く <span aria-hidden="true">↗</span></a>` : ""}
++        ${mapUrl ? `<a class="btn btn--accent food-break-map-link" href="${mapUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}をGoogleマップで開く（外部サイト）"${trackingAttributes("map", { linkType: "food", contentId: food.id, areaId, courseId: food.courseId, stopOrder: food.nearStopOrder })}${trackingAttributes("food", { foodId: food.id, courseId: food.courseId, areaId, linkType: "map" })}>Googleマップで開く <span aria-hidden="true">↗</span></a>` : ""}
+         <dl class="food-break-facts">
+           <div><dt>利用時間帯</dt><dd>${escapeHtml(periods.length ? periods.join("・") : "情報なし")}</dd></div>
+           <div><dt>予算</dt><dd>${escapeHtml(food.priceLabel || "公式メニューをご確認ください")}</dd></div>
+@@ -795,10 +847,10 @@
+           ${serviceFacts.map(([label, value]) => `<span>${escapeHtml(label)}：${escapeHtml(foodServiceValueLabel(value))}</span>`).join("")}
+         </div>
+         <div class="food-break-links">
+-          ${officialUrl ? `<a href="${officialUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}の公式サイトを開く（外部サイト）">公式サイト <span aria-hidden="true">↗</span></a>` : ""}
+-          ${menuUrl ? `<a href="${menuUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}の公式メニューを開く（外部サイト）">公式メニュー <span aria-hidden="true">↗</span></a>` : ""}
+-          ${reservationUrl ? `<a href="${reservationUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}の公式予約案内を開く（外部サイト）">公式予約 <span aria-hidden="true">↗</span></a>` : ""}
+-          ${tabelogUrl ? `<a class="food-break-tabelog-link" href="${tabelogUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}を食べログで確認する（外部サイト）">食べログで確認 <span aria-hidden="true">↗</span></a>` : ""}
++          ${officialUrl ? `<a href="${officialUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}の公式サイトを開く（外部サイト）"${trackingAttributes("food", { foodId: food.id, courseId: food.courseId, areaId, linkType: "official" })}${trackingAttributes("official", { contentType: "food", contentId: food.id, linkType: "official", areaId })}>公式サイト <span aria-hidden="true">↗</span></a>` : ""}
++          ${menuUrl ? `<a href="${menuUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}の公式メニューを開く（外部サイト）"${trackingAttributes("food", { foodId: food.id, courseId: food.courseId, areaId, linkType: "menu" })}${trackingAttributes("official", { contentType: "food", contentId: food.id, linkType: "menu", areaId })}>公式メニュー <span aria-hidden="true">↗</span></a>` : ""}
++          ${reservationUrl ? `<a href="${reservationUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}の公式予約案内を開く（外部サイト）"${trackingAttributes("food", { foodId: food.id, courseId: food.courseId, areaId, linkType: "reservation" })}${trackingAttributes("official", { contentType: "food", contentId: food.id, linkType: "reservation", areaId })}>公式予約 <span aria-hidden="true">↗</span></a>` : ""}
++          ${tabelogUrl ? `<a class="food-break-tabelog-link" href="${tabelogUrl}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(food.name)}を食べログで確認する（外部サイト）"${trackingAttributes("food", { foodId: food.id, courseId: food.courseId, areaId, linkType: "tabelog" })}>食べログで確認 <span aria-hidden="true">↗</span></a>` : ""}
+         </div>
+         <div class="food-break-meta">
+           <span>情報確認日：${escapeHtml(practicalInfoDate(food.informationCheckedAt))}</span>
+@@ -896,7 +948,7 @@
+     const area = DATA.areas.find((a) => a.id === spot.areaId);
+     const officialUrl = safeExternalUrl(spot.officialUrl);
+     const coverClass = spotImageKeys.has(spot.image) ? "article-cover article-cover--spot" : "article-cover";
+-    return `${header()}<main id="main"><section class="article-header"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { href: "#/spots", label: "スポット" }, { label: spot.name }])}<span class="eyebrow">${spot.category}・${area.name}</span><h1>${spot.name}</h1>${favoriteButton("spot", spot.id, spot.name, true)}<p class="article-lead">${spot.excerpt}</p><div class="${coverClass}">${imageMarkup(spot.image, spotImageAlt(spot), "")}</div>${trustPanel(spot, officialUrl ? [{ label: spot.name, url: officialUrl }] : [])}</div></section><section class="section section--compact"><div class="container map-layout"><div class="map-shell"><iframe loading="lazy" src="${mapsEmbedUrl(spot.mapQuery)}" title="${escapeHtml(spot.name)}のGoogleマップ"></iframe></div><div class="contact-panel"><h2>行く前に確認</h2><p>営業時間、休館日、料金などは変更される場合があります。訪問前に公式情報をご確認ください。</p>${officialUrl ? `<p><a class="btn btn--accent" href="${officialUrl}" target="_blank" rel="noopener noreferrer">公式情報</a></p>` : "<p>公式URLは未登録です。</p>"}<p><a class="btn" href="${mapsPlaceUrl(spot.mapQuery)}" target="_blank" rel="noopener noreferrer">Googleマップで開く</a></p><p><a class="text-link" href="#/area/${area.id}">${area.name}のガイドへ →</a></p></div></div></section></main>${footer()}`;
++    return `${header()}<main id="main"><section class="article-header"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { href: "#/spots", label: "スポット" }, { label: spot.name }])}<span class="eyebrow">${spot.category}・${area.name}</span><h1>${spot.name}</h1>${favoriteButton("spot", spot.id, spot.name, true)}<p class="article-lead">${spot.excerpt}</p><div class="${coverClass}">${imageMarkup(spot.image, spotImageAlt(spot), "")}</div>${trustPanel(spot, officialUrl ? [{ label: spot.name, url: officialUrl }] : [])}</div></section><section class="section section--compact"><div class="container map-layout"><div class="map-shell"><iframe loading="lazy" src="${mapsEmbedUrl(spot.mapQuery)}" title="${escapeHtml(spot.name)}のGoogleマップ"></iframe></div><div class="contact-panel"><h2>行く前に確認</h2><p>営業時間、休館日、料金などは変更される場合があります。訪問前に公式情報をご確認ください。</p>${officialUrl ? `<p><a class="btn btn--accent" href="${officialUrl}" target="_blank" rel="noopener noreferrer"${trackingAttributes("official", { contentType: "spot", contentId: spot.id, linkType: "official", areaId: area.id })}>公式情報</a></p>` : "<p>公式URLは未登録です。</p>"}<p><a class="btn" href="${mapsPlaceUrl(spot.mapQuery)}" target="_blank" rel="noopener noreferrer"${trackingAttributes("map", { linkType: "spot", contentId: spot.id, areaId: area.id })}>Googleマップで開く</a></p><p><a class="text-link" href="#/area/${area.id}">${area.name}のガイドへ →</a></p></div></div></section></main>${footer()}`;
+   }
+ 
+   function mapPage(areaId) {
+@@ -926,23 +978,39 @@
+ 
+   function privacyPage() {
+     const contactPrivacy = configuredEmail || configuredFormUrl ? "お問い合わせ時に入力した情報は、利用者が選択したメールまたは外部フォームの提供元へ送信されます。" : "現在、問い合わせフォームと送信先は未設定で、サイト上で個人情報を送信する機能は表示していません。";
+-    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "プライバシーポリシー" }])}<span class="eyebrow">PRIVACY</span><h1>プライバシーポリシー</h1><p>現在のサイト実装に合わせた情報の取り扱いを説明します。</p></div></section><section class="section section--compact"><div class="narrow article-body"><h2>取得していない情報</h2><p>このコードにはアクセス解析、会員登録、決済、ブラウザの位置情報取得機能はありません。</p><h2>お気に入り情報</h2><p>お気に入り情報は利用者のブラウザ内に保存され、サーバーへ送信されません。アカウント間や端末間では同期されず、ブラウザのサイトデータを削除すると消去されます。</p><h2>外部サービス</h2><p>Googleマップの埋め込みや公式情報などの外部リンクを利用した際、各サービスへ通信が発生します。掲載画像はサイト内のローカルファイルです。外部サービス側の情報取り扱いは、それぞれの規約とプライバシーポリシーをご確認ください。</p><h2>お問い合わせ</h2><p>${contactPrivacy}</p><p><a class="btn" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
++    const analyticsPrivacy = ANALYTICS.isEnabled()
++      ? `<h2>アクセス解析</h2><p>サイト改善と利用状況の把握を目的としてGoogle Analytics 4を利用しています。Cookie等が利用される場合があります。氏名やメールアドレスを解析イベントとして送信せず、検索語の生データも送信しない設計です。Google側の情報の取り扱いは、Googleの規約とプライバシーポリシーをご確認ください。</p>`
++      : `<h2>アクセス解析</h2><p>現在、アクセス解析は無効で、Google Analytics 4の解析通信は行っていません。</p>`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "プライバシーポリシー" }])}<span class="eyebrow">PRIVACY</span><h1>プライバシーポリシー</h1><p>現在のサイト実装に合わせた情報の取り扱いを説明します。</p></div></section><section class="section section--compact"><div class="narrow article-body">${analyticsPrivacy}<h2>取得していない情報</h2><p>このサイトには会員登録、決済、ブラウザの位置情報取得機能はありません。</p><h2>お気に入り情報</h2><p>お気に入り情報は利用者のブラウザ内に保存され、サーバーへ送信されません。アカウント間や端末間では同期されず、ブラウザのサイトデータを削除すると消去されます。</p><h2>外部サービス</h2><p>Googleマップの埋め込みや公式情報などの外部リンクを利用した際、各サービスへ通信が発生します。掲載画像はサイト内のローカルファイルです。外部サービス側の情報取り扱いは、それぞれの規約とプライバシーポリシーをご確認ください。</p><h2>お問い合わせ</h2><p>${contactPrivacy}</p><p><a class="btn" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
+   }
+ 
+   function advertisingPage() {
+-    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "広告掲載" }])}<span class="eyebrow">PARTNERS</span><h1>広告掲載・地域パートナー</h1><p>現在、正式な掲載プランと受付方法を準備しています。</p></div></section><section class="section section--compact"><div class="narrow article-body"><div class="article-note">地域パートナー募集予定／テスト掲載の相談受付準備中／媒体資料準備中／アクセス実績を蓄積中です。</div><p>架空のアクセス数、掲載実績、固定料金は表示していません。広告を掲載する場合は「PR」と明示し、編集記事と区別します。</p><p>受付開始後は、このページとお問い合わせページで案内します。</p><p><a class="btn" href="#/contact">お問い合わせ状況を確認</a> <a class="btn" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
++    const contactAction = configuredEmail || configuredFormUrl
++      ? `<a class="btn btn--accent" href="#/contact">広告掲載について相談する</a>`
++      : `<a class="btn" href="#/contact">お問い合わせ状況を確認</a>`;
++    return `${header()}<main id="main"><section class="page-hero"><div class="narrow">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "広告掲載" }])}<span class="eyebrow">PARTNERS</span><h1>広告掲載・地域パートナー</h1><p>現在、正式な掲載プランと受付方法を準備しています。</p></div></section><section class="section section--compact"><div class="narrow article-body"><div class="article-note">地域パートナー募集予定／テスト掲載の相談受付準備中／媒体資料準備中／アクセス実績を蓄積中です。</div><p>架空のアクセス数、掲載実績、固定料金は表示していません。広告を掲載する場合は「PR」と明示し、編集記事と区別します。</p><p>受付開始後は、このページとお問い合わせページで案内します。</p><p>${contactAction} <a class="btn" href="#/">トップへ戻る</a></p></div></section></main>${footer()}`;
+   }
+ 
+   function contactPage() {
+     const methods = [];
+-    if (configuredFormUrl) methods.push(`<a class="btn btn--accent" href="${configuredFormUrl}" target="_blank" rel="noopener noreferrer">お問い合わせフォームを開く</a>`);
+-    if (configuredEmail) methods.push(`<a class="btn btn--accent" href="mailto:${encodeURIComponent(configuredEmail)}">メールで問い合わせる</a>`);
++    if (configuredFormUrl) methods.push(`<a class="btn btn--accent" href="${configuredFormUrl}" target="_blank" rel="noopener noreferrer"${trackingAttributes("contact", { method: "form", sourcePage: "contact" })}>お問い合わせフォームを開く</a>`);
++    if (configuredEmail) methods.push(`<a class="btn btn--accent" href="mailto:${encodeURIComponent(configuredEmail)}"${trackingAttributes("contact", { method: "email", sourcePage: "contact" })}>メールで問い合わせる</a>`);
+     const contactBody = methods.length
+       ? `<div class="contact-panel"><h2>受付方法</h2><div class="form-actions">${methods.join("")}</div><p>外部サービスまたはメールアプリが開きます。送信前に宛先をご確認ください。</p></div>`
+       : `<div class="contact-panel"><h2>現在、お問い合わせ受付を準備中です</h2><p>公開用メールアドレスまたは外部フォームが未設定のため、送信フォームと送信ボタンは表示していません。</p><p>受付開始後は、このページで案内します。</p></div>`;
+     return `${header()}<main id="main"><section class="page-hero"><div class="container">${breadcrumbs([{ href: "#/", label: "トップ" }, { label: "お問い合わせ" }])}<span class="eyebrow">CONTACT</span><h1>情報訂正・お問い合わせ</h1><p>${methods.length ? "公開中の受付方法をご利用ください。" : "現在、お問い合わせ受付を準備中です。"}</p></div></section><section class="section section--compact"><div class="container">${contactBody}<div class="empty-actions"><a class="btn" href="#/">トップへ戻る</a><a class="btn" href="#/operation">運営情報</a><a class="btn" href="#/advertise">広告掲載</a></div></div></section></main>${footer()}`;
+   }
+ 
++  const searchMatchCount = (keywordValue, areaId) => {
++    const keyword = String(keywordValue || "").toLowerCase();
++    return [
++      ...DATA.areas.filter((area) => (!areaId || area.id === areaId) && (!keyword || `${area.name} ${area.lead} ${area.tags.join(" ")}`.toLowerCase().includes(keyword))),
++      ...DATA.courses.filter((course) => (!areaId || course.areaId === areaId) && (!keyword || `${course.title} ${course.summary}`.toLowerCase().includes(keyword))),
++      ...DATA.spots.filter((spot) => (!areaId || spot.areaId === areaId) && (!keyword || `${spot.name} ${spot.excerpt} ${spot.category}`.toLowerCase().includes(keyword))),
++      ...DATA.stories.filter((story) => (!areaId || story.areaId === areaId) && (!keyword || `${story.title} ${story.excerpt}`.toLowerCase().includes(keyword))),
++    ].length;
++  };
++
+   function searchResults() {
+     const params = new URLSearchParams(location.hash.split("?")[1] || "");
+     const keyword = (params.get("keyword") || "").toLowerCase();
+@@ -961,6 +1029,153 @@
+     return `${header()}<main id="main"><section class="page-hero"><div class="narrow"><span class="eyebrow">404</span><h1>ページが見つかりません</h1><p>URLをご確認いただくか、トップまたはエリア一覧からお探しください。</p><div class="empty-actions"><a class="btn btn--accent" href="#/">トップへ戻る</a><a class="btn" href="#/areas">エリア一覧へ戻る</a></div></div></section></main>${footer()}`;
+   }
+ 
++  const plainText = (value = "") => String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
++  const shortDescription = (value) => plainText(value).slice(0, 155);
++  const safeAnalyticsHash = () => {
++    const [path = "#/", query = ""] = location.hash.split("?");
++    if (!query) return path || "#/";
++    const params = new URLSearchParams(query);
++    params.delete("keyword");
++    const safeQuery = params.toString();
++    return `${path || "#/"}${safeQuery ? `?${safeQuery}` : ""}`;
++  };
++  const analyticsPageLocation = (safeHash) => {
++    if (configuredSiteUrl) {
++      const url = new URL(configuredSiteUrl);
++      url.hash = safeHash;
++      return url.href;
++    }
++    return `${location.origin}${location.pathname}${safeHash}`;
++  };
++  const pageInformation = () => {
++    const [type = "", id = ""] = routeParts();
++    const siteName = CONFIG.siteName || "おさんぽクラブ東京";
++    const details = {
++      areas: ["エリアから探す", "高円寺・吉祥寺・浅草の街歩きエリアを、雰囲気や目的から探せます。", "areas"],
++      courses: ["おさんぽコース", "東京の街歩きコースを、所要時間・予算・気分・歩く相手から絞り込めます。", "courses"],
++      spots: ["スポット紹介", "東京の散歩に組み込みやすい商店街、公園、神社、文化施設を紹介します。", "spots"],
++      stories: ["街の読み物", "高円寺・吉祥寺・浅草を歩く理由と楽しみ方を紹介する街の読み物です。", "stories"],
++      events: ["掲載イベント情報", "東京の街歩きと合わせて確認できるイベント情報を、公式情報の確認状態とともに掲載します。", "events"],
++      map: ["お散歩マップ", "高円寺・吉祥寺・浅草の散歩コースと立ち寄り地点をGoogleマップで確認できます。", "map"],
++      favorites: ["お気に入り", "ブラウザに保存したエリア、コース、スポット、街の読み物をまとめて確認できます。", "favorites"],
++      search: ["検索結果", "公開中のエリア、コース、スポット、街の読み物から条件に合う内容を表示します。", "search"],
++      about: ["おさんぽクラブ東京について", "公式情報をもとに東京の街歩きプランを編集する、おさんぽクラブ東京の案内です。", "about"],
++      operation: ["運営情報", "おさんぽクラブ東京の運営方針と問い合わせ受付状況を案内します。", "operation"],
++      "editorial-policy": ["編集方針", "事実と編集上の提案を区別する、おさんぽクラブ東京の編集方針です。", "editorial_policy"],
++      policy: ["編集方針", "事実と編集上の提案を区別する、おさんぽクラブ東京の編集方針です。", "editorial_policy"],
++      privacy: ["プライバシーポリシー", "おさんぽクラブ東京におけるアクセス解析、お気に入り、外部サービス、問い合わせ情報の取り扱いを説明します。", "privacy"],
++      advertise: ["広告掲載・地域パートナー", "おさんぽクラブ東京の広告掲載と地域パートナー募集の準備状況を案内します。", "advertise"],
++      advertising: ["広告掲載・地域パートナー", "おさんぽクラブ東京の広告掲載と地域パートナー募集の準備状況を案内します。", "advertise"],
++      contact: ["情報訂正・お問い合わせ", "おさんぽクラブ東京への情報訂正と問い合わせの受付状況を案内します。", "contact"],
++    };
++    let title = siteName;
++    let description = "東京の街を、気分・時間・予算から探せる街歩きメディア。実在スポット、イベント、散歩コースをGoogleマップと一緒に紹介します。";
++    let routeName = "home";
++    let content = null;
++
++    if (type === "area") {
++      content = DATA.areas.find((area) => area.id === id);
++      if (content) [title, description, routeName] = [content.name, `${content.name}の街歩きガイド。${content.lead || content.description}`, "area_detail"];
++    } else if (type === "course") {
++      content = DATA.courses.find((course) => course.id === id);
++      if (content) [title, description, routeName] = [content.title, `${content.title}。${content.summary}`, "course_detail"];
++    } else if (type === "spot") {
++      content = DATA.spots.find((spot) => spot.id === id);
++      if (content) [title, description, routeName] = [content.name, `${content.name}。${content.excerpt}`, "spot_detail"];
++    } else if (type === "story") {
++      content = DATA.stories.find((story) => story.id === id);
++      if (content) [title, description, routeName] = [content.title, `${content.title}。${content.excerpt}`, "story_detail"];
++    } else if (details[type]) {
++      [title, description, routeName] = details[type];
++    } else if (type) {
++      title = "ページが見つかりません";
++      description = "指定されたページは見つかりませんでした。トップまたはエリア一覧からお探しください。";
++      routeName = "not_found";
++    }
++    if (["area", "course", "spot", "story"].includes(type) && !content) {
++      title = "ページが見つかりません";
++      description = "指定されたページは見つかりませんでした。トップまたはエリア一覧からお探しください。";
++      routeName = "not_found";
++    }
++
++    const safeHash = safeAnalyticsHash();
++    const pageTitle = title === siteName ? siteName : `${plainText(title)} | ${siteName}`;
++    return {
++      type,
++      id,
++      content,
++      title: pageTitle,
++      description: shortDescription(description),
++      routeName,
++      safeHash,
++      pageLocation: analyticsPageLocation(safeHash),
++    };
++  };
++  const setMetaContent = (selector, value) => {
++    const element = document.head.querySelector(selector);
++    if (element) element.setAttribute("content", value);
++  };
++  const updateDocumentMetadata = () => {
++    const info = pageInformation();
++    document.title = info.title;
++    setMetaContent('meta[name="description"]', info.description);
++    setMetaContent('meta[property="og:title"]', info.title);
++    setMetaContent('meta[property="og:description"]', info.description);
++    setMetaContent('meta[property="og:url"]', configuredSiteUrl ? info.pageLocation : "");
++    setMetaContent('meta[name="twitter:title"]', info.title);
++    setMetaContent('meta[name="twitter:description"]', info.description);
++    return info;
++  };
++  const trackRenderedPage = (info) => {
++    const sent = ANALYTICS.trackPageView({
++      pageKey: info.safeHash,
++      pageTitle: info.title,
++      pageLocation: info.pageLocation,
++      routeName: info.routeName,
++    });
++    if (!sent) return;
++    const eventNames = {
++      area: "area_view",
++      course: "course_view",
++      spot: "spot_view",
++      story: "story_view",
++      advertise: "advertise_view",
++      advertising: "advertise_view",
++      contact: "contact_view",
++    };
++    const eventName = eventNames[info.type];
++    if (!eventName) return;
++    const areaId = info.type === "area"
++      ? info.content?.id
++      : info.content?.areaId;
++    trackEvent(eventName, {
++      content_id: info.content?.id,
++      content_type: info.type === "advertising" ? "advertise" : info.type,
++      area_id: areaId,
++      route_name: info.routeName,
++    });
++  };
++  const courseFilterEventParameters = (filters, extra = {}) => ({
++    selected_filter_count: Object.values(filters).filter(Boolean).length,
++    area_id: filters.area,
++    duration: filters.duration,
++    budget: filters.budget,
++    audience: filters.audience,
++    mood: filters.mood,
++    has_keyword: Boolean(filters.keyword),
++    ...extra,
++  });
++  const trackingParameters = (element, group) => {
++    const prefix = `track${group.charAt(0).toUpperCase()}${group.slice(1)}`;
++    return Object.fromEntries(Object.entries(element.dataset)
++      .filter(([key]) => key.startsWith(prefix) && key !== prefix)
++      .map(([key, value]) => {
++        const suffix = key.slice(prefix.length);
++        const parameter = suffix.charAt(0).toLowerCase() + suffix.slice(1);
++        return [parameter.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`), value];
++      }));
++  };
++
+   function render() {
+     const [type, id] = routeParts();
+     let html;
+@@ -982,9 +1197,11 @@
+     else if (type === "search") html = searchResults();
+     else html = notFound();
+     app.innerHTML = html;
++    const pageInfo = updateDocumentMetadata();
+     bindInteractions();
+     window.scrollTo({ top: 0, behavior: "instant" });
+     window.__OSANPO_APP_READY__ = true;
++    trackRenderedPage(pageInfo);
+   }
+ 
+   function bindInteractions() {
+@@ -1000,8 +1217,15 @@
+       event.preventDefault();
+       const form = new FormData(event.currentTarget);
+       const params = new URLSearchParams();
+-      if (form.get("keyword")) params.set("keyword", form.get("keyword"));
+-      if (form.get("area")) params.set("area", form.get("area"));
++      const keyword = String(form.get("keyword") || "").trim();
++      const areaId = String(form.get("area") || "");
++      if (keyword) params.set("keyword", keyword);
++      if (areaId) params.set("area", areaId);
++      trackEvent("search_submit", {
++        has_keyword: Boolean(keyword),
++        area_id: areaId,
++        result_count: searchMatchCount(keyword, areaId),
++      });
+       location.hash = `#/search?${params.toString()}`;
+     });
+ 
+@@ -1013,17 +1237,29 @@
+         const value = String(form.get(key) || "").trim();
+         if (value) filters[key] = value;
+       });
++      trackEvent("course_filter_apply", courseFilterEventParameters(filters));
+       location.hash = courseFiltersToHash(filters);
+     });
+ 
+     document.querySelectorAll("[data-course-filter-remove]").forEach((button) => {
+       button.addEventListener("click", () => {
+         const filters = readCourseFilters();
+-        delete filters[button.dataset.courseFilterRemove];
++        const removedFilter = button.dataset.courseFilterRemove;
++        delete filters[removedFilter];
++        trackEvent("course_filter_remove", courseFilterEventParameters(filters, { removed_filter: removedFilter }));
+         location.hash = courseFiltersToHash(filters);
+       });
+     });
+ 
++    document.querySelectorAll("[data-course-filter-clear]").forEach((link) => {
++      link.addEventListener("click", () => {
++        const filters = readCourseFilters();
++        trackEvent("course_filter_clear", courseFilterEventParameters({}, {
++          removed_filter: Object.keys(filters).filter((key) => filters[key]).join(","),
++        }));
++      });
++    });
++
+     document.querySelectorAll("[data-practical-jump]").forEach((button) => {
+       button.addEventListener("click", () => {
+         const section = document.getElementById(button.dataset.practicalJump || "");
+@@ -1048,6 +1284,11 @@
+           updateFavoriteButtons(type, id);
+           updateFavoriteCount();
+         }
++        trackEvent("favorite_change", {
++          content_type: type,
++          content_id: id,
++          action: active ? "add" : "remove",
++        });
+         announceFavoriteChange(favoriteLabel(type, favorite.record), active);
+       });
+     });
+@@ -1094,6 +1335,23 @@
+     main.focus({ preventScroll: true });
+   });
+ 
++  document.addEventListener("click", (event) => {
++    const link = event.target.closest("a");
++    if (!link) return;
++    [
++      ["map", "google_map_click"],
++      ["official", "official_link_click"],
++      ["food", "food_link_click"],
++      ["transit", "transit_link_click"],
++      ["contact", "contact_cta_click"],
++    ].forEach(([group, eventName]) => {
++      const flag = `track${group.charAt(0).toUpperCase()}${group.slice(1)}`;
++      if (link.dataset[flag] === "true") {
++        trackEvent(eventName, trackingParameters(link, group));
++      }
++    });
++  });
++
+   window.addEventListener("hashchange", render);
+   render();
+ })();
+diff --git a/config.js b/config.js
+index 4347227..92d7e0b 100644
+--- a/config.js
++++ b/config.js
+@@ -2,7 +2,13 @@ window.OSANPO_CONFIG = {
+   siteName: "おさんぽクラブ東京",
+   siteSubtitle: "Tokyo Sanpo Club",
+   basePath: "",
++  siteUrl: "",
+   contactEmail: "",
+   contactFormUrl: "",
+   eventUpdateMode: "手動更新",
++  analytics: {
++    enabled: false,
++    provider: "ga4",
++    measurementId: "",
++  },
+ };
+diff --git a/index.html b/index.html
+index 2675a3a..2eed307 100644
+--- a/index.html
++++ b/index.html
+@@ -7,6 +7,7 @@
+     <meta name="description" content="東京の街を、気分・時間・予算から探せる街歩きメディア。実在スポット、イベント、散歩コースをGoogleマップと一緒に紹介します。" />
+     <meta property="og:title" content="おさんぽクラブ東京" />
+     <meta property="og:description" content="東京には、歩くと楽しいまちがたくさんある。" />
++    <meta property="og:url" content="" />
+     <meta property="og:type" content="website" />
+     <meta property="og:image" content="assets/images/hero/hero-tokyo-walk.webp" />
+     <meta property="og:image:width" content="1600" />
+@@ -39,6 +40,7 @@
+       }, 5000);
+     </script>
+     <script src="config.js"></script>
++    <script src="analytics.js"></script>
+     <script src="data.js"></script>
+     <script src="app.js"></script>
+   </body>
+diff --git a/robots.txt b/robots.txt
+new file mode 100644
+index 0000000..c2a49f4
+--- /dev/null
++++ b/robots.txt
+@@ -0,0 +1,2 @@
++User-agent: *
++Allow: /
+-- 
+2.51.1
+
