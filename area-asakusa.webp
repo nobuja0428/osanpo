@@ -1,5 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="18" fill="#b6493d"/>
-  <path d="M19 43c11-2 19-9 25-22M20 24c4 1 7 4 9 8M33 20c3 1 6 3 8 6" fill="none" stroke="#fffaf4" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="18" cy="44" r="5" fill="#fffaf4"/>
-</svg>
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fffaf4">
+    <meta name="description" content="高円寺・吉祥寺・浅草の街歩きエリアを、雰囲気や目的から探せます。">
+    <link rel="canonical" href="https://nobuja0428.github.io/osanpo/areas/">
+    <meta property="og:title" content="エリアから探す｜おさんぽクラブ東京">
+    <meta property="og:description" content="高円寺・吉祥寺・浅草の街歩きエリアを、雰囲気や目的から探せます。">
+    <meta property="og:url" content="https://nobuja0428.github.io/osanpo/areas/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://nobuja0428.github.io/osanpo/assets/images/hero/hero-tokyo-walk.webp">
+    <meta property="og:image:width" content="1600">
+    <meta property="og:image:height" content="900">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="エリアから探す｜おさんぽクラブ東京">
+    <meta name="twitter:description" content="高円寺・吉祥寺・浅草の街歩きエリアを、雰囲気や目的から探せます。">
+    <meta name="twitter:image" content="https://nobuja0428.github.io/osanpo/assets/images/hero/hero-tokyo-walk.webp">
+    <link rel="icon" href="/osanpo/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/osanpo/styles.css">
+    <title>エリアから探す｜おさんぽクラブ東京</title>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://nobuja0428.github.io/osanpo/areas/","url":"https://nobuja0428.github.io/osanpo/areas/","name":"エリアから探す｜おさんぽクラブ東京","description":"高円寺・吉祥寺・浅草の街歩きエリアを、雰囲気や目的から探せます。","isPartOf":{"@id":"https://nobuja0428.github.io/osanpo/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"トップ","item":"https://nobuja0428.github.io/osanpo/"},{"@type":"ListItem","position":2,"name":"エリアから探す","item":"https://nobuja0428.github.io/osanpo/areas/"}]}]}</script>
+
+  </head>
+  <body data-page-key="/osanpo/areas/" data-route-name="areas" data-content-type="areas">
+    <a class="skip-link" href="#main">本文へ移動</a>
+    <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/osanpo/" aria-label="トップページ">
+        <span class="brand-mark">歩</span>
+        <span class="brand-copy"><strong>おさんぽクラブ東京</strong><span>Tokyo Sanpo Club</span></span>
+      </a>
+      <nav class="site-nav" id="siteNav" aria-label="メインナビゲーション">
+        <a href="/osanpo/areas/" aria-current="page">エリアから探す</a><a href="/osanpo/courses/">おさんぽコース</a><a href="/osanpo/spots/">スポット紹介</a><a href="/osanpo/map/">地図で探す</a><a href="/osanpo/about/">はじめての方</a><a href="/osanpo/contact/">お問い合わせ</a>
+        <a href="/osanpo/#/favorites">お気に入り</a>
+      </nav>
+      <button class="nav-toggle" type="button" aria-label="メニューを開く" aria-controls="siteNav" aria-expanded="false">☰</button>
+    </div>
+  </header>
+  <div class="sr-only" id="favoriteStatus" role="status" aria-live="polite" aria-atomic="true"></div><main id="main"><section class="page-hero"><div class="container"><nav class="breadcrumbs" aria-label="パンくず"><a href="/osanpo/">トップ</a><span aria-hidden="true">›</span><span aria-current="page">エリアから探す</span></nav><span class="eyebrow">DISCOVER TOKYO</span><h1>エリアから探す</h1><p>東京40エリアへの拡充を予定しています。公開情報の確認と現地取材を順次進めます。</p></div></section><section class="section section--compact"><div class="container"><div class="grid grid--3"><article class="card"><a class="card-link" href="/osanpo/areas/koenji/"><div class="card-media card-media--area area-media--koenji"><img src="/osanpo/assets/images/areas/area-koenji.webp" alt="高円寺の商店街と路地を表現したイメージ" width="1200" height="800" loading="lazy" decoding="async"><span class="image-label">イメージ</span></div><div class="card-body"><span class="card-kicker">杉並区</span><h2>高円寺</h2><p>古着と音楽、商店街と生活の路地が隣り合う街。</p><div class="card-meta"><span class="pill pill--green">基本ガイド</span><span class="pill">古着</span><span class="pill">商店街</span><span class="pill">一人散歩</span></div></div></a></article><article class="card"><a class="card-link" href="/osanpo/areas/kichijoji/"><div class="card-media card-media--area area-media--kichijoji"><img src="/osanpo/assets/images/areas/area-kichijoji.webp" alt="吉祥寺の緑と水辺の街歩きを表現したイメージ" width="1200" height="800" loading="lazy" decoding="async"><span class="image-label">イメージ</span></div><div class="card-body"><span class="card-kicker">武蔵野市</span><h2>吉祥寺</h2><p>公園、水辺、商店街が近い距離にまとまる街。</p><div class="card-meta"><span class="pill pill--green">基本ガイド</span><span class="pill">公園</span><span class="pill">カフェ</span><span class="pill">デート</span></div></div></a></article><article class="card"><a class="card-link" href="/osanpo/areas/asakusa/"><div class="card-media card-media--area area-media--asakusa"><img src="/osanpo/assets/images/areas/area-asakusa.webp" alt="浅草の門前町と下町の街並みを表現したイメージ" width="1200" height="800" loading="lazy" decoding="async"><span class="image-label">イメージ</span></div><div class="card-body"><span class="card-kicker">台東区</span><h2>浅草</h2><p>門前町の歴史と、道具街・水辺まで楽しめる下町。</p><div class="card-meta"><span class="pill pill--green">基本ガイド</span><span class="pill">歴史</span><span class="pill">建築</span><span class="pill">下町</span></div></div></a></article></div></div></section></main><footer class="site-footer">
+    <div class="container footer-inner">
+      <div><h2>おさんぽクラブ東京</h2><p>公開情報をもとに、AIによる構成・表現の補助も利用して東京の街歩きプランを編集するメディアです。掲載画像にはAI生成画像が含まれ、実景と異なる場合があります。</p></div>
+      <div><h2>探す</h2><div class="footer-links"><a href="/osanpo/areas/">エリア</a><a href="/osanpo/courses/">コース</a><a href="/osanpo/spots/">スポット</a><a href="/osanpo/stories/">読み物</a><a href="/osanpo/events/">イベント</a><a href="/osanpo/map/">お散歩マップ</a><a href="/osanpo/#/favorites">お気に入り</a></div></div>
+      <div><h2>運営</h2><div class="footer-links"><a href="/osanpo/operation/">運営情報</a><a href="/osanpo/editorial-policy/">編集方針</a><a href="/osanpo/privacy/">プライバシーポリシー</a><a href="/osanpo/advertise/">広告掲載</a><a href="/osanpo/contact/">お問い合わせ</a></div></div>
+    </div>
+    <div class="container footer-bottom">© 2026 おさんぽクラブ東京</div>
+  </footer>
+    <script src="/osanpo/config.js"></script><script src="/osanpo/analytics.js"></script><script src="/osanpo/favorites.js"></script><script src="/osanpo/static-page.js"></script>
+  </body>
+</html>

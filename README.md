@@ -1,289 +1,194 @@
-# おさんぽクラブ東京 — GitHub Pages版
+# おさんぽクラブ東京 — 公開V1
 
-公開中の「おさんぽクラブ」の構成を参考に、GitHub Pagesへ置きやすい静的SPAとして作成したコードです。
+高円寺・吉祥寺・浅草のエリア、散歩コース、スポット、読み物を掲載するGitHub Pages向けの静的サイトです。公開コンテンツはクリーンURLの実体HTMLとして配信し、検索・絞り込み・お気に入りには既存SPAを併用します。
 
-## 主な機能
+## 公開設定
 
-- トップページ
-- エリア一覧・詳細
-- 散歩コース一覧・詳細
-- スポット記事
-- 街の読み物
-- 掲載イベント情報（開催状態を日時から判定し、終了分は過去欄へ移動）
-- Googleマップ埋め込み・ルートリンク
-- 検索（キーワード・エリア）
-- 散歩コース絞り込み（キーワード・エリア・所要時間・予算・気分・対象者）
-- お気に入り保存・お気に入り一覧
-- お問い合わせ（メール・外部フォーム未設定時は準備中表示）
-- スマートフォン対応
-- ハッシュルーティングによるGitHub Pages対応
+- 正式公開URL：<https://nobuja0428.github.io/osanpo/>
+- basePath：`/osanpo/`
+- 公開方式：GitHub Pages、リポジトリルート
+- 実行時npm依存：なし
+- GitHub Pages側のビルド：不要
 
-## ローカルで確認
-
-依存パッケージはありません。
-
-```bash
-python -m http.server 8000
-```
-
-ブラウザで `http://localhost:8000` を開きます。
-
-## GitHub Pagesで公開
-
-1. 配布ZIPを解凍
-2. ZIPの中身（`index.html`、`assets/`など）をGitHubリポジトリのルートへ配置
-3. ZIPファイル自体はGitHubへ置かない
-4. GitHubの `Settings` → `Pages`
-5. `Deploy from a branch` を選択
-6. `main` ブランチの `/ (root)` を指定
-7. 表示されたURLへアクセス
-
-`index.html`を含むフォルダーを一段深く配置しないでください。
-
-## 連絡先の設定
-
-`config.js` を編集します。
+`config.js`の正は次です。
 
 ```js
-window.OSANPO_CONFIG = {
-  siteUrl: "",
-  contactEmail: "",
-  contactFormUrl: "",
-  analytics: {
-    enabled: false,
-    provider: "ga4",
-    measurementId: "",
-  },
-};
+basePath: "/osanpo/",
+siteUrl: "https://nobuja0428.github.io/osanpo/",
+contactEmail: "",
+contactFormUrl: "",
+analytics: {
+  enabled: false,
+  provider: "ga4",
+  measurementId: "",
+},
 ```
 
-公開用アドレスが決まった場合だけ `contactEmail` に設定してください。Googleフォームを使う場合は、公開したGoogleフォームのHTTPS URLを`contactFormUrl`へ設定してください。`forms.gle`または`docs.google.com/forms/`以外のURL、`example.com`・`example.jp`のメール、空欄は無効扱いとなり、準備中表示を維持します。
+GA4測定ID、GoogleフォームURL、公開用メールアドレスは未設定です。架空の値は設定しません。
 
-## 公開RC2の設定とアクセス解析
+## ファイル構成
 
-公開RC2では、`config.js`へ公開URL・問い合わせ先・GA4の設定欄を追加し、`analytics.js`へ解析処理を分離しました。初期状態は次のとおりで、アクセス解析と問い合わせ送信UIは動作しません。
+- `index.html`：トップ。JavaScriptなしでも主要内容を表示し、JavaScript有効時は既存SPAを起動
+- `areas/`、`courses/`、`spots/`、`stories/`：一覧・詳細の実体HTML
+- `events/`、`map/`、`about/`、`operation/`、`editorial-policy/`、`privacy/`、`advertise/`、`contact/`：案内ページの実体HTML
+- `app.js`：既存SPA、検索、絞り込み、動的表示
+- `static-page.js`：静的ページのナビ、計測、外部リンク、共通お気に入りUI
+- `favorites.js`：SPAと静的ページで共有する`localStorage`処理
+- `analytics.js`：GA4の読み込み、page_view、イベント送信
+- `data.js`：掲載コンテンツと画像参照
+- `config.js`：公開URL、basePath、問い合わせ、GA4
+- `styles.css`：共通デザイン
+- `scripts/build-static.mjs`：クリーンURL HTMLと`sitemap.xml`の生成
+- `scripts/check-site.mjs`：設定、HTML、SEO、リンク、画像SHA、秘密情報の検査
+- `robots.txt`、`sitemap.xml`：検索エンジン向け設定
+- `404.html`：noindex付き404
+- `FIELD_RESEARCH_CHECKLIST.md`：未実施の現地確認
+- `CONTENT_QUALITY_REPORT.md`：画像品質と差し替え方針
 
-- `siteUrl: ""`
-- `contactEmail: ""`
-- `contactFormUrl: ""`
+## クリーンURL
+
+トップと次の分類・詳細、案内ページを実体HTMLとして生成します。
+
+- `/osanpo/`
+- `/osanpo/areas/` と3エリア
+- `/osanpo/courses/` と3コース
+- `/osanpo/spots/` と6スポット
+- `/osanpo/stories/` と3記事
+- `/osanpo/events/`
+- `/osanpo/map/`
+- `/osanpo/about/`
+- `/osanpo/operation/`
+- `/osanpo/editorial-policy/`
+- `/osanpo/privacy/`
+- `/osanpo/advertise/`
+- `/osanpo/contact/`
+
+正確な一覧は`sitemap.xml`を参照してください。
+
+各ページは、title、description、canonical、OGP、Twitter Card、WebPage、BreadcrumbListをHTML配信時点で持ちます。トップはWebSiteとOrganizationも持ちます。OGP画像はエリア・コース・スポット・読み物では固有画像、その他はヒーロー画像です。すべて正式公開URLの絶対URLです。
+
+## 旧ハッシュURL互換
+
+トップの初期スクリプトが、公開コンテンツの旧ハッシュURLを対応するクリーンURLへ移動します。
+
+```text
+#/area/koenji
+→ /osanpo/areas/koenji/
+
+#/course/koenji-first
+→ /osanpo/courses/koenji-first/
+```
+
+エリア、コース、スポット、読み物の詳細と、主要案内ページが対象です。検索、お気に入り、条件付き絞り込みは利用者ごとに状態が異なるため、SPAのハッシュURLを維持します。無条件転送や404のトップ転送は行いません。
+
+## 静的ページとサイトマップの再生成
+
+Node.js標準機能だけを使用します。`npm install`は不要です。
+
+```bash
+node scripts/build-static.mjs
+node scripts/check-site.mjs
+```
+
+`build-static.mjs`は`data.js`と`config.js`を読み、共通テンプレートから生成済みHTMLと`sitemap.xml`を更新します。同じ入力で繰り返し実行しても差分は出ません。生成済みHTMLをGitHubへ配置するため、GitHub Pages側でNode.jsを実行する必要はありません。
+
+新しいエリア、コース、スポット、読み物を追加するときは、次の順で進めます。
+
+1. 確認済みの事実と画像を`data.js`へ追加
+2. 既存IDと重複しないID、画像、alt、確認状態、公式情報を設定
+3. `node scripts/build-static.mjs`
+4. `node scripts/check-site.mjs`
+5. ローカルHTTPサーバーで5画面幅と操作を確認
+6. `sitemap.xml`と公開差分を確認
+
+## robots、canonical、構造化データ
+
+`robots.txt`はCSS、JavaScript、画像をブロックせず、正式な`sitemap.xml`を指定します。`sitemap.xml`には生成済みクリーンURLだけを含め、ハッシュURL、検索、お気に入り、404、架空のlastmodは含めません。
+
+canonicalは各クリーンURL自身です。検索・お気に入り・404を検索対象の独立ページとして扱いません。構造化データに架空の法人、著者、住所、電話、評価、価格、取材日は含めません。
+
+## GA4
+
+初期状態では解析を行いません。
+
 - `analytics.enabled: false`
 - `analytics.measurementId: ""`
+- GA4スクリプトを読み込まない
 
-正式な公開HTTPS URLが決まったら`siteUrl`へ設定してください。動的な`og:url`の生成と解析用の画面URLに使用します。空欄またはHTTPS以外のURLは使用されません。
+利用する場合は、運営者がGA4プロパティを作成し、正式な`G-`形式の測定IDを設定して`enabled`を`true`にします。`analytics.js`は`send_page_view: false`で読み込み、SPAと静的ページがそれぞれ1回だけpage_viewを送ります。同じ表示で二重送信しません。
 
-GA4を利用する場合は、運営者がGoogle Analytics側でプロパティを作成し、`analytics.measurementId`へ正式な`G-`から始まる英数字の測定IDを設定したうえで、`analytics.enabled`を`true`にします。`enabled`が`true`、`provider`が`ga4`、測定IDが有効、ブラウザ環境という条件がすべてそろった場合だけGA4スクリプトを読み込みます。解析無効時や無効な測定IDでは読み込まず、呼び出しはno-opになります。
+SPAの計測イベントは次を維持します。
 
-SPAの初回表示とハッシュ変更後に`page_view`を手動送信します。初期の自動画面表示は無効化し、同じURLでのお気に入り表示更新などは重複ページビューにしません。検索・コース絞り込みURLは、解析送信時だけ`keyword`の値を除外します。
+- `area_view`、`course_view`、`spot_view`、`story_view`
+- `advertise_view`、`contact_view`
+- `google_map_click`、`official_link_click`
+- `food_link_click`、`transit_link_click`
+- `favorite_change`
+- `search_submit`
+- `course_filter_apply`、`course_filter_remove`、`course_filter_clear`
+- `contact_cta_click`
 
-### 計測イベント
+静的ページでも、ページ閲覧、コンテンツ閲覧、Googleマップ、公式リンク、食事・休憩、駅・電車、問い合わせCTA、広告掲載ページを同じ解析処理で計測できます。
 
-| イベント | 主な送信項目 |
-| --- | --- |
-| `area_view`、`course_view`、`spot_view`、`story_view` | `content_id`、`content_type`、`area_id`、`route_name` |
-| `advertise_view`、`contact_view` | `content_type`、`route_name` |
-| `google_map_click` | `link_type`、`content_id`、`area_id`、`course_id`、`stop_order` |
-| `official_link_click` | `content_type`、`content_id`、`link_type`、`area_id` |
-| `food_link_click` | `food_id`、`course_id`、`area_id`、`link_type` |
-| `transit_link_click` | `transit_id`、`course_id`、`role`、`link_type` |
-| `favorite_change` | `content_type`、`content_id`、`action` |
-| `search_submit` | `has_keyword`、`area_id`、`result_count` |
-| `course_filter_apply`、`course_filter_remove`、`course_filter_clear` | 選択件数、各選択キー、`has_keyword`、`removed_filter` |
-| `contact_cta_click` | `method`、`source_page` |
+生の検索語、氏名、メールアドレス、電話番号、住所、問い合わせ本文、フォーム入力、外部URL全文は独自イベントへ送りません。Cookie同意の要否とGoogle側の規約は、公開地域、法務、運用方針に応じて運営者が確認してください。
 
-利用者が入力した検索語そのもの、氏名、メールアドレス、住所、外部URL全文、ドメイン名は解析イベントへ送信しません。お気に入りは従来どおりブラウザ内の`localStorage`だけへ保存します。
+## 問い合わせと広告掲載
 
-## SEO基礎と外部作業
+未設定時は、問い合わせページに準備中表示だけを出し、フォーム、送信ボタン、架空の連絡先は表示しません。広告掲載は「地域パートナー募集予定」「テスト掲載の相談受付準備中」「媒体資料準備中」「アクセス実績を蓄積中」と表示し、受付中のCTA、架空料金、実績、広告主は表示しません。
 
-画面ごとに`document.title`、meta description、OGP、Twitter Cardのタイトルと説明を更新します。`siteUrl`が有効なHTTPS URLの場合だけ`og:url`を絶対URLとして更新します。OGP画像は既存のヒーロー画像を維持しています。
+将来設定する場合：
 
-`robots.txt`は通常ページ、CSS、JavaScript、画像のクロールを禁止しない最小構成です。正式な公開URLが未確定のため、`sitemap.xml`は作成していません。公開URL確定後に正しいURLで作成し、運営者がGoogle Search Consoleへ登録・所有権確認・送信を行ってください。
+- GoogleフォームはHTTPSの`forms.gle`または`docs.google.com/forms/`だけ
+- メールは有効な公開用アドレスだけ。example系は無効
+- 設定後に`node scripts/build-static.mjs`を再実行
+- 外部フォームは外部遷移を表示し、`rel="noopener noreferrer"`を維持
+- CTAは`contact_cta_click`で計測
 
-このサイトはハッシュルーティングの静的SPAです。各ハッシュ画面が検索エンジンへ独立ページとして確実に登録されるとは限らず、今回のmeta更新だけで完全なSEO対応にはなりません。検索流入を本格化する場合は、静的HTML化またはパス型ページへの移行を別段階で検討してください。
+## お気に入り、検索、絞り込み
 
-GA4プロパティ作成、Googleフォーム作成、Google Search Console登録、所有権確認、`sitemap.xml`送信はコード外の作業です。Cookie同意の要否は、公開地域、法務、運用方針に応じて運営者側で確認してください。公開前の設定・外部作業は`RELEASE_CHECKLIST.md`も使用してください。
+お気に入りのキーは`osanpoClubFavoritesV1`を維持し、ブラウザ内だけに保存します。既存データを消さず、SPAと静的詳細ページで同じ`favorites.js`を使用します。アカウント同期やサーバー送信はありません。
 
-## 画像
+検索と絞り込みはSPAで動作します。解析ではキーワードの有無と件数だけを送り、生の検索語は送りません。
 
-画像はすべて`assets/images/`以下のローカルWebPです。掲載画像には、街や散歩体験の雰囲気を表現するために制作した生成イメージが含まれます。実際の街並み、店舗、施設、イベントの開催記録写真とは異なる場合があります。
+## イベント
 
-画像参照を更新する場合は、`data.js`の`images`と各コンテンツの`image`・`imageAlt`を対応させ、ファイル名の大文字小文字と実ファイルの存在を確認してください。
+イベントは手動更新です。生成時点で現在・今後の確認済みイベントが0件の場合、トップとヘッダーで強調せず、イベントページとフッターから過去情報へ到達できます。新しい確認済みイベントを`data.js`へ追加して再生成すると、ヘッダーナビへ自動復帰します。
 
-## お気に入り
+## 画像と現地確認
 
-お気に入りは利用者のブラウザ内に保存されます。サーバー送信、アカウント同期、端末間同期は行いません。ブラウザのサイトデータを削除するとお気に入りも消去されます。
+画像20点はローカルWebPで、AI生成画像を含むイメージ素材です。実景写真、店舗外観、施設記録、イベント開催記録として扱いません。今回、画像は変更しておらず、`scripts/check-site.mjs`がSHA-256を確認します。
 
-## 散歩コースの絞り込み
+現地取材、コース実歩行、店舗営業、トイレ利用、駅出口、混雑、バリアフリー、イベント現地確認は未実施です。`FIELD_RESEARCH_CHECKLIST.md`を使用し、確認した事実だけを更新してください。
 
-`#/courses`では、キーワード、エリア、所要時間、予算、気分・テーマ、対象者を組み合わせてコースを絞り込めます。選択中の条件は一つずつ解除でき、すべて解除することもできます。
+## ローカル確認
 
-条件はハッシュ内のクエリ文字列へ保存されます。たとえば`#/courses?area=koenji&duration=120&audience=solo`のようなURLを共有すると、同じ条件と結果を開けます。
+GitHub Pagesと同じ`/osanpo/`で配信できるローカルHTTPサーバーを使用し、トップ、一覧、詳細、案内、検索、お気に入り、404を確認します。
 
-コースを追加する場合は、表示用の`duration`、`budget`、`audience`に加えて、判定用の次の項目をすべて設定してください。
+公開前は最低限、次を実行します。
 
-- `durationMinutes`：所要時間の分数
-- `budgetMaxYen`：予算上限の目安（円）
-- `audienceKeys`：対象者キーの配列
-- `moodKeys`：気分・テーマキーの配列
+```bash
+node scripts/build-static.mjs
+node scripts/check-site.mjs
+node --check app.js
+node --check analytics.js
+node --check favorites.js
+node --check static-page.js
+```
 
-利用可能な対象者キーは`solo`（一人）、`friends`（友人）、`date`（デート）、`family`（家族）、`sightseeing`（観光）です。気分・テーマキーは`shopping`（商店街・買い物）、`vintage`（古着・路地）、`nature`（公園・水辺）、`cafe`（カフェ）、`history`（歴史・建築）です。
+その後、1440px、1024px、768px、375px、320px相当で、横スクロール、ヘッダー、画像、パンくず、戻る、お気に入り、検索、0件、フィルター、地図、問い合わせ準備中、イベント0件時、meta、canonicalを実ブラウザで確認します。
 
-## イベントの更新
+## コード外の作業
 
-`data.js` の `events` に追加します。`end` を過ぎたイベントはトップから非表示になり、イベントページの過去欄へ移動します。
+次はコードで完了扱いにしません。
 
-イベントは手動更新です。自動取得や中止・延期の自動反映は実装していません。`informationCheckedAt`、`lastUpdated`、`officialUrl`を更新し、中止・延期時は`status`へ明示してください。
-
-## Googleマップ
-
-APIキー不要のGoogle Maps URLsと、位置確認用のGoogleマップ検索埋め込みを利用しています。高円寺・吉祥寺・浅草の3コースは、スマートフォンで経由地点が欠落しないよう、徒歩ルートを前半・後半に分けています。
-
-コースの地点を更新する場合は、`data.js`の`routeStops`で`order`、`name`、`query`、`role`を設定します。表示とGoogleマップURLは同じ`routeStops`を参照します。既存表示との互換性のため、`stops`も対応する順番で維持してください。
-
-`routeSegments`では、`originStopOrder`、`waypointStopOrders`、`destinationStopOrder`へ地点番号を順番どおりに指定します。1区間のwaypointsは3件以内とし、前半の終点と後半の始点を一致させてください。
-
-Googleマップの経路は変更される可能性があります。公開前に外部Googleマップ画面をiPhone・Android等の実機で開き、徒歩モード、地点順、前半の終点と後半の始点を確認してください。現地踏査と実際の通行状況の確認は別途必要です。
-
-## おでかけ実用情報（第1弾：トイレ）
-
-高円寺・吉祥寺・浅草のコース詳細に、散歩中に利用しやすいトイレ情報を掲載しています。表示位置は、Googleマップ徒歩ルートの後、「この順番で歩く理由」の前です。自治体オープンデータと自治体・施設の公式情報を使用し、コースの前半・後半、最寄りのコース地点番号、Googleマップ、設備、出典、情報確認日を表示します。
-
-杉並区、武蔵野市、台東区のCC BY 4.0データを使用した項目には、画面上で出典名、ライセンス、元データ、データ更新日を表示します。台東区データには、台東区が内容を保証しない旨も表示します。自治体の説明文、画像、画面デザインは転載していません。
-
-`data.js`の`toilets`で、主に次の項目を管理します。
-
-- `id`：トイレごとの重複しないID
-- `courseId`、`areaId`：対応するコースとエリア
-- `name`、`type`：正式名称と種類
-- `routePart`：`first`、`second`、`start`、`goal`のいずれか
-- `nearStopOrder`、`nearStopName`：最寄りのコース地点番号と名称
-- `locationNote`、`address`：コース内での位置補足と公式所在地
-- `mapQuery`：APIキー不要のGoogle Maps検索URLへ渡す正式名称・所在地
-- `wheelchair`、`ostomate`、`infantFacilities`：設備情報
-- `availableStartTime`、`availableEndTime`、`availableTimeNote`：公式に確認できた利用時間
-- `status`：`available`、`temporarily-closed`、`information-pending`のいずれか
-- `sourceName`、`sourceUrl`、`datasetUrl`、`sourceLicense`：出典とライセンス
-- `sourceUpdatedAt`、`informationCheckedAt`：元データ更新日とサイト確認日
-
-設備情報は3値で管理します。
-
-- `true`：公式情報で「あり」と確認できた
-- `false`：公式情報で「なし」と確認できた
-- `null`：情報がない、または確認できない
-
-空欄を`false`へ置き換えないでください。画面ではそれぞれ「あり」「なし」「情報なし」と表示します。
-
-情報を更新するときは、自治体オープンデータ、自治体公式ページ、施設管理者の公式情報の順に確認し、`informationCheckedAt`を更新します。元データ自体が更新された場合は`sourceUpdatedAt`も更新してください。一時閉鎖が公式に確認できた場合は`status`を`temporarily-closed`へ変更し、再開日を推測せず、`usageNote`へ確認できた事実だけを記載します。再開を公式に確認した後で`available`へ戻します。
-
-各トイレの「Googleマップで開く」は、`https://www.google.com/maps/search/?api=1&query=...`形式を使用します。APIキー、位置情報取得、GPS、実行時の外部データ取得は使用しません。
-
-トイレ情報は公開情報だけをもとに作成しており、現地確認は行っていません。利用時間、設備、工事、閉鎖、施設側の都合は変更される場合があります。公開前と定期更新時に公式情報と現地表示を確認してください。
-
-第1弾のトイレ情報は、第2弾の駅・電車情報追加後も名称、設備、出典、確認日、Googleマップリンクを変更せず維持します。食事・休憩情報は第3弾で別に検討します。
-
-## おでかけ実用情報（第2弾：駅・電車）
-
-高円寺・吉祥寺・浅草のコース詳細に、散歩へ行くときの駅と歩き終わった後に利用しやすい駅を掲載しています。コースのSTART・GOALとの関係を先に示し、鉄道会社、路線、確認できた駅番号、公式駅情報、公式時刻表、公式運行情報、構内図・出口案内、バリアフリー情報へ案内します。
-
-表示位置は「おでかけ実用情報」の先頭です。電車・駅情報の後に、第3弾の食事・カフェ・休憩情報、第1弾のトイレ情報を続けています。乗換案内サイトの代わりではなく、各散歩コースの開始駅と終了駅に必要な公式確認先をまとめるための情報です。
-
-`data.js`の`transitAccess`で、主に次の項目を管理します。
-
-- `id`：駅アクセスごとの重複しないID
-- `courseId`：対応する散歩コース
-- `role`：`arrival`（行き）または`return`（帰り）
-- `roleLabel`：画面へ表示する「行き」または「帰り」
-- `stationName`、`stationCode`：駅名と、公式に確認できた駅番号
-- `routeConnection`：コースのSTART・GOALと駅の関係
-- `mapQuery`：駅名、鉄道会社、地域名を含むGoogleマップ検索文字列
-- `informationCheckedAt`：鉄道会社公式情報を確認した日
-- `fieldResearch`：現地で駅動線を確認したか
-- `officialSources`：確認に使った鉄道会社の公式ページ
-- `operators`：同じ駅を利用する鉄道会社ごとの路線と公式リンク
-- `alternativeStations`：浅草のように、別の場所に同名駅がある場合の補助情報
-
-`operators`は配列です。同じ駅に複数の鉄道会社がある場合は、会社ごとに次の項目を更新してください。
-
-- `name`：鉄道会社名
-- `lines`：公式駅ページの表記に沿った路線名の配列
-- `stationPageUrl`：公式駅ページ
-- `timetableUrl`：鉄道会社の公式駅ページから案内される時刻表
-- `operationInfoUrl`：鉄道会社の公式運行情報
-- `stationMapUrl`：公式構内図・出口案内
-- `barrierFreeUrl`：公式バリアフリー情報
-
-浅草の都営浅草線・東武スカイツリーライン・つくばエクスプレスは、東京メトロ浅草駅とは位置が異なるため、`alternativeStations`で駅名、駅番号、鉄道会社、公式駅ページ、Googleマップ検索文字列を別々に管理します。同じ駅として統合しないでください。
-
-`recommendedExit`は画面へ表示する出口名、`exitVerified`は確認状態です。おすすめ出口は、鉄道会社公式の構内図・出口案内とコース地点との位置関係を両方確認し、`exitVerified: true`にした場合だけ表示されます。確認が不十分な場合は`recommendedExit`を空欄、`exitVerified`を`false`または`null`にし、画面では公式構内図の確認を案内します。出口番号を推測して入力しないでください。
-
-駅情報を更新するときは、鉄道会社の公式駅ページ、時刻表、構内図・出口案内、バリアフリー情報、運行情報の順に確認し、`informationCheckedAt`を更新してください。時刻表の時刻、始発・終電、運賃、所要時間、現在の遅延・運休・平常運転は転載しません。サイト内へリアルタイム運行情報を取得する処理も追加しません。
-
-行きの駅にある「現在地から電車経路を調べる」は、APIキー不要のGoogle Maps URLsを使用します。URLは`https://www.google.com/maps/dir/?api=1&destination=...&travelmode=transit`形式で、出発地は指定しません。現在地が利用できる場合はGoogleマップ側で出発地に使われ、利用できない場合はGoogleマップ側で入力できます。GPS、現在地取得処理、交通API、スクレイピングは使用していません。
-
-駅動線は公開されている鉄道会社・地図情報だけをもとに整理しており、現地確認は行っていません。出口、設備、時刻表、運行状況は変更される場合があるため、公開前と定期更新時に鉄道会社の公式情報を確認してください。
-
-## おでかけ実用情報（第3弾：食事・カフェ・休憩）
-
-高円寺・吉祥寺・浅草のコース詳細に、散歩の流れに合わせて選べる食事、カフェ、短い休憩、テイクアウトの候補を追加しています。掲載内容は店舗、商店街、商業施設等の公開情報をもとに作成しており、現地取材・実食確認は行っていません。ランキングや広告ではなく、コースのどの地点で何のために立ち寄るかを判断するための編集上の参考候補です。
-
-表示位置は「おでかけ実用情報」の2番目です。電車・駅、食事・休憩、トイレの順に表示し、冒頭のボタンも同じ順番で、URLハッシュを変更せず対象見出しへスクロールします。既存のハッシュルーティング、徒歩ルート、駅情報、トイレ情報は維持します。
-
-`data.js`の`foodBreaks`で、主に次の項目を管理します。
-
-- `id`：店舗ごとの重複しないID
-- `courseId`、`areaId`：対応するコースとエリア
-- `role`：`short-break`、`cafe-break`、`meal`、`takeout`
-- `routePart`：`start`、`first`、`second`、`goal`
-- `nearStopOrder`、`nearStopName`：最寄りのコース地点番号と名称
-- `servicePeriods`：`breakfast`、`lunch`、`cafe`、`dinner`、`takeout`
-- `officialUrl`、`menuUrl`、`reservationUrl`：店舗の公式確認先。存在しない場合は空文字
-- `tabelogUrl`：確認できた食べログ店舗個別ページ。検索結果URLは使用しない
-- `mapQuery`：正式店名と所在地を含むGoogleマップ検索文字列
-- `informationCheckedAt`：公式情報を確認した日
-- `fieldResearch`：現地取材・実食を行ったか
-- `isSponsored`：広告掲載か。今回の通常掲載はすべて`false`
-
-サービス情報は3値で保持します。
-
-- `true`：店舗公式情報で対応を確認
-- `false`：店舗公式情報で非対応と確認
-- `null`：確認できない
-
-`null`を`false`へ変換しないでください。画面では「公式情報で対応を確認」「公式情報では非対応」「情報なし」と表示します。食事制限やアレルギー対応を保証する表現は使用しません。
-
-公式情報は、店舗公式サイト、チェーン公式店舗ページ、商業施設・商店街の公式店舗ページ、自治体・観光協会の順に優先します。公式サイトがなく公式SNSだけを使う場合は、店舗名、所在地、直近の更新、営業継続を慎重に確認してください。
-
-営業時間と定休日は変わりやすいため、原則としてサイト内へ詳細時刻を固定表示しません。利用時間帯だけを公式情報から確認し、最新情報は公式サイトへ案内します。価格も推測せず、公式メニューがある場合だけ確認先を表示します。
-
-食べログは口コミや利用者情報を追加確認する補助リンクです。評価点、ランキング、称号、口コミ件数、口コミ本文・要約、投稿画像、予算、営業時間、設備情報を転載しません。個別店舗URLの変更や閉店表示を確認した場合は、`tabelogUrl`を更新または空文字にしてください。
-
-Googleマップは場所確認用です。評価、口コミ、営業中表示、混雑、写真、メニュー、営業時間、アクセシビリティ属性を転載しません。APIキー、Places API、GPS、現在地取得、スクレイピングは使用しません。
-
-閉店を確認した店舗は掲載から除外してください。一時休業は原則掲載せず、公式な再開情報を確認できない場合は`status`を`temporarily-closed`または`information-pending`として主要候補に扱わないでください。更新時は公式情報、Googleマップの閉業表示、食べログ個別ページを補助的に突き合わせ、`informationCheckedAt`を更新します。
-
-第1弾のトイレ8件、第2弾の駅アクセス6件・浅草補助駅3件、Google徒歩ルート6件、画像20点は第3弾でも保護対象です。監査で公式情報との明確な不一致が見つかった場合だけ、対象データを最小限修正します。
-
-iPhone・Android実機での確認は行っていません。公開前に実機で、ページ内移動、外部リンク、320px相当の表示、固定ヘッダーとの重なりを確認してください。外部リンクは半年ごとの再確認を推奨します。
-
-## 白画面防止
-
-`index.html`はJavaScriptの読み込み前に「読み込んでいます」と表示します。`app.js`の初回描画が完了すると`window.__OSANPO_APP_READY__`を設定し、正常な画面へ置き換えます。スクリプトの読み込みや実行に失敗した場合は、一定時間後に再読み込み案内を表示します。
-
-## 更新時に触る主なファイル
-
-- `data.js`：エリア、コース、スポット、読み物、イベント、画像参照
-- `config.js`：公開用問い合わせ先などの設定
-- `app.js`：表示・ルーティング・検索・お気に入り
-- `styles.css`：レイアウトと表示
-- `index.html`：基本meta情報と読み込み設定
-
-## 公開前チェック
-
-- 店舗・施設・イベントの情報は公式情報を確認して更新してください。
-- `informationCheckedAt`、`lastUpdated`、公式URLを確認してください。
-- コースの歩きやすさや休憩候補など、現地情報は現地確認が必要です。
-- 生成イメージを実在店舗・施設・イベントの記録写真として表示しないでください。
-- 問い合わせ先が未設定のとき、フォームと送信ボタンが表示されないことを確認してください。
-- 全内部リンク、画像パス、GoogleマップURL、検索、お気に入り、イベント状態を確認してください。
-- PCとスマートフォンで横スクロールや操作不能がないことを確認してください。
-- 個人情報、APIキー、トークン、ローカル作業パスが含まれていないことを確認してください。
-- 現在のエリアデータは高円寺・吉祥寺・浅草の3件です。残り37エリアのページや記事は、確認済み情報が用意できるまで追加しません。
+- GA4測定ID設定とリアルタイム確認
+- Googleフォーム作成
+- 公開用メール設定
+- Google Search Console登録と所有権確認
+- `sitemap.xml`送信
+- iPhone・Android実機確認
+- 現地取材
+- 最新イベント確認
+- Cookie同意要否の確認
+- 店舗営業確認
+- 掲載プラン決定

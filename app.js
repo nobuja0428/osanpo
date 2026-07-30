@@ -6,6 +6,11 @@
     trackEvent: () => false,
     trackPageView: () => false,
   };
+  const FAVORITES = window.OSANPO_FAVORITES || {
+    key: (type, id) => `${type}:${id}`,
+    read: () => [],
+    write: () => null,
+  };
   const app = document.getElementById("app");
   const SITE_INFO = DATA.siteInfo || {};
   const img = (key) => DATA.images[key] || DATA.images.hero;
@@ -90,6 +95,38 @@
   const configuredEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(CONFIG.contactEmail || "") && !/@example\.(com|jp)$/i.test(CONFIG.contactEmail) ? CONFIG.contactEmail : "";
   const configuredFormUrl = safeGoogleFormUrl(CONFIG.contactFormUrl);
   const configuredSiteUrl = safeHttpsSiteUrl(CONFIG.siteUrl);
+  const basePath = `/${String(CONFIG.basePath || "/").replace(/^\/+|\/+$/g, "")}/`.replace("//", "/");
+  const cleanRouteMap = {
+    "": "",
+    areas: "areas/",
+    courses: "courses/",
+    spots: "spots/",
+    stories: "stories/",
+    events: "events/",
+    map: "map/",
+    about: "about/",
+    operation: "operation/",
+    "editorial-policy": "editorial-policy/",
+    policy: "editorial-policy/",
+    privacy: "privacy/",
+    advertise: "advertise/",
+    advertising: "advertise/",
+    contact: "contact/",
+  };
+  const cleanUrlFromHash = (hash) => {
+    const match = String(hash || "").match(/^#\/(?:(area|course|spot|story)\/([a-z0-9-]+)|([a-z-]+))?$/);
+    if (!match) return "";
+    if (match[1] && match[2]) {
+      const plural = { area: "areas", course: "courses", spot: "spots", story: "stories" }[match[1]];
+      return `${basePath}${plural}/${match[2]}/`;
+    }
+    const route = match[3] || "";
+    return Object.hasOwn(cleanRouteMap, route) ? `${basePath}${cleanRouteMap[route]}` : "";
+  };
+  const rewritePublicLinks = (html) => html.replace(/href="(#[^"]*)"/g, (attribute, hash) => {
+    const cleanUrl = cleanUrlFromHash(hash);
+    return cleanUrl ? `href="${cleanUrl}"` : attribute;
+  });
   const trackEvent = (eventName, parameters = {}) => ANALYTICS.trackEvent(eventName, parameters);
   const mapsPlaceUrl = (query) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   const mapsEmbedUrl = (query) => `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
@@ -180,7 +217,6 @@
     return `${fmt.format(s)}〜${fmt.format(e)}`;
   };
   const imageDisclosure = "掲載画像には、街や散歩体験の雰囲気を表現するため、AI生成画像を使用しているものがあります。実際の街並み、店舗、施設の記録写真とは異なる場合があります。";
-  const FAVORITES_STORAGE_KEY = "osanpoClubFavoritesV1";
   const favoriteCollections = {
     area: DATA.areas,
     course: DATA.courses,
@@ -189,7 +225,7 @@
   };
 
   function favoriteKey(type, id) {
-    return `${type}:${id}`;
+    return FAVORITES.key(type, id);
   }
 
   function favoriteRecord(key) {
@@ -221,11 +257,7 @@
   }
 
   function loadFavorites() {
-    try {
-      return validFavoriteKeys(JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY)));
-    } catch {
-      return [];
-    }
+    return validFavoriteKeys(FAVORITES.read());
   }
 
   const favorites = new Set(loadFavorites());
@@ -234,12 +266,7 @@
     const keys = validFavoriteKeys([...favorites]);
     favorites.clear();
     keys.forEach((key) => favorites.add(key));
-    try {
-      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(keys));
-      return true;
-    } catch {
-      return false;
-    }
+    return FAVORITES.write(keys) !== null;
   }
 
   function isFavorite(type, id) {
@@ -281,12 +308,12 @@
       ["areas", "エリアから探す"],
       ["courses", "おさんぽコース"],
       ["spots", "スポット紹介"],
-      ["events", "イベント"],
       ["map", "地図で探す"],
       ["favorites", "お気に入り"],
       ["about", "はじめての方"],
       ["contact", "お問い合わせ"],
     ];
+    if (featuredEvents().length) nav.splice(3, 0, ["events", "イベント"]);
     return `
       <header class="site-header">
         <div class="container header-inner">
@@ -309,7 +336,7 @@
         <div class="container footer-inner">
           <div><h3>おさんぽクラブ東京</h3><p>公開情報をもとに、AIによる構成・表現の補助も利用して東京の街歩きプランを編集するメディアです。${imageDisclosure}</p></div>
           <div><h3>探す</h3><div class="footer-links"><a href="#/areas">エリア</a><a href="#/courses">コース</a><a href="#/spots">スポット</a><a href="#/events">イベント</a><a href="#/map">お散歩マップ</a><a href="#/favorites">お気に入り</a></div></div>
-          <div><h3>運営</h3><div class="footer-links"><a href="#/operation">運営情報</a><a href="#/editorial-policy">編集方針</a><a href="#/privacy">プライバシーポリシー</a><a href="#/advertise">広告掲載</a><a href="#/contact">お問い合わせ</a><a href="README.md">GitHub版について</a></div></div>
+          <div><h3>運営</h3><div class="footer-links"><a href="#/operation">運営情報</a><a href="#/editorial-policy">編集方針</a><a href="#/privacy">プライバシーポリシー</a><a href="#/advertise">広告掲載</a><a href="#/contact">お問い合わせ</a></div></div>
         </div>
         <div class="container footer-bottom">© 2026 おさんぽクラブ東京</div>
       </footer>`;
@@ -1115,6 +1142,15 @@
     const element = document.head.querySelector(selector);
     if (element) element.setAttribute("content", value);
   };
+  const setRobotsDirective = (value) => {
+    let element = document.head.querySelector('meta[name="robots"]');
+    if (!element) {
+      element = document.createElement("meta");
+      element.setAttribute("name", "robots");
+      document.head.appendChild(element);
+    }
+    element.setAttribute("content", value);
+  };
   const updateDocumentMetadata = () => {
     const info = pageInformation();
     document.title = info.title;
@@ -1124,6 +1160,7 @@
     setMetaContent('meta[property="og:url"]', configuredSiteUrl ? info.pageLocation : "");
     setMetaContent('meta[name="twitter:title"]', info.title);
     setMetaContent('meta[name="twitter:description"]', info.description);
+    setRobotsDirective(["favorites", "search"].includes(info.type) || info.routeName === "not_found" ? "noindex,follow" : "index,follow");
     return info;
   };
   const trackRenderedPage = (info) => {
@@ -1196,7 +1233,7 @@
     else if (type === "contact") html = contactPage();
     else if (type === "search") html = searchResults();
     else html = notFound();
-    app.innerHTML = html;
+    app.innerHTML = rewritePublicLinks(html);
     const pageInfo = updateDocumentMetadata();
     bindInteractions();
     window.scrollTo({ top: 0, behavior: "instant" });

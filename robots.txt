@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://nobuja0428.github.io/osanpo/sitemap.xml

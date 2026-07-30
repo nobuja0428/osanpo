@@ -33,6 +33,14 @@ a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 p, li, dd, a { overflow-wrap: anywhere; }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
 
 .skip-link {
   position: fixed;
@@ -114,6 +122,8 @@ p, li, dd, a { overflow-wrap: anywhere; }
   background: #333;
 }
 .hero-frame img { position: absolute; inset: 0; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.hero-media { position: absolute; inset: 0; }
+.hero-media .image-label { z-index: 2; right: 10px; bottom: 10px; }
 .hero-frame::after {
   content: "";
   position: absolute;
@@ -341,6 +351,7 @@ textarea.form-control { min-height: 150px; padding-top: 12px; resize: vertical; 
 }
 .card-body { padding: 20px; }
 .card-kicker { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+.card h2,
 .card h3 { margin: 6px 0 10px; font-size: 21px; line-height: 1.4; }
 .card p { margin: 0; color: var(--muted); }
 .card-meta { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0 0; }
@@ -673,7 +684,8 @@ textarea.form-control { min-height: 150px; padding-top: 12px; resize: vertical; 
 
 .site-footer { margin-top: 72px; background: #202724; color: #fff; }
 .footer-inner { padding: 48px 0; display: grid; grid-template-columns: 1.3fr repeat(2, .7fr); gap: 40px; }
-.footer-inner h3 { margin-top: 0; }
+.footer-inner h2,
+.footer-inner h3 { margin-top: 0; font-size: 1.17em; }
 .footer-links { display: grid; gap: 9px; }
 .footer-links a { color: #d7ded9; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,.14); padding: 18px 0; color: #b8c0bb; font-size: 13px; }

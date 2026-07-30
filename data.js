@@ -5,7 +5,7 @@ window.OSANPO_DATA = {
     fieldResearch: false,
     publicInfoBased: true,
     aiAssisted: true,
-    expansionMessage: "東京40エリアを順次取材・拡充しています。",
+    expansionMessage: "東京40エリアへの拡充を予定しています。公開情報の確認と現地取材を順次進めます。",
     publishedAreaCount: 3,
     plannedAreaCount: 37,
   },

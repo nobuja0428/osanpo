@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
+    <meta name="description" content="指定されたページは見つかりませんでした。おさんぽクラブ東京のトップページから公開中の街歩き情報をお探しください。" />
     <title>ページが見つかりません｜おさんぽクラブ東京</title>
     <style>
       body { margin: 0; padding: 32px 20px; font-family: sans-serif; color: #1f2724; background: #fffaf4; }
@@ -16,12 +17,7 @@
       <p>404</p>
       <h1>ページが見つかりません</h1>
       <p>URLが変更されたか、ページが公開されていない可能性があります。</p>
-      <p><a id="homeLink" href="./">トップへ戻る</a></p>
+      <p><a href="/osanpo/">トップへ戻る</a></p>
     </main>
-    <script>
-      const segments = location.pathname.split("/").filter(Boolean);
-      const base = /\.github\.io$/i.test(location.hostname) && segments.length ? `/${segments[0]}/` : "/";
-      document.getElementById("homeLink").href = `${base}#/`;
-    </script>
   </body>
 </html>
