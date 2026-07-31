@@ -1,0 +1,14 @@
+node_modules/
+reports/
+.lighthouse-profile/
+test-results/
+playwright-report/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+_audit_osanpo_main/
+_audit_osanpo_source/
+osanpo-main.zip
+.env*
+!.env.example
