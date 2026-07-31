@@ -13,7 +13,7 @@ function RecheckBadge({ type, id }: { type: ContentType; id: string }) {
 function CardImage({ imageKey, alt }: { imageKey: string; alt: string }) {
   return (
     <div className="card-media">
-      <Image src={assetUrl(imagePath(imageKey))} alt={alt} width={1200} height={900} />
+      <Image src={assetUrl(imagePath(imageKey))} alt={alt} width={800} height={600} sizes="(max-width: 600px) calc(100vw - 28px), (max-width: 900px) calc(50vw - 32px), 360px" />
       <span className="image-label">イメージ</span>
     </div>
   );

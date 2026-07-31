@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, imagePath, officialSourcesFor, stories, storyById } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
@@ -42,13 +43,14 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
         <div className="container detail-grid">
           <article className="article-body">
             <div className="detail-cover">
-              <Image src={assetUrl(imagePath(story.image))} alt={story.imageAlt} width={1200} height={900} priority />
+              <Image src={assetUrl(imagePath(story.image))} alt={story.imageAlt} width={800} height={600} sizes="(max-width: 900px) calc(100vw - 40px), 740px" />
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="story" id={story.id} />
             <TrustPanel verification={verification} />
             <p>{story.intro}</p>
             {story.sections.map((section) => <section key={section.heading}><h2>{section.heading}</h2><p>{section.body}</p></section>)}
+            <MonetizationSlot page="story" placement="article-end" />
             <p><Link className="button button-primary" href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
           </article>
           <aside className="sidebar-panel">

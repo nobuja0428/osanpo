@@ -27,10 +27,13 @@ jobs:
       - run: npm run build
       - name: Guard official base path
         run: |
+          grep -q 'basePath: "/osanpo"' next.config.mjs
           if grep -R "shinosanpo" out src public next.config.mjs; then
             echo "Unexpected shinosanpo reference found"
             exit 1
           fi
+          grep -q '/osanpo/_next/' out/index.html
+          grep -q 'https://nobuja0428.github.io/osanpo/' out/sitemap.xml
           test -f out/courses/koenji-first/index.html
           test -f out/areas/koenji/index.html
           test -f out/sitemap.xml

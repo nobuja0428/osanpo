@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AreaCard, CourseCard, SpotCard, StoryCard } from "@/components/Cards";
 import { areas, courses, spots, stories } from "@/lib/content";
 import { assetUrl } from "@/lib/site";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 
 export default function HomePage() {
   return (
@@ -19,7 +20,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-media">
-            <Image src={assetUrl("assets/images/hero/hero-tokyo-walk.webp")} width={1600} height={900} alt="東京の街歩きを表現したイメージ" priority />
+            <Image src={assetUrl("assets/images/hero/hero-tokyo-walk.webp")} width={960} height={540} sizes="(max-width: 900px) calc(100vw - 40px), 56vw" alt="東京の街歩きを表現したイメージ" preload fetchPriority="high" />
             <span className="image-label">イメージ</span>
           </div>
         </div>
@@ -46,6 +47,7 @@ export default function HomePage() {
           <div className="card-grid">{courses.map((course) => <CourseCard course={course} key={course.id} />)}</div>
         </div>
       </section>
+      <MonetizationSlot page="home" placement="before-related-content" />
 
       <section className="section">
         <div className="container">

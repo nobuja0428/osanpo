@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { LegacyHashRedirect } from "@/components/LegacyHashRedirect";
+import { InlineEnhancements } from "@/components/InlineEnhancements";
 import { Analytics } from "@/components/Analytics";
 import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 import "./globals.css";
@@ -43,6 +43,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -55,12 +56,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ja">
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-        <LegacyHashRedirect />
-        <Analytics />
+        {measurementId ? <Analytics /> : null}
         <a className="skip-link" href="#main">本文へ移動</a>
         <Header />
         {children}
         <Footer />
+        <InlineEnhancements />
       </body>
     </html>
   );

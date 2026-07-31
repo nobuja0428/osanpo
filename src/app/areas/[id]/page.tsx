@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, areas, courses, imagePath } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
@@ -40,7 +41,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
         <div className="container detail-grid">
           <article>
             <div className="detail-cover">
-              <Image src={assetUrl(imagePath(area.image))} alt={area.imageAlt} width={1200} height={900} priority />
+              <Image src={assetUrl(imagePath(area.image))} alt={area.imageAlt} width={800} height={600} sizes="(max-width: 900px) calc(100vw - 40px), 740px" />
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="area" id={area.id} />
@@ -57,6 +58,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             </ul>
           </article>
           <aside className="sidebar-panel">
+            <MonetizationSlot page="area" placement="sidebar" />
             <h2>情報について</h2>
             <p>情報確認日：{area.informationCheckedAt || "未記録"}</p>
             <p>現地取材：{area.fieldResearch ? "あり" : "なし"}</p>

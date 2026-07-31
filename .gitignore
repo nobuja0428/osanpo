@@ -6,6 +6,7 @@ playwright-report/
 .next/
 out/
 coverage/
+pre-release/
 *.tsbuildinfo
 _audit_osanpo_main/
 _audit_osanpo_source/

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, courseById, courses, foodBreaks, imagePath, officialSourcesFor, toilets, transitAccess } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
@@ -45,7 +46,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         <div className="container detail-grid">
           <article>
             <div className="detail-cover">
-              <Image src={assetUrl(imagePath(course.image))} alt={course.imageAlt} width={1200} height={900} priority />
+              <Image src={assetUrl(imagePath(course.image))} alt={course.imageAlt} width={800} height={600} sizes="(max-width: 900px) calc(100vw - 40px), 740px" />
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="course" id={course.id} />
@@ -67,6 +68,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               ))}
             </ol>
             <p>{course.routeNotice}</p>
+            <MonetizationSlot page="course" placement="near-map-action" />
 
             <h2>1. 電車・駅情報</h2>
             {courseTransit.map((item) => (

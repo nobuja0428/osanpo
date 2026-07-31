@@ -23,6 +23,14 @@ try {
       cls: run.lhr.audits["cumulative-layout-shift"].numericValue,
       inp: run.lhr.audits["interaction-to-next-paint"]?.numericValue ?? null,
       tbt: run.lhr.audits["total-blocking-time"].numericValue,
+      diagnostics: {
+        lcpElement: run.lhr.audits["largest-contentful-paint-element"]?.details?.items ?? [],
+        resourceSummary: run.lhr.audits["resource-summary"]?.details?.items ?? [],
+        renderBlocking: run.lhr.audits["render-blocking-resources"]?.details?.items ?? [],
+        imageOptimization: run.lhr.audits["uses-optimized-images"]?.details?.items ?? [],
+        responsiveImages: run.lhr.audits["uses-responsive-images"]?.details?.items ?? [],
+        thirdParties: run.lhr.audits["third-party-summary"]?.details?.items ?? [],
+      },
     };
   }
   mkdirSync(join(root, "reports"), { recursive: true });

@@ -23,13 +23,14 @@ for (const width of [320, 375, 768, 1024, 1440]) {
 test("mobile menu opens and closes", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/osanpo/");
-  const menu = page.locator(".nav-toggle");
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  const menu = page.locator("summary.nav-toggle");
+  const container = page.locator("details.mobile-nav");
+  await expect(container).not.toHaveAttribute("open", "");
   await menu.click();
-  await expect(menu).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("navigation", { name: "メインナビゲーション" })).toBeVisible();
+  await expect(container).toHaveAttribute("open", "");
+  await expect(page.getByRole("navigation", { name: "モバイルナビゲーション" })).toBeVisible();
   await menu.click();
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(container).not.toHaveAttribute("open", "");
 });
 
 test("key content remains readable without JavaScript", async ({ browser }) => {

@@ -33,10 +33,12 @@ button, select, input { font: inherit; }
 .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--green); color: white; font-weight: 800; }
 .brand strong, .brand small { display: block; }
 .brand small { color: var(--muted); font-size: 11px; letter-spacing: .08em; }
-.site-nav { display: flex; align-items: center; gap: 22px; font-size: 14px; font-weight: 700; }
-.site-nav a { text-decoration: none; }
-.site-nav a:hover, .site-nav a:focus-visible { color: var(--green); }
-.nav-toggle { display: none; border: 1px solid var(--line); border-radius: 999px; background: white; padding: 8px 14px; }
+.desktop-nav { display: flex; align-items: center; gap: 22px; font-size: 14px; font-weight: 700; }
+.desktop-nav a, .mobile-nav a { text-decoration: none; }
+.desktop-nav a:hover, .desktop-nav a:focus-visible, .mobile-nav a:hover, .mobile-nav a:focus-visible { color: var(--green); }
+.mobile-nav { display: none; }
+.nav-toggle { border: 1px solid var(--line); border-radius: 999px; background: white; padding: 8px 14px; cursor: pointer; list-style: none; }
+.nav-toggle::-webkit-details-marker { display: none; }
 .hero { padding: 70px 0 54px; overflow: hidden; }
 .hero-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: center; }
 .hero-copy h1 { margin: 10px 0 24px; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: clamp(42px, 6vw, 76px); line-height: 1.2; letter-spacing: -.03em; }
@@ -131,9 +133,9 @@ button, select, input { font: inherit; }
   .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quick-links { grid-template-columns: repeat(2, 1fr); }
   .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .site-nav { display: none; position: absolute; left: 20px; right: 20px; top: 70px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow); }
-  .site-nav.is-open { display: grid; }
-  .nav-toggle { display: block; }
+  .desktop-nav { display: none; }
+  .mobile-nav { display: block; }
+  .mobile-nav nav { position: absolute; left: 20px; right: 20px; top: 70px; z-index: 40; display: grid; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: var(--shadow); }
 }
 @media (max-width: 600px) {
   .container, .narrow { width: min(100% - 28px, 1120px); }
