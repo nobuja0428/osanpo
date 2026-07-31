@@ -1,0 +1,43 @@
+{
+  "name": "osanpo-club-tokyo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "preview": "node scripts/serve-static.mjs",
+    "build": "npm run quality:check && next build",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "quality:check": "node scripts/content-quality.mjs",
+    "images:optimize": "node scripts/optimize-images.mjs",
+    "test:e2e": "npm run build && playwright test --project=chromium",
+    "test:a11y": "npm run build && playwright test --project=a11y",
+    "lighthouse": "node scripts/lighthouse.mjs",
+    "test:lighthouse": "npm run build && npm run lighthouse",
+    "test:all": "npm run lint && npm run typecheck && npm run test && npm run build && playwright test --project=chromium && playwright test --project=a11y && npm run lighthouse"
+  },
+  "dependencies": {
+    "next": "16.2.12",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@axe-core/playwright": "4.11.0",
+    "@playwright/test": "1.58.2",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.12",
+    "lighthouse": "12.6.0",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "minimatch": "10.2.3",
+    "postcss": "8.5.18",
+    "sharp": "0.35.0"
+  }
+}
