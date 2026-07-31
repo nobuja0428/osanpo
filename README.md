@@ -124,7 +124,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 - 単体テスト
 - 静的ビルド
 - `/osanpo/` と主要生成ページの検査
-- `shinosanpo` 残存検査
+- 旧サイト識別子の残存検査
 
 `.github/workflows/deploy-pages.yml` は main への push または手動実行時だけ、テスト成功後の `out/` を GitHub Pages へ公開します。
 

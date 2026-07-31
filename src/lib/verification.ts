@@ -41,3 +41,9 @@ export function dateLabel(date: string) {
   const [year, month, day] = date.split("-");
   return year && month && day ? `${year}年${Number(month)}月${Number(day)}日` : date;
 }
+
+export function revalidationQueue(now = new Date()) {
+  return Object.entries(verificationCatalog)
+    .filter(([, verification]) => isExpired(verification, now))
+    .map(([key, verification]) => ({ key, expiresAt: verification.expiresAt ?? "" }));
+}
