@@ -1,15 +1,22 @@
 const script = `
 (() => {
-  const hash = window.location.hash;
   const fixedRoutes = { "#/areas": "/areas/", "#/courses": "/courses/", "#/spots": "/spots/", "#/stories": "/stories/", "#/events": "/events/", "#/map": "/map/", "#/search": "/search/", "#/favorites": "/favorites/", "#/about": "/about/", "#/operation": "/operation/", "#/editorial-policy": "/editorial-policy/", "#/policy": "/editorial-policy/", "#/privacy": "/privacy/", "#/advertise": "/advertise/", "#/advertising": "/advertise/", "#/contact": "/contact/" };
-  if (hash) {
+  const redirectLegacyHash = () => {
+    const hash = window.location.hash;
+    if (!hash) return false;
     const clean = hash.split("?")[0]; let destination = fixedRoutes[clean];
     for (const [prefix, path] of [["#/area/", "/areas/"], ["#/course/", "/courses/"], ["#/spot/", "/spots/"], ["#/story/", "/stories/"]]) if (!destination && clean.startsWith(prefix)) destination = path + clean.slice(prefix.length) + "/";
-    if (destination) { const query = hash.includes("?") ? hash.slice(hash.indexOf("?") + 1).replace(/^keyword=/, "q=") : ""; window.location.replace("/osanpo" + destination + (query ? "?" + query : "")); return; }
-  }
+    if (!destination) return false;
+    const query = hash.includes("?") ? hash.slice(hash.indexOf("?") + 1).replace(/^keyword=/, "q=") : "";
+    window.location.replace("/osanpo" + destination + (query ? "?" + query : ""));
+    return true;
+  };
+  if (redirectLegacyHash()) return;
+  window.addEventListener("hashchange", redirectLegacyHash);
+
   const storageKey = "osanpoClubFavoritesV1";
   const read = () => { try { const value = JSON.parse(localStorage.getItem(storageKey) || "[]"); return Array.isArray(value) ? value.filter((item) => typeof item === "string") : []; } catch { return []; } };
-  const render = (button, active) => { button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); button.innerHTML = '<span aria-hidden="true">' + (active ? "★" : "☆") + "</span> " + (active ? "お気に入り済み" : "お気に入りに追加"); };
+  const render = (button, active) => { button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); button.innerHTML = '<span aria-hidden="true">' + (active ? "\\u2605" : "\\u2606") + "</span> " + (active ? "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u6e08\\u307f" : "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u306b\\u8ffd\\u52a0"); };
   const initialize = () => document.querySelectorAll("[data-favorite-key]").forEach((button) => {
     const key = button.dataset.favoriteKey;
     render(button, read().includes(key));
