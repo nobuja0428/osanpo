@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("top page and assets load below the GitHub Pages base path", async ({ page }) => {
   await page.goto("/osanpo/");
-  await expect(page.getByRole("heading", { name: "きょうの東京を、 歩いて見つけよう。" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "東京を、もっと歩きたくなる。" })).toBeVisible();
   await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(1);
   await expect(page.locator("img").first()).toBeVisible();
   const image = page.locator("img").first();
@@ -46,6 +46,13 @@ test("favorites persist and can be removed", async ({ page }) => {
   await expect(page.getByRole("button", { name: "お気に入り済み" })).toBeVisible();
   await page.getByRole("button", { name: "お気に入り済み" }).click();
   await expect(page.getByRole("button", { name: "お気に入りに追加" })).toBeVisible();
+});
+
+test("event detail keeps its official and map actions visible", async ({ page }) => {
+  await page.goto("/osanpo/events/kagurazaka-festival-2026/");
+  await expect(page.getByRole("heading", { name: "第52回 神楽坂まつり" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "公式情報を確認" })).toHaveAttribute("href", /^https:\/\//);
+  await expect(page.getByRole("link", { name: "会場を地図で見る" })).toHaveAttribute("href", /^https:\/\//);
 });
 
 test("legacy hash URLs redirect and 404 stays inside the site", async ({ page }) => {

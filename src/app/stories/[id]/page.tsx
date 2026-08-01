@@ -9,6 +9,7 @@ import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, imagePath, officialSourcesFor, stories, storyById } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
+import { ContentViewTracker } from "@/components/ContentViewTracker";
 
 export function generateStaticParams() {
   return stories.map((story) => ({ id: story.id }));
@@ -38,6 +39,7 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
 
   return (
     <main id="main">
+      <ContentViewTracker type="story" id={story.id} areaId={story.areaId} />
       <PageHero eyebrow={`${area.name}・${story.category}・${story.readTime}`} title={story.title} lead={story.excerpt} crumbs={[{ href: "/stories/", label: "読み物" }, { label: story.title }]} />
       <section className="section">
         <div className="container detail-grid">

@@ -14,6 +14,15 @@ const script = `
   if (redirectLegacyHash()) return;
   window.addEventListener("hashchange", redirectLegacyHash);
 
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[data-analytics-event]");
+    if (!link || typeof window.gtag !== "function") return;
+    const name = link.dataset.analyticsEvent;
+    if (!name || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
+    const parameters = { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", placement: link.dataset.placement || "", provider: link.dataset.provider || "", category: link.dataset.category || "" };
+    window.gtag("event", name, parameters);
+  });
+
   const storageKey = "osanpoClubFavoritesV1";
   const read = () => { try { const value = JSON.parse(localStorage.getItem(storageKey) || "[]"); return Array.isArray(value) ? value.filter((item) => typeof item === "string") : []; } catch { return []; } };
   const render = (button, active) => { button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); button.innerHTML = '<span aria-hidden="true">' + (active ? "\\u2605" : "\\u2606") + "</span> " + (active ? "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u6e08\\u307f" : "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u306b\\u8ffd\\u52a0"); };

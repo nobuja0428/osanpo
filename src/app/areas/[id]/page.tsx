@@ -9,6 +9,7 @@ import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, areas, courses, imagePath } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
+import { ContentViewTracker } from "@/components/ContentViewTracker";
 
 export function generateStaticParams() {
   return areas.map((area) => ({ id: area.id }));
@@ -36,6 +37,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <main id="main">
+      <ContentViewTracker type="area" id={area.id} areaId={area.id} />
       <PageHero eyebrow={area.ward} title={`${area.name}を歩く`} lead={area.description} crumbs={[{ href: "/areas/", label: "エリア" }, { label: area.name }]} />
       <section className="section">
         <div className="container detail-grid">

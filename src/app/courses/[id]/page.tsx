@@ -8,6 +8,7 @@ import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, courseById, courses, foodBreaks, imagePath, officialSourcesFor, toilets, transitAccess } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
+import { ContentViewTracker } from "@/components/ContentViewTracker";
 
 export function generateStaticParams() {
   return courses.map((course) => ({ id: course.id }));
@@ -41,6 +42,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
   return (
     <main id="main">
+      <ContentViewTracker type="course" id={course.id} areaId={course.areaId} />
       <PageHero eyebrow={`${area.name}・モデルコース`} title={course.title} lead={course.summary} crumbs={[{ href: "/courses/", label: "コース" }, { label: course.title }]} />
       <section className="section">
         <div className="container detail-grid">
@@ -50,27 +52,39 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="course" id={course.id} />
+            <nav className="page-section-nav" aria-label="コース内ナビ"><a href="#course-overview">コース紹介</a><a href="#course-stops">スポット</a><a href="#course-access">アクセス</a><a href="#course-info">情報確認</a></nav>
             <TrustPanel verification={verification} />
-            <dl className="facts">
+            <dl className="facts" id="course-overview">
               <div><dt>所要時間</dt><dd>{course.duration}</dd></div>
               <div><dt>距離</dt><dd>{course.distance}</dd></div>
               <div><dt>予算</dt><dd>{course.budget}</dd></div>
               <div><dt>向いている人</dt><dd>{course.audience}</dd></div>
+              <div><dt>スタート</dt><dd>{course.routeStops[0]?.name}</dd></div>
+              <div><dt>ゴール</dt><dd>{course.routeStops.at(-1)?.name}</dd></div>
             </dl>
 
-            <h2>歩く順番</h2>
+            <h2 id="course-stops">歩く順番</h2>
             <ol className="route-list">
               {course.routeStops.map((stop) => (
                 <li key={stop.order}>
                   <strong>{stop.name}</strong><br />
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stop.query)}`} target="_blank" rel="noreferrer">地図を開く</a>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stop.query)}`} target="_blank" rel="noreferrer" data-analytics-event="google_map_click" data-content-id={course.id}>地図を開く</a>
                 </li>
               ))}
             </ol>
+            <div className="route-actions">{course.routeSegments.map((segment) => {
+              const origin = course.routeStops.find((stop) => stop.order === segment.originStopOrder);
+              const destination = course.routeStops.find((stop) => stop.order === segment.destinationStopOrder);
+              const waypoints = segment.waypointStopOrders.map((order) => course.routeStops.find((stop) => stop.order === order)?.query).filter(Boolean);
+              if (!origin || !destination) return null;
+              const params = new URLSearchParams({ api: "1", origin: origin.query, destination: destination.query, travelmode: "walking" });
+              if (waypoints.length) params.set("waypoints", waypoints.join("|"));
+              return <a className="button button-secondary" key={segment.id} href={`https://www.google.com/maps/dir/?${params}`} target="_blank" rel="noreferrer" data-analytics-event="google_map_click" data-content-id={course.id}>{segment.label}を徒歩ルートで見る</a>;
+            })}</div>
             <p>{course.routeNotice}</p>
             <MonetizationSlot page="course" placement="near-map-action" />
 
-            <h2>1. 電車・駅情報</h2>
+            <h2 id="course-access">1. 電車・駅情報</h2>
             {courseTransit.map((item) => (
               <section key={item.id} className="sidebar-panel">
                 <h3>{item.roleLabel}：{item.stationName} {item.stationCode}</h3>
@@ -101,7 +115,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </section>
             ))}
           </article>
-          <aside className="sidebar-panel">
+          <aside className="sidebar-panel" id="course-info">
             <h2>掲載情報について</h2>
             <p>現地取材・コース実歩行は未実施です。時間、距離、予算には推定値を含みます。</p>
             <p>文章の構成・整理にAIを使用しています。訪問前に公式情報をご確認ください。</p>

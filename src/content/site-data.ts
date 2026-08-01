@@ -5,7 +5,7 @@ export const siteData = {
     fieldResearch: false,
     publicInfoBased: true,
     aiAssisted: true,
-    expansionMessage: "東京40エリアへの拡充を予定しています。公開情報の確認と現地取材を順次進めます。",
+    expansionMessage: "東京40エリアへの拡充を予定しています。公開情報を確認し、掲載基準を満たした内容から順次追加します。",
     publishedAreaCount: 3,
     plannedAreaCount: 37,
   },

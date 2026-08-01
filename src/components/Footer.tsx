@@ -15,12 +15,16 @@ export function Footer() {
             <Link href="/courses/">コース</Link>
             <Link href="/spots/">スポット</Link>
             <Link href="/stories/">読み物</Link>
+            <Link href="/events/">イベント</Link>
+            <Link href="/map/">地図</Link>
           </div>
         </div>
         <div>
           <h2>運営</h2>
           <div className="footer-links">
+            <Link href="/about/">サイトについて</Link>
             <Link href="/editorial-policy/">編集方針</Link>
+            <Link href="/operation/">運営情報</Link>
             <Link href="/privacy/">プライバシー</Link>
             <Link href="/advertise/">広告掲載</Link>
             <Link href="/contact/">お問い合わせ</Link>

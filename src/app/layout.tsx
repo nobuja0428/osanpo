@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { InlineEnhancements } from "@/components/InlineEnhancements";
-import { LegacyHashRedirect } from "@/components/LegacyHashRedirect";
 import { Analytics } from "@/components/Analytics";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -62,8 +62,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Header />
         {children}
         <Footer />
+        <MobileBottomNav />
         <InlineEnhancements />
-        <LegacyHashRedirect />
       </body>
     </html>
   );

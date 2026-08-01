@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const links = [
-  ["/areas/", "エリア"], ["/courses/", "コース"], ["/spots/", "スポット"], ["/stories/", "読み物"], ["/events/", "イベント"], ["/search/", "検索"], ["/favorites/", "お気に入り"],
+  ["/courses/", "コース"], ["/areas/", "エリア"], ["/spots/", "スポット"], ["/events/", "イベント"], ["/map/", "地図"], ["/search/", "検索"], ["/favorites/", "お気に入り"],
 ] as const;
 
 function Navigation() {

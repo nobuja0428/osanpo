@@ -37,7 +37,7 @@ test("key content remains readable without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:4173/osanpo/");
-  await expect(page.getByRole("heading", { name: "きょうの東京を、 歩いて見つけよう。" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "東京を、もっと歩きたくなる。" })).toBeVisible();
   await page.goto("http://127.0.0.1:4173/osanpo/courses/koenji-first/");
   await expect(page.getByRole("heading", { name: "1. 電車・駅情報" })).toBeVisible();
   await context.close();

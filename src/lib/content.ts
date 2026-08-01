@@ -33,6 +33,10 @@ export function storyById(id: string) {
   return stories.find((story) => story.id === id);
 }
 
+export function eventById(id: string) {
+  return events.find((event) => event.id === id);
+}
+
 export function imagePath(key: string) {
   return siteData.images[key as keyof typeof siteData.images];
 }
