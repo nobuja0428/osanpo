@@ -19,7 +19,7 @@ const script = `
     if (!link || typeof window.gtag !== "function") return;
     const name = link.dataset.analyticsEvent;
     if (!name || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
-    const parameters = { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", placement: link.dataset.placement || "", provider: link.dataset.provider || "", category: link.dataset.category || "" };
+    const parameters = { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", area_id: link.dataset.areaId || "", route_segment: link.dataset.routeSegment || "", placement: link.dataset.placement || "", provider: link.dataset.provider || "", category: link.dataset.category || "" };
     window.gtag("event", name, parameters);
   });
 

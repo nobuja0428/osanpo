@@ -201,10 +201,48 @@ button, select, input { font: inherit; }
 .map-area-list { display: grid; gap: 16px; }
 .map-area-list .card { box-shadow: none; }
 .mobile-bottom-nav { display: none; }
+
+/* Map and route pass: a fixed shell keeps iframe loading from shifting the page. */
+.embedded-map { margin: 22px 0; }
+.map-frame-shell { min-height: 340px; overflow: hidden; border: 1px solid #cbd8cb; border-radius: 16px; background: linear-gradient(135deg, #eef5ed, #f8f5e9); }
+.map-frame { display: block; width: 100%; height: 340px; border: 0; background: #eef5ed; }
+.map-fallback { display: grid; min-height: 340px; align-content: center; gap: 8px; padding: 28px; color: var(--green-dark); text-align: center; }
+.map-fallback span, .map-note, .map-check-date { color: var(--muted); font-size: 13px; }
+.map-note { margin: 9px 0 6px; }
+.external-text-link { color: var(--green-dark); font-size: 13px; font-weight: 800; }
+.map-panel .embedded-map { margin: 12px 0; }
+.map-panel .map-frame-shell { min-height: 330px; }
+.map-panel .map-frame, .map-panel .map-fallback { height: 330px; min-height: 330px; }
+.map-area-links { display: flex; flex-wrap: wrap; gap: 7px; margin: 11px 0; }
+.map-area-links a { padding: 5px 9px; border-radius: 999px; background: var(--tint); color: var(--green-dark); font-size: 12px; font-weight: 800; text-decoration: none; }
+.course-map-section, .area-map-section { margin: 42px 0; padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: #fbfdf9; }
+.course-map-section h2, .area-map-section h2 { margin: 5px 0 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 30px; }
+.route-stop { display: grid; gap: 5px; }
+.route-stop .route-stage { width: fit-content; margin-top: 3px; padding: 2px 8px; border-radius: 999px; background: #eff4ef; color: var(--green-dark); font-size: 11px; font-weight: 900; letter-spacing: .06em; }
+.route-stop.is-start::before { background: #167048; }
+.route-stop.is-goal::before { background: #9a552e; }
+.route-stop.is-start .route-stage { background: #dff2e7; color: #0b5b38; }
+.route-stop.is-goal .route-stage { background: #fbe7d9; color: #8a451d; }
+.route-stop a { width: fit-content; color: var(--green-dark); font-size: 13px; font-weight: 800; }
+.map-explorer { display: grid; gap: 28px; }
+.map-area-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.map-area-buttons button { min-height: 46px; min-width: 104px; border: 1px solid var(--green); border-radius: 999px; padding: 9px 16px; background: white; color: var(--green-dark); font-weight: 800; cursor: pointer; }
+.map-area-buttons button[aria-selected="true"] { background: var(--green); color: white; }
+.map-explorer-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr); gap: 26px; align-items: start; }
+.map-explorer-map { margin: 0; }
+.map-explorer-map .map-frame-shell, .map-explorer-map .map-frame, .map-explorer-map .map-fallback { min-height: 470px; height: 470px; }
+.map-area-summary { padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: white; }
+.map-area-summary h2 { margin: 6px 0 12px; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 34px; }
+.map-related-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.map-related-grid h2 { margin: 0 0 14px; font-size: 21px; }
+.map-related-grid section { display: grid; align-content: start; gap: 10px; }
+.map-related-card { display: block; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: white; color: var(--ink); font-weight: 800; text-decoration: none; }
+.map-related-card p { margin: 6px 0 0; color: var(--muted); font-size: 13px; font-weight: 400; }
 @media (max-width: 900px) {
   .home-two-column, .map-layout { grid-template-columns: 1fr; }
   .home-sidebar { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-sidebar .map-panel, .home-sidebar .partner-panel { grid-column: 1 / -1; }
+  .map-explorer-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
   body { padding-bottom: 68px; }
@@ -221,6 +259,15 @@ button, select, input { font: inherit; }
   .home-sidebar .map-panel, .home-sidebar .partner-panel { grid-column: auto; }
   .home-sidebar { gap: 12px; }
   .map-embed-panel iframe { min-height: 320px; }
+  .map-frame-shell, .map-frame, .map-fallback, .map-panel .map-frame-shell, .map-panel .map-frame, .map-panel .map-fallback { min-height: 280px; height: 280px; }
+  .course-map-section, .area-map-section { margin: 32px 0; padding: 17px; border-radius: 16px; }
+  .course-map-section h2, .area-map-section h2 { font-size: 25px; }
+  .map-explorer-map .map-frame-shell, .map-explorer-map .map-frame, .map-explorer-map .map-fallback { min-height: 320px; height: 320px; }
+  .map-area-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .map-area-buttons button { min-width: 0; padding-inline: 7px; font-size: 13px; }
+  .map-area-summary { padding: 19px; border-radius: 16px; }
+  .map-area-summary h2 { font-size: 28px; }
+  .map-related-grid { grid-template-columns: 1fr; gap: 20px; }
   .mobile-bottom-nav { position: fixed; z-index: 50; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 7px 4px max(7px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(255,255,255,.98); box-shadow: 0 -6px 20px rgba(0,0,0,.08); }
   .mobile-bottom-nav a { padding: 5px 2px; color: var(--muted); font-size: 10px; font-weight: 800; text-align: center; text-decoration: none; }
   .mobile-bottom-nav a:hover, .mobile-bottom-nav a:focus-visible { color: var(--green-dark); }

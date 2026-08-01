@@ -7,6 +7,7 @@ import { isRecommendedEvent } from "@/lib/events";
 import { assetUrl } from "@/lib/site";
 import { dateLabel, verificationCatalog } from "@/lib/verification";
 import { MonetizationSlot } from "@/components/MonetizationSlot";
+import { MapEmbed } from "@/components/MapEmbed";
 
 const contentNames = new Map<string, string>([
   ...areas.map((item): [string, string] => [`area:${item.id}`, item.name]),
@@ -55,7 +56,7 @@ export default function HomePage() {
           <div className="card-grid">{spots.slice(0, 3).map((spot) => <SpotCard spot={spot} key={spot.id} />)}</div>
         </div>
         <aside className="home-sidebar">
-          <section className="sidebar-panel map-panel"><p className="eyebrow">MAP</p><h2>おさんぽマップ</h2><div className="map-overview" aria-label="公開中エリアの案内"><strong>高円寺・吉祥寺・浅草</strong><span>公開中の3エリアを、地図と公式マップで確認できます。</span></div><Link className="button button-primary" href="/map/">地図から探す</Link></section>
+          <section className="sidebar-panel map-panel"><p className="eyebrow">MAP</p><h2>おさんぽマップ</h2><MapEmbed query={areas.map((area) => area.mapQuery).join(" ")} title="高円寺・吉祥寺・浅草の地図" contentId="tokyo-areas" placement="home-sidebar" /><div className="map-area-links" aria-label="エリア別の地図"><Link href="/areas/koenji/">高円寺</Link><Link href="/areas/kichijoji/">吉祥寺</Link><Link href="/areas/asakusa/">浅草</Link></div><Link className="button button-primary" href="/map/">地図から探す</Link></section>
           <section className="sidebar-panel"><p className="eyebrow">EVENTS</p><h2>現在・今後のイベント</h2>{currentEvents.length ? <ul className="compact-list">{currentEvents.map((event) => <li key={event.id}><strong>{event.title}</strong><span>{event.venue}</span></li>)}</ul> : <><p>現在、確認済みのイベント情報はありません。</p><Link href="/events/">過去のイベントを見る →</Link></>}</section>
           <section className="sidebar-panel"><p className="eyebrow">UPDATES</p><h2>新着・更新情報</h2><ul className="compact-list">{updates.map(([key, verification]) => <li key={key}><span>{dateLabel(verification.lastUpdatedAt)}</span><Link href={verification.internalPath}>{contentNames.get(key) ?? "掲載情報"}</Link></li>)}</ul></section>
           <section className="sidebar-panel"><p className="eyebrow">ABOUT</p><h2>このサイトについて</h2><p>公開情報をもとに整理し、現地取材は行っていません。AI画像には「イメージ」と表示しています。</p><Link href="/editorial-policy/">編集方針を読む →</Link></section>

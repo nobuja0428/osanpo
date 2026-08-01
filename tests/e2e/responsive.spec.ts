@@ -7,7 +7,7 @@ const routes = [
   "/osanpo/events/", "/osanpo/map/", "/osanpo/search/", "/osanpo/favorites/", "/osanpo/editorial-policy/", "/osanpo/operation/", "/osanpo/advertise/", "/osanpo/contact/", "/osanpo/missing-page/",
 ];
 
-for (const width of [320, 375, 768, 1024, 1440]) {
+for (const width of [320, 375, 390, 768, 1024, 1440]) {
   test(`major routes have no horizontal overflow at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     for (const route of routes) {
