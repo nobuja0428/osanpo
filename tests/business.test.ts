@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { businessContact, businessListingApplicationEnabled, businessServices, resolveBusinessContact } from "@/content/business";
+import { businessContact, businessListingApplicationEnabled, businessListingFields, businessServices, resolveBusinessContact } from "@/content/business";
 
 describe("business service safety defaults", () => {
   it("keeps production contact and listing application disabled", () => {
@@ -15,8 +15,13 @@ describe("business service safety defaults", () => {
   });
 
   it("uses reference pricing without promising outcomes", () => {
-    expect(businessServices.map((service) => service.id)).toEqual(["store-page", "website", "support"]);
+    expect(businessServices.map((service) => service.id)).toEqual(["store-page", "map-guidance", "website", "support"]);
     expect(businessServices.every((service) => service.priceNote.includes("参考価格") || service.priceNote.includes("目安"))).toBe(true);
+  });
+
+  it("defines future listing fields without storing a submission", () => {
+    expect(businessListingFields.map((field) => field.key)).toContain("contact");
+    expect(businessListingFields.find((field) => field.key === "contact")?.personalData).toBe(true);
   });
 
   it("limits business click parameters to non-identifying fields", () => {
