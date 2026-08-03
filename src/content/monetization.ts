@@ -7,6 +7,8 @@ export type RevenueSlot = {
   active: boolean;
   disclosure: "広告" | "PR";
   trackingEvent: "affiliate_click";
+  provider?: string;
+  category?: string;
   destination?: string;
   label?: string;
 };

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("top page and assets load below the GitHub Pages base path", async ({ page }) => {
   await page.goto("/osanpo/");
-  await expect(page.getByRole("heading", { name: "きょうの東京を、 歩いて見つけよう。" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "東京を、もっと歩きたくなる。" })).toBeVisible();
   await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(1);
   await expect(page.locator("img").first()).toBeVisible();
   const image = page.locator("img").first();
@@ -46,6 +46,35 @@ test("favorites persist and can be removed", async ({ page }) => {
   await expect(page.getByRole("button", { name: "お気に入り済み" })).toBeVisible();
   await page.getByRole("button", { name: "お気に入り済み" }).click();
   await expect(page.getByRole("button", { name: "お気に入りに追加" })).toBeVisible();
+});
+
+test("event detail keeps its official and map actions visible", async ({ page }) => {
+  await page.goto("/osanpo/events/kagurazaka-festival-2026/");
+  await expect(page.getByRole("heading", { name: "第52回 神楽坂まつり" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "公式情報を確認" })).toHaveAttribute("href", /^https:\/\//);
+  await expect(page.getByRole("link", { name: "会場を地図で見る" })).toHaveAttribute("href", /^https:\/\//);
+});
+
+test("embedded maps, area selection, and walking routes are available", async ({ page }) => {
+  await page.goto("/osanpo/");
+  const homeMap = page.locator("iframe[title='高円寺・吉祥寺・浅草の地図']");
+  await expect(homeMap).toHaveAttribute("loading", "lazy");
+  await expect(homeMap).toHaveAttribute("src", /google\.com\/maps/);
+
+  await page.goto("/osanpo/map/");
+  const tabs = page.getByRole("tab");
+  await expect(tabs).toHaveCount(3);
+  await page.getByRole("tab", { name: "吉祥寺" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "吉祥寺" })).toBeVisible();
+  await page.getByRole("tab", { name: "浅草" }).click();
+  await expect(page.getByRole("heading", { name: "浅草" })).toBeVisible();
+
+  await page.goto("/osanpo/courses/koenji-first/");
+  await expect(page.getByText("START", { exact: true })).toBeVisible();
+  await expect(page.getByText("GOAL", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "コース全体の徒歩ルートを開く" })).toHaveAttribute("href", /travelmode=walking/);
+  await expect(page.getByRole("link", { name: /徒歩ルートで見る/ }).first()).toHaveAttribute("href", /travelmode=walking/);
 });
 
 test("legacy hash URLs redirect and 404 stays inside the site", async ({ page }) => {

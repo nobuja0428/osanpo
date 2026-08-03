@@ -5,9 +5,10 @@ const routes = [
   "/osanpo/courses/", "/osanpo/courses/koenji-first/", "/osanpo/courses/kichijoji-park/", "/osanpo/courses/asakusa-history/",
   "/osanpo/spots/", "/osanpo/spots/koenji-junjo/", "/osanpo/stories/", "/osanpo/stories/koenji-shopping-streets/", "/osanpo/stories/inokashira-short-walk/", "/osanpo/stories/asakusa-first-hour/",
   "/osanpo/events/", "/osanpo/map/", "/osanpo/search/", "/osanpo/favorites/", "/osanpo/editorial-policy/", "/osanpo/operation/", "/osanpo/advertise/", "/osanpo/contact/", "/osanpo/missing-page/",
+  "/osanpo/business/", "/osanpo/business/store-page/", "/osanpo/business/website/", "/osanpo/business/support/", "/osanpo/business/examples/", "/osanpo/business/contact/",
 ];
 
-for (const width of [320, 375, 768, 1024, 1440]) {
+for (const width of [320, 375, 390, 768, 1024, 1440]) {
   test(`major routes have no horizontal overflow at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     for (const route of routes) {
@@ -37,7 +38,7 @@ test("key content remains readable without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:4173/osanpo/");
-  await expect(page.getByRole("heading", { name: "きょうの東京を、 歩いて見つけよう。" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "東京を、もっと歩きたくなる。" })).toBeVisible();
   await page.goto("http://127.0.0.1:4173/osanpo/courses/koenji-first/");
   await expect(page.getByRole("heading", { name: "1. 電車・駅情報" })).toBeVisible();
   await context.close();

@@ -1,32 +1,19 @@
 import type { Metadata } from "next";
+import { MapExplorer } from "@/components/MapExplorer";
 import { PageHero } from "@/components/PageHero";
-import { areas } from "@/lib/content";
+import { areas, courses, spots } from "@/lib/content";
 import { absoluteUrl } from "@/lib/site";
+import { verificationFor } from "@/lib/verification";
 
 export const metadata: Metadata = {
   title: "地図から散歩エリアを探す",
-  description: "高円寺・吉祥寺・浅草をGoogleマップで確認できます。",
+  description: "高円寺・吉祥寺・浅草の散歩エリア、コース、スポットをページ内の地図で確認できます。",
   alternates: { canonical: absoluteUrl("map/") },
 };
 
 export default function MapPage() {
-  return (
-    <main id="main">
-      <PageHero eyebrow="MAP" title="地図から探す" lead="APIキー不要の外部地図リンクで、各エリアの位置を確認できます。" crumbs={[{ label: "地図" }]} />
-      <section className="section">
-        <div className="container card-grid">
-          {areas.map((area) => (
-            <article className="card" key={area.id}>
-              <div className="card-body">
-                <p className="eyebrow">{area.ward}</p>
-                <h2>{area.name}</h2>
-                <p>{area.lead}</p>
-                <a className="button button-primary" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(area.mapQuery)}`} target="_blank" rel="noreferrer">Googleマップで見る</a>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
-  );
+  return <main id="main">
+    <PageHero eyebrow="MAP" title="地図から探す" lead="公開中の3エリアを選び、関連コースと主なスポットを確認できます。地図は参考表示です。" crumbs={[{ label: "地図" }]} />
+    <section className="section map-page-section"><div className="container"><MapExplorer areaItems={areas.map(({ id, name, ward, lead, description, mapQuery }) => ({ id, name, ward, lead, description, mapQuery, informationCheckedAt: verificationFor("area", id)?.informationCheckedAt ?? "未記録" }))} courseItems={courses.map(({ id, areaId, title, summary, routeStops }) => ({ id, areaId, title, summary, routeStops: routeStops.map(({ query }) => ({ query })) }))} spotItems={spots.map(({ id, areaId, name, mapQuery }) => ({ id, areaId, name, mapQuery }))} /></div></section>
+  </main>;
 }

@@ -9,6 +9,7 @@ import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, imagePath, officialSourcesFor, spotById, spots } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
+import { ContentViewTracker } from "@/components/ContentViewTracker";
 
 export function generateStaticParams() {
   return spots.map((spot) => ({ id: spot.id }));
@@ -38,6 +39,7 @@ export default async function SpotDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <main id="main">
+      <ContentViewTracker type="spot" id={spot.id} areaId={spot.areaId} />
       <PageHero eyebrow={`${area.name}・${spot.category}`} title={spot.name} lead={spot.excerpt} crumbs={[{ href: "/spots/", label: "スポット" }, { label: spot.name }]} />
       <section className="section">
         <div className="container detail-grid">

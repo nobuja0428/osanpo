@@ -14,6 +14,20 @@ const script = `
   if (redirectLegacyHash()) return;
   window.addEventListener("hashchange", redirectLegacyHash);
 
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[data-analytics-event]");
+    if (!link || typeof window.gtag !== "function") return;
+    const name = link.dataset.analyticsEvent;
+    if (!name || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
+    const businessEvents = new Set(["business_page_view", "service_view", "business_cta_click", "pricing_view", "example_view", "contact_intent", "store_listing_interest"]);
+    const parameters = businessEvents.has(name)
+      ? { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", service_type: link.dataset.serviceType || "", placement: link.dataset.placement || "" }
+      : { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", area_id: link.dataset.areaId || "", route_segment: link.dataset.routeSegment || "", placement: link.dataset.placement || "", service_type: link.dataset.serviceType || "", provider: link.dataset.provider || "", category: link.dataset.category || "" };
+    window.gtag("event", name, parameters);
+    const secondaryName = link.dataset.analyticsSecondaryEvent;
+    if (secondaryName && /^[a-z][a-z0-9_]{0,39}$/.test(secondaryName)) window.gtag("event", secondaryName, parameters);
+  });
+
   const storageKey = "osanpoClubFavoritesV1";
   const read = () => { try { const value = JSON.parse(localStorage.getItem(storageKey) || "[]"); return Array.isArray(value) ? value.filter((item) => typeof item === "string") : []; } catch { return []; } };
   const render = (button, active) => { button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); button.innerHTML = '<span aria-hidden="true">' + (active ? "\\u2605" : "\\u2606") + "</span> " + (active ? "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u6e08\\u307f" : "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u306b\\u8ffd\\u52a0"); };
