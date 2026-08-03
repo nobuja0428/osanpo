@@ -60,7 +60,7 @@ export default function HomePage() {
           <section className="sidebar-panel"><p className="eyebrow">EVENTS</p><h2>現在・今後のイベント</h2>{currentEvents.length ? <ul className="compact-list">{currentEvents.map((event) => <li key={event.id}><strong>{event.title}</strong><span>{event.venue}</span></li>)}</ul> : <><p>現在、確認済みのイベント情報はありません。</p><Link href="/events/">過去のイベントを見る →</Link></>}</section>
           <section className="sidebar-panel"><p className="eyebrow">UPDATES</p><h2>新着・更新情報</h2><ul className="compact-list">{updates.map(([key, verification]) => <li key={key}><span>{dateLabel(verification.lastUpdatedAt)}</span><Link href={verification.internalPath}>{contentNames.get(key) ?? "掲載情報"}</Link></li>)}</ul></section>
           <section className="sidebar-panel"><p className="eyebrow">ABOUT</p><h2>このサイトについて</h2><p>公開情報をもとに整理し、現地取材は行っていません。AI画像には「イメージ」と表示しています。</p><Link href="/editorial-policy/">編集方針を読む →</Link></section>
-          <section className="sidebar-panel partner-panel"><p className="eyebrow">PARTNERS</p><h2>地域パートナー</h2><p>掲載・連携の準備中です。未設定の広告や商品は表示していません。</p><Link href="/advertise/">広告掲載について →</Link></section>
+          <section className="sidebar-panel partner-panel business-panel"><p className="eyebrow">FOR BUSINESSES</p><h2>地域のお店・事業者の方へ</h2><p>地図とWebで、お店の魅力を伝えるための準備中サービスです。</p><Link href="/business/" data-analytics-event="business_cta_click" data-page-type="home" data-content-id="business-home" data-placement="home-sidebar-business">サービスを見る →</Link><p className="business-contact-pending" role="status">掲載・制作のご相談は受付準備中</p></section>
         </aside>
       </div></section>
       <MonetizationSlot page="home" placement="before-related-content" />

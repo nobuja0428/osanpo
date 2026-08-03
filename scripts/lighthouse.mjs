@@ -15,7 +15,7 @@ try {
   mkdirSync(profileDirectory, { recursive: true });
   chrome = await launch({ chromePath: chromium.executablePath(), userDataDir: profileDirectory, chromeFlags: ["--headless", "--no-sandbox"] });
   const results = {};
-  for (const [name, path] of [["home", "/osanpo/"], ["course", "/osanpo/courses/koenji-first/"]]) {
+  for (const [name, path] of [["home", "/osanpo/"], ["business", "/osanpo/business/"]]) {
     const run = await lighthouse(`http://127.0.0.1:4173${path}`, { port: chrome.port, onlyCategories: ["performance", "accessibility", "best-practices", "seo"], formFactor: "desktop", screenEmulation: { disabled: true } });
     results[name] = {
       scores: Object.fromEntries(Object.entries(run.lhr.categories).map(([key, value]) => [key, value.score])),

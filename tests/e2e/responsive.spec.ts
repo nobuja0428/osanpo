@@ -5,6 +5,7 @@ const routes = [
   "/osanpo/courses/", "/osanpo/courses/koenji-first/", "/osanpo/courses/kichijoji-park/", "/osanpo/courses/asakusa-history/",
   "/osanpo/spots/", "/osanpo/spots/koenji-junjo/", "/osanpo/stories/", "/osanpo/stories/koenji-shopping-streets/", "/osanpo/stories/inokashira-short-walk/", "/osanpo/stories/asakusa-first-hour/",
   "/osanpo/events/", "/osanpo/map/", "/osanpo/search/", "/osanpo/favorites/", "/osanpo/editorial-policy/", "/osanpo/operation/", "/osanpo/advertise/", "/osanpo/contact/", "/osanpo/missing-page/",
+  "/osanpo/business/", "/osanpo/business/store-page/", "/osanpo/business/website/", "/osanpo/business/support/", "/osanpo/business/examples/", "/osanpo/business/contact/",
 ];
 
 for (const width of [320, 375, 390, 768, 1024, 1440]) {

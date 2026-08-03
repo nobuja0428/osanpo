@@ -27,6 +27,7 @@ export function Footer() {
             <Link href="/operation/">運営情報</Link>
             <Link href="/privacy/">プライバシー</Link>
             <Link href="/advertise/">広告掲載</Link>
+            <Link href="/business/">事業者向け</Link>
             <Link href="/contact/">お問い合わせ</Link>
           </div>
         </div>
