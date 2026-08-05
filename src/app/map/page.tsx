@@ -14,6 +14,6 @@ export const metadata: Metadata = {
 export default function MapPage() {
   return <main id="main">
     <PageHero eyebrow="MAP" title="地図から探す" lead="公開中の3エリアを選び、関連コースと主なスポットを確認できます。地図は参考表示です。" crumbs={[{ label: "地図" }]} />
-    <section className="section map-page-section"><div className="container"><MapExplorer areaItems={areas.map(({ id, name, ward, lead, description, mapQuery }) => ({ id, name, ward, lead, description, mapQuery, informationCheckedAt: verificationFor("area", id)?.informationCheckedAt ?? "未記録" }))} courseItems={courses.map(({ id, areaId, title, summary, routeStops }) => ({ id, areaId, title, summary, routeStops: routeStops.map(({ query }) => ({ query })) }))} spotItems={spots.map(({ id, areaId, name, mapQuery }) => ({ id, areaId, name, mapQuery }))} /></div></section>
+    <section className="section map-page-section"><div className="container"><MapExplorer areaItems={areas.map(({ id, name, ward, lead, description, mapQuery }) => ({ id, name, ward, lead, description, mapQuery, informationCheckedAt: verificationFor("area", id)?.informationCheckedAt ?? "未記録" }))} courseItems={courses} spotItems={spots.map(({ id, areaId, name, mapQuery }) => ({ id, areaId, name, mapQuery }))} /></div></section>
   </main>;
 }

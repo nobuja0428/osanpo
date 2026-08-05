@@ -30,7 +30,7 @@ function EventList({ stateFilter }: { stateFilter: ReturnType<typeof eventState>
             <div className="card-media"><Image src={assetUrl(imagePath(item.image))} alt={item.imageAlt} width={800} height={600} sizes="(max-width: 600px) calc(100vw - 28px), (max-width: 900px) calc(50vw - 32px), 360px" /><span className="image-label">イメージ</span></div>
             <div className="card-body">
               <p className="eyebrow">{eventStateLabels[state]}・{item.area}</p>
-              <h3><Link href={`/events/${item.id}/`}>{item.title}</Link></h3>
+              <h3><Link className="card-primary-link" href={`/events/${item.id}/`}>{item.title}</Link></h3>
               <p>{new Date(item.start).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}<br />{new Date(item.end).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}</p>
               <p>{item.venue}・{item.price}</p>
               <p>情報確認日：{verification ? dateLabel(verification.informationCheckedAt) : "未記録"}</p>

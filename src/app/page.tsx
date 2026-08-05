@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { AreaCard, CourseCard, SpotCard, StoryCard } from "@/components/Cards";
+import { AreaCard, SpotCard, StoryCard } from "@/components/Cards";
+import { CourseCardCollection } from "@/components/CourseCardCollection";
 import { HeroSearch } from "@/components/HeroSearch";
 import { areas, courses, events, spots, stories } from "@/lib/content";
 import { isRecommendedEvent } from "@/lib/events";
@@ -46,7 +47,7 @@ export default function HomePage() {
       <section className="section home-content"><div className="container home-two-column">
         <div className="home-main">
           <div className="section-heading"><div><p className="eyebrow">COURSES</p><h2>おすすめおさんぽコース</h2></div><Link href="/courses/">すべて見る →</Link></div>
-          <div className="card-grid">{courses.map((course) => <CourseCard course={course} key={course.id} />)}</div>
+          <CourseCardCollection items={courses} placement="home-recommended-courses" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">AREAS</p><h2>エリアから探す</h2></div><Link href="/areas/">エリア一覧 →</Link></div>
           <p className="availability-note">現在は<strong>{areas.length}エリア公開中</strong>です。東京40エリアのうち、残り{40 - areas.length}エリアは公開情報を確認でき次第、順次追加します。</p>
           <div className="card-grid">{areas.map((area) => <AreaCard area={area} key={area.id} />)}</div>
@@ -60,7 +61,7 @@ export default function HomePage() {
           <section className="sidebar-panel"><p className="eyebrow">EVENTS</p><h2>現在・今後のイベント</h2>{currentEvents.length ? <ul className="compact-list">{currentEvents.map((event) => <li key={event.id}><strong>{event.title}</strong><span>{event.venue}</span></li>)}</ul> : <><p>現在、確認済みのイベント情報はありません。</p><Link href="/events/">過去のイベントを見る →</Link></>}</section>
           <section className="sidebar-panel"><p className="eyebrow">UPDATES</p><h2>新着・更新情報</h2><ul className="compact-list">{updates.map(([key, verification]) => <li key={key}><span>{dateLabel(verification.lastUpdatedAt)}</span><Link href={verification.internalPath}>{contentNames.get(key) ?? "掲載情報"}</Link></li>)}</ul></section>
           <section className="sidebar-panel"><p className="eyebrow">ABOUT</p><h2>このサイトについて</h2><p>公開情報をもとに整理し、現地取材は行っていません。AI画像には「イメージ」と表示しています。</p><Link href="/editorial-policy/">編集方針を読む →</Link></section>
-          <section className="sidebar-panel partner-panel business-panel"><p className="eyebrow">FOR BUSINESSES</p><h2>地域のお店・事業者の方へ</h2><p>地図とWebで、お店の魅力を伝えるための準備中サービスです。</p><Link href="/business/" data-analytics-event="business_cta_click" data-page-type="home" data-content-id="business-home" data-placement="home-sidebar-business">サービスを見る →</Link><p className="business-contact-pending" role="status">掲載・制作のご相談は受付準備中</p></section>
+          <section className="sidebar-panel partner-panel business-panel"><p className="eyebrow">FOR BUSINESSES</p><h2>地域のお店・事業者の方へ</h2><p>地図とWebで、お店の魅力を伝えるサービスです。</p><Link href="/business/" data-analytics-event="business_cta_click" data-page-type="home" data-content-id="business-home" data-placement="home-sidebar-business">サービスを見る →</Link><Link className="external-text-link" href="/business/contact/">メール相談を受け付けています</Link></section>
         </aside>
       </div></section>
       <MonetizationSlot page="home" placement="before-related-content" />
