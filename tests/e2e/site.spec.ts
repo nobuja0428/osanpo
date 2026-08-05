@@ -66,9 +66,9 @@ test("embedded maps, area selection, and walking routes are available", async ({
   await expect(tabs).toHaveCount(3);
   await page.getByRole("tab", { name: "吉祥寺" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { name: "吉祥寺" })).toBeVisible();
+  await expect(page.getByRole("tabpanel").getByRole("heading", { name: "吉祥寺", exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "浅草" }).click();
-  await expect(page.getByRole("heading", { name: "浅草" })).toBeVisible();
+  await expect(page.getByRole("tabpanel").getByRole("heading", { name: "浅草", exact: true })).toBeVisible();
 
   await page.goto("/osanpo/courses/koenji-first/");
   await expect(page.getByText("START", { exact: true })).toBeVisible();

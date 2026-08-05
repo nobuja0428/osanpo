@@ -11,9 +11,9 @@ export type BusinessService = {
   href: string;
 };
 
-export const businessContactEnabled = false;
+export const businessContactEnabled = true;
 export const businessContactFormUrl = "";
-export const businessContactEmail = "";
+export const businessContactEmail = "osanpo.contact.tokyo@gmail.com";
 export const businessListingApplicationEnabled = false;
 
 export const businessAudience = ["飲食店", "カフェ", "美容室", "整体院", "教室", "小売店", "地域サービス事業者"];
@@ -124,3 +124,17 @@ export const businessContact = resolveBusinessContact({
   formUrl: businessContactFormUrl,
   email: businessContactEmail,
 });
+
+export const contactSubjects = {
+  general: "おさんぽクラブ東京への問い合わせ",
+  listing: "店舗掲載についての相談",
+  website: "Web・LP制作についての相談",
+  support: "サイト更新支援についての相談",
+} as const;
+
+export type ContactSubjectKey = keyof typeof contactSubjects;
+
+export function emailContactHref(subjectKey: ContactSubjectKey) {
+  if (!businessContact || businessContact.kind !== "email") return businessContact?.href ?? "";
+  return `${businessContact.href}?subject=${encodeURIComponent(contactSubjects[subjectKey])}`;
+}

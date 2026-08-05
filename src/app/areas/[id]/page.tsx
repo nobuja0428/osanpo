@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -12,6 +11,7 @@ import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
 import { MapEmbed } from "@/components/MapEmbed";
 import { mapDirectionsUrl, mapExternalUrl } from "@/lib/maps";
+import { CourseCardCollection } from "@/components/CourseCardCollection";
 
 export function generateStaticParams() {
   return areas.map((area) => ({ id: area.id }));
@@ -59,9 +59,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             </dl>
             <section className="area-map-section"><p className="eyebrow">AREA MAP</p><h2>{area.name}の地図</h2><MapEmbed query={area.mapQuery} title={`${area.name}の地図`} contentId={area.id} areaId={area.id} placement="area-detail" /><div className="route-actions"><a className="button button-primary" href={mapExternalUrl(area.mapQuery)} target="_blank" rel="noopener noreferrer" data-analytics-event="google_map_click" data-page-type="area" data-content-id={area.id} data-area-id={area.id} data-placement="area-detail">Googleマップで大きく開く <span aria-hidden="true">↗</span></a>{representativeCourse ? <a className="button button-secondary" href={mapDirectionsUrl(representativeCourse.routeStops.map((stop) => stop.query))} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="area" data-content-id={representativeCourse.id} data-area-id={area.id} data-route-segment="whole" data-placement="area-detail">代表コースの徒歩ルートを開く <span aria-hidden="true">↗</span></a> : null}</div></section>
             <h2>このエリアのコース</h2>
-            <ul>
-              {relatedCourses.map((course) => <li key={course.id}><Link href={`/courses/${course.id}/`}>{course.title}</Link></li>)}
-            </ul>
+            <CourseCardCollection items={relatedCourses} placement={`area-${area.id}-courses`} />
           </article>
           <aside className="sidebar-panel">
             <MonetizationSlot page="area" placement="sidebar" />

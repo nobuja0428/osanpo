@@ -19,10 +19,7 @@ const script = `
     if (!link || typeof window.gtag !== "function") return;
     const name = link.dataset.analyticsEvent;
     if (!name || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
-    const businessEvents = new Set(["business_page_view", "service_view", "business_cta_click", "pricing_view", "example_view", "contact_intent", "store_listing_interest"]);
-    const parameters = businessEvents.has(name)
-      ? { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", service_type: link.dataset.serviceType || "", placement: link.dataset.placement || "" }
-      : { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", area_id: link.dataset.areaId || "", route_segment: link.dataset.routeSegment || "", placement: link.dataset.placement || "", service_type: link.dataset.serviceType || "", provider: link.dataset.provider || "", category: link.dataset.category || "" };
+    const parameters = { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", area_id: link.dataset.areaId || "", route_segment: link.dataset.routeSegment || "", placement: link.dataset.placement || "", contact_type: link.dataset.contactType || "" };
     window.gtag("event", name, parameters);
     const secondaryName = link.dataset.analyticsSecondaryEvent;
     if (secondaryName && /^[a-z][a-z0-9_]{0,39}$/.test(secondaryName)) window.gtag("event", secondaryName, parameters);

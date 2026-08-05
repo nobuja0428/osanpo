@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Area, Course, Spot, Story } from "@/lib/content";
 import { areaById, imagePath } from "@/lib/content";
 import { assetUrl } from "@/lib/site";
+import { courseRouteQueries, mapDirectionsUrl } from "@/lib/maps";
 import { isExpired, verificationFor, type ContentType } from "@/lib/verification";
 
 function RecheckBadge({ type, id }: { type: ContentType; id: string }) {
@@ -26,7 +27,7 @@ export function AreaCard({ area }: { area: Area }) {
       <div className="card-body">
         <p className="eyebrow">{area.ward}</p>
         <RecheckBadge type="area" id={area.id} />
-        <h3><Link href={`/areas/${area.id}/`}>{area.name}</Link></h3>
+        <h3><Link className="card-primary-link" href={`/areas/${area.id}/`}>{area.name}</Link></h3>
         <p>{area.lead}</p>
         <div className="pills">{area.tags.map((tag) => <span className="pill" key={tag}>{tag}</span>)}</div>
       </div>
@@ -34,20 +35,24 @@ export function AreaCard({ area }: { area: Area }) {
   );
 }
 
-export function CourseCard({ course }: { course: Course }) {
+export function CourseCard({ course, onMapOpen, selected = false, placement = "course-card", hideImage = false }: { course: Course; onMapOpen?: (courseId: string) => void; selected?: boolean; placement?: string; hideImage?: boolean }) {
   const area = areaById(course.areaId);
+  const routeQueries = courseRouteQueries(course.routeStops);
+  const start = course.routeStops[0];
+  const goal = course.routeStops[course.routeStops.length - 1];
   return (
-    <article className="card">
-      <CardImage imageKey={course.image} alt={course.imageAlt} />
+    <article className={`card course-card${selected ? " is-selected" : ""}`} data-course-id={course.id}>
+      {hideImage ? null : <CardImage imageKey={course.image} alt={course.imageAlt} />}
       <div className="card-body">
         <p className="eyebrow">{area?.name}・モデルコース</p>
         <RecheckBadge type="course" id={course.id} />
-        <h3><Link href={`/courses/${course.id}/`}>{course.title}</Link></h3>
+        <h3><Link className="card-primary-link" href={`/courses/${course.id}/`} data-analytics-event="course_card_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-placement={placement}>{course.title}</Link></h3>
         <p>{course.summary}</p>
-        <div className="pills">
-          <span className="pill">{course.duration}</span>
-          <span className="pill">{course.budget}</span>
-          <span className="pill">{course.audience}</span>
+        <dl className="course-card-facts"><div><dt>所要時間</dt><dd>{course.duration}</dd></div><div><dt>距離</dt><dd>{course.distance}</dd></div><div><dt>予算</dt><dd>{course.budget}</dd></div></dl>
+        <div className="course-card-route"><p><span className="route-label is-start">START</span><strong>{start?.name}</strong></p><p><span className="route-label is-goal">GOAL</span><strong>{goal?.name}</strong></p></div>
+        <div className="course-card-actions">
+          {onMapOpen ? <button className="button button-primary" type="button" aria-label={`${course.title}の地図を見る`} aria-expanded={selected} onClick={() => onMapOpen(course.id)}>地図を見る</button> : null}
+          <a className="button button-secondary" href={mapDirectionsUrl(routeQueries)} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-route-segment="whole" data-placement={placement}>徒歩ルートを開く <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </article>
@@ -62,7 +67,7 @@ export function SpotCard({ spot }: { spot: Spot }) {
       <div className="card-body">
         <p className="eyebrow">{area?.name}・{spot.category}</p>
         <RecheckBadge type="spot" id={spot.id} />
-        <h3><Link href={`/spots/${spot.id}/`}>{spot.name}</Link></h3>
+        <h3><Link className="card-primary-link" href={`/spots/${spot.id}/`}>{spot.name}</Link></h3>
         <p>{spot.excerpt}</p>
       </div>
     </article>
@@ -77,7 +82,7 @@ export function StoryCard({ story }: { story: Story }) {
       <div className="card-body">
         <p className="eyebrow">{area?.name}・{story.category}</p>
         <RecheckBadge type="story" id={story.id} />
-        <h3><Link href={`/stories/${story.id}/`}>{story.title}</Link></h3>
+        <h3><Link className="card-primary-link" href={`/stories/${story.id}/`}>{story.title}</Link></h3>
         <p>{story.excerpt}</p>
       </div>
     </article>

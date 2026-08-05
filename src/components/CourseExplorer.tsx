@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CourseCard } from "@/components/Cards";
+import { CourseCardCollection } from "@/components/CourseCardCollection";
 import { trackEvent } from "@/components/Analytics";
 import { areas, courses } from "@/lib/content";
 import type { CourseFilters } from "@/lib/filters";
@@ -104,7 +104,7 @@ export function CourseExplorer() {
         </div>
       ) : null}
       <p className="result-count" aria-live="polite">{results.length}件のコース</p>
-      {results.length ? <div className="card-grid">{results.map((course) => <CourseCard course={course} key={course.id} />)}</div> : <div className="empty-state"><h2>条件に合うコースがありません</h2><p>条件を減らすか、キーワードを変えてもう一度お試しください。</p></div>}
+      {results.length ? <CourseCardCollection key={results.map((course) => course.id).join("-")} items={results} placement="courses-filter-results" /> : <div className="empty-state"><h2>条件に合うコースがありません</h2><p>条件を減らすか、キーワードを変えてもう一度お試しください。</p></div>}
     </>
   );
 }

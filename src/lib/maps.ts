@@ -10,3 +10,7 @@ export function mapDirectionsUrl(queries: string[]) {
   if (rest.length) params.set("waypoints", rest.join("|"));
   return `https://www.google.com/maps/dir/?${params}`;
 }
+
+export function courseRouteQueries(routeStops: { query: string }[]) {
+  return routeStops.map((stop) => stop.query).filter(Boolean);
+}
