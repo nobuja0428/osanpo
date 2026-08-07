@@ -4,7 +4,7 @@ const routes = [
   "/osanpo/", "/osanpo/areas/", "/osanpo/areas/koenji/", "/osanpo/areas/kichijoji/", "/osanpo/areas/asakusa/",
   "/osanpo/courses/", "/osanpo/courses/koenji-first/", "/osanpo/courses/kichijoji-park/", "/osanpo/courses/asakusa-history/",
   "/osanpo/spots/", "/osanpo/spots/koenji-junjo/", "/osanpo/stories/", "/osanpo/stories/koenji-shopping-streets/", "/osanpo/stories/inokashira-short-walk/", "/osanpo/stories/asakusa-first-hour/",
-  "/osanpo/events/", "/osanpo/map/", "/osanpo/search/", "/osanpo/favorites/", "/osanpo/editorial-policy/", "/osanpo/operation/", "/osanpo/advertise/", "/osanpo/contact/", "/osanpo/missing-page/",
+  "/osanpo/events/", "/osanpo/map/", "/osanpo/plan/", "/osanpo/search/", "/osanpo/favorites/", "/osanpo/editorial-policy/", "/osanpo/operation/", "/osanpo/advertise/", "/osanpo/contact/", "/osanpo/missing-page/",
   "/osanpo/business/", "/osanpo/business/store-page/", "/osanpo/business/website/", "/osanpo/business/support/", "/osanpo/business/examples/", "/osanpo/business/contact/",
 ];
 
@@ -41,5 +41,8 @@ test("key content remains readable without JavaScript", async ({ browser }) => {
   await expect(page.getByRole("heading", { name: "東京を、もっと歩きたくなる。" })).toBeVisible();
   await page.goto("http://127.0.0.1:4173/osanpo/courses/koenji-first/");
   await expect(page.getByRole("heading", { name: "1. 電車・駅情報" })).toBeVisible();
+  await page.goto("http://127.0.0.1:4173/osanpo/plan/");
+  await expect(page.getByText("JavaScriptが無効です")).toBeVisible();
+  await expect(page.getByRole("link", { name: "コース一覧を見る" })).toBeVisible();
   await context.close();
 });

@@ -4,7 +4,7 @@ test("business pages expose services, reference pricing, and only self-owned exa
   await page.goto("/osanpo/business/");
   await expect(page.getByRole("heading", { name: "地域のお店の魅力を、地図とWebで伝える" })).toBeVisible();
   await expect(page.getByRole("link", { name: "詳しく見る →" })).toHaveCount(4);
-  await expect(page.getByRole("link", { name: "店舗掲載について相談する" })).toHaveAttribute("href", /mailto:osanpo\.contact\.tokyo@gmail\.com\?subject=/);
+  await expect(page.getByRole("link", { name: "Googleフォームで相談する ↗" }).first()).toHaveAttribute("href", "https://docs.google.com/forms/d/e/1FAIpQLSfjBa3cxGBrjEUSLEDY8ZkcvFs4xU5PXzNW6CbpZ_0MQgGYyw/viewform?usp=dialog");
   await expect(page.getByRole("heading", { name: "よくある課題" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "料金の考え方" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "よくある質問" })).toBeVisible();
@@ -19,11 +19,13 @@ test("business pages expose services, reference pricing, and only self-owned exa
   await expect(page.getByText("Next.js", { exact: true })).toBeVisible();
 });
 
-test("business contact exposes the configured subject-safe email link", async ({ page }) => {
+test("business contact exposes the configured Google form", async ({ page }) => {
   await page.goto("/osanpo/business/contact/");
-  await expect(page.getByRole("heading", { name: "メールでご相談を受け付けています" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Googleフォームでご相談ください" })).toBeVisible();
   await expect(page.locator("form, input, textarea, select")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "メールで相談する" })).toHaveAttribute("href", /mailto:osanpo\.contact\.tokyo@gmail\.com\?subject=/);
+  const formLink = page.getByRole("link", { name: "Googleフォームで相談する ↗" });
+  await expect(formLink).toHaveAttribute("target", "_blank");
+  await expect(formLink).toHaveAttribute("rel", "noopener noreferrer");
 });
 
 test("business pages do not request analytics when GA is disabled and remain keyboard reachable", async ({ page }) => {

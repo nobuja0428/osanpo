@@ -12,7 +12,7 @@ export type BusinessService = {
 };
 
 export const businessContactEnabled = true;
-export const businessContactFormUrl = "";
+export const businessContactFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfjBa3cxGBrjEUSLEDY8ZkcvFs4xU5PXzNW6CbpZ_0MQgGYyw/viewform?usp=dialog";
 export const businessContactEmail = "osanpo.contact.tokyo@gmail.com";
 export const businessListingApplicationEnabled = false;
 
@@ -27,7 +27,7 @@ export const businessFaqs = [
   { question: "相談前に何を用意すればよいですか？", answer: "まずは現在ある情報、写真、公式サイトやSNSの有無を確認します。必要な内容と優先順位は相談しながら整理します。" },
   { question: "料金だけで依頼できますか？", answer: "参考価格は目安です。掲載内容、写真や原稿の準備状況、確認範囲を確認してから個別に見積もります。" },
   { question: "集客や売上は保証されますか？", answer: "保証しません。情報を分かりやすく整理する制作・更新支援であり、検索順位、来店数、売上などの成果を約束するものではありません。" },
-  { question: "無料掲載は今すぐ申請できますか？", answer: "現在は準備中です。受付開始までは入力フォームや送信ボタンを表示せず、個人情報をこの静的サイトに保存しません。" },
+  { question: "無料掲載は今すぐ申請できますか？", answer: "無料掲載の開始時期は未定です。店舗掲載に関する相談はGoogleフォームで受け付け、個人情報をこの静的サイトに保存しません。" },
 ];
 
 export const businessListingFields = [
@@ -135,6 +135,6 @@ export const contactSubjects = {
 export type ContactSubjectKey = keyof typeof contactSubjects;
 
 export function emailContactHref(subjectKey: ContactSubjectKey) {
-  if (!businessContact || businessContact.kind !== "email") return businessContact?.href ?? "";
-  return `${businessContact.href}?subject=${encodeURIComponent(contactSubjects[subjectKey])}`;
+  if (!isPublicEmail(businessContactEmail)) return "";
+  return `mailto:${businessContactEmail}?subject=${encodeURIComponent(contactSubjects[subjectKey])}`;
 }

@@ -27,7 +27,7 @@ function EventList({ stateFilter }: { stateFilter: ReturnType<typeof eventState>
         const expired = verification ? isExpired(verification) : true;
         return (
           <article className="card" key={item.id}>
-            <div className="card-media"><Image src={assetUrl(imagePath(item.image))} alt={item.imageAlt} width={800} height={600} sizes="(max-width: 600px) calc(100vw - 28px), (max-width: 900px) calc(50vw - 32px), 360px" /><span className="image-label">イメージ</span></div>
+            <Link className="card-media-link" href={`/events/${item.id}/`}><div className="card-media"><Image src={assetUrl(imagePath(item.image))} alt={item.imageAlt} width={800} height={600} sizes="(max-width: 600px) calc(100vw - 28px), (max-width: 900px) calc(50vw - 32px), 360px" /><span className="image-label">イメージ</span></div></Link>
             <div className="card-body">
               <p className="eyebrow">{eventStateLabels[state]}・{item.area}</p>
               <h3><Link className="card-primary-link" href={`/events/${item.id}/`}>{item.title}</Link></h3>

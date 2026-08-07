@@ -28,7 +28,7 @@ export default function HomePage() {
     <main id="main">
       <section className="hero hero-complete">
         <div className="container hero-complete-inner">
-          <Image className="hero-background" src={assetUrl("assets/images/hero/hero-tokyo-walk.webp")} width={960} height={540} sizes="100vw" alt="東京の街歩きを表現したイメージ" preload fetchPriority="high" />
+          <Image className="hero-background" src={assetUrl("assets/images/hero/hero-tokyo-walk.webp")} width={960} height={540} sizes="100vw" alt="東京の街歩きを表現したイメージ" preload fetchPriority="high" decoding="sync" />
           <div className="hero-overlay">
             <p className="eyebrow">TOKYO SANPO CLUB</p>
             <h1>東京を、もっと歩きたくなる。</h1>
@@ -46,6 +46,7 @@ export default function HomePage() {
 
       <section className="section home-content"><div className="container home-two-column">
         <div className="home-main">
+          <section className="home-plan-cta"><div><p className="eyebrow">TODAY&apos;S PLAN</p><h2>今日はどこを歩く？</h2><p>時間・予算・気分を選ぶだけで、現在公開中のコースからおすすめを探します。</p></div><Link className="button button-primary" href="/plan/">30秒でコースを選ぶ</Link></section>
           <div className="section-heading"><div><p className="eyebrow">COURSES</p><h2>おすすめおさんぽコース</h2></div><Link href="/courses/">すべて見る →</Link></div>
           <CourseCardCollection items={courses} placement="home-recommended-courses" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">AREAS</p><h2>エリアから探す</h2></div><Link href="/areas/">エリア一覧 →</Link></div>
@@ -61,7 +62,7 @@ export default function HomePage() {
           <section className="sidebar-panel"><p className="eyebrow">EVENTS</p><h2>現在・今後のイベント</h2>{currentEvents.length ? <ul className="compact-list">{currentEvents.map((event) => <li key={event.id}><strong>{event.title}</strong><span>{event.venue}</span></li>)}</ul> : <><p>現在、確認済みのイベント情報はありません。</p><Link href="/events/">過去のイベントを見る →</Link></>}</section>
           <section className="sidebar-panel"><p className="eyebrow">UPDATES</p><h2>新着・更新情報</h2><ul className="compact-list">{updates.map(([key, verification]) => <li key={key}><span>{dateLabel(verification.lastUpdatedAt)}</span><Link href={verification.internalPath}>{contentNames.get(key) ?? "掲載情報"}</Link></li>)}</ul></section>
           <section className="sidebar-panel"><p className="eyebrow">ABOUT</p><h2>このサイトについて</h2><p>公開情報をもとに整理し、現地取材は行っていません。AI画像には「イメージ」と表示しています。</p><Link href="/editorial-policy/">編集方針を読む →</Link></section>
-          <section className="sidebar-panel partner-panel business-panel"><p className="eyebrow">FOR BUSINESSES</p><h2>地域のお店・事業者の方へ</h2><p>地図とWebで、お店の魅力を伝えるサービスです。</p><Link href="/business/" data-analytics-event="business_cta_click" data-page-type="home" data-content-id="business-home" data-placement="home-sidebar-business">サービスを見る →</Link><Link className="external-text-link" href="/business/contact/">メール相談を受け付けています</Link></section>
+          <section className="sidebar-panel partner-panel business-panel"><p className="eyebrow">FOR BUSINESSES</p><h2>地域のお店・事業者の方へ</h2><p>地図とWebで、お店の魅力を伝えるサービスです。</p><Link href="/business/" data-analytics-event="business_cta_click" data-page-type="home" data-content-id="business-home" data-placement="home-sidebar-business">サービスを見る →</Link><Link className="external-text-link" href="/business/contact/">Googleフォームで相談できます</Link></section>
         </aside>
       </div></section>
       <MonetizationSlot page="home" placement="before-related-content" />
