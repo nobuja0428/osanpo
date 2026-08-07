@@ -17,12 +17,16 @@ test("planner completes five questions, explains results, restores URL, and supp
   await page.getByRole("button", { name: "結果を見る" }).click();
   await expect(page.getByRole("heading", { name: "今日のおさんぽ候補" })).toBeVisible();
   await expect(page.locator(".planner-result-card")).toHaveCount(3);
+  const favorite = page.locator(".planner-result-card [data-favorite-key]").first();
+  await favorite.click();
+  await expect(favorite).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: "初めての高円寺：商店街と路地を2時間で歩く" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "おすすめした理由" }).first()).toBeVisible();
   await expect(page).toHaveURL(/duration=120.*budget=3000.*audience=solo.*mood=shopping.*assurance=toilet/);
 
   const restoredUrl = page.url();
   await page.reload();
+  await expect(page.locator(".planner-result-card [data-favorite-key]").first()).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: "今日のおさんぽ候補" })).toBeVisible();
   await expect(page.url()).toBe(restoredUrl);
   await page.getByRole("button", { name: "最初からやり直す" }).click();
