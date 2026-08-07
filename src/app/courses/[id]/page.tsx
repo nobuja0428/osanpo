@@ -11,6 +11,8 @@ import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
 import { MapEmbed } from "@/components/MapEmbed";
 import { mapDirectionsUrl, mapExternalUrl } from "@/lib/maps";
+import { CourseSafetySummary } from "@/components/CourseSafetySummary";
+import { RouteCustomizer } from "@/components/RouteCustomizer";
 
 export function generateStaticParams() {
   return courses.map((course) => ({ id: course.id }));
@@ -56,7 +58,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="course" id={course.id} />
-            <nav className="page-section-nav" aria-label="コース内ナビ"><a href="#course-overview">コース概要</a><a href="#course-map">地図</a><a href="#course-route">徒歩ルート</a><a href="#course-stops">立ち寄り地点</a><a href="#course-access">アクセス</a><a href="#course-info">情報確認</a></nav>
+            <nav className="page-section-nav" aria-label="コース内ナビ"><a href="#course-overview">コース概要</a><a href="#course-map">地図</a><a href="#course-route">徒歩ルート</a><a href="#course-customizer">コース調整</a><a href="#course-stops">立ち寄り地点</a><a href="#course-access">アクセス</a><a href="#course-info">情報確認</a></nav>
             <dl className="facts" id="course-overview">
               <div><dt>所要時間</dt><dd>{course.duration}</dd></div>
               <div><dt>距離</dt><dd>{course.distance}</dd></div>
@@ -65,6 +67,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <div><dt>スタート</dt><dd>{course.routeStops[0]?.name}</dd></div>
               <div><dt>ゴール</dt><dd>{course.routeStops.at(-1)?.name}</dd></div>
             </dl>
+            <CourseSafetySummary course={course} />
 
             <section className="course-map-section" id="course-map"><div className="section-title-row"><div><p className="eyebrow">COURSE MAP</p><h2>コースの地図</h2></div></div><MapEmbed query={routeQueries.join(" ")} title={`${course.title}の地図`} contentId={course.id} areaId={course.areaId} placement="course-map" /><div className="route-actions"><a className="button button-primary" href={mapExternalUrl(routeQueries.join(" "))} target="_blank" rel="noopener noreferrer" data-analytics-event="google_map_click" data-page-type="course" data-content-id={course.id} data-area-id={course.areaId} data-placement="course-map">Googleマップで大きく開く <span aria-hidden="true">↗</span></a><a className="button button-secondary" href={wholeRouteUrl} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="course" data-content-id={course.id} data-area-id={course.areaId} data-route-segment="whole" data-placement="course-map">コース全体の徒歩ルートを開く <span aria-hidden="true">↗</span></a></div></section>
 
@@ -87,7 +90,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               return <a className="button button-secondary" key={segment.id} href={mapDirectionsUrl([origin.query, ...waypoints, destination.query])} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="course" data-content-id={course.id} data-area-id={course.areaId} data-route-segment={segment.id} data-placement="course-route">{segment.label}を徒歩ルートで見る <span aria-hidden="true">↗</span></a>;
             })}</div>
             <p>{course.routeNotice}</p>
+            <RouteCustomizer course={course} />
             <MonetizationSlot page="course" placement="near-map-action" />
+
+            <h2 id="course-stops">立ち寄り地点の確認</h2>
+            <p>各地点は上の徒歩ルートとコース調整に、既存データの順番どおり掲載しています。</p>
 
             <h2 id="course-access">1. 電車・駅情報</h2>
             {courseTransit.map((item) => (

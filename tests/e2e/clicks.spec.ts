@@ -36,10 +36,14 @@ test("wide card click areas navigate for every public card type", async ({ page 
     await page.goto(listPath);
     const card = page.locator("article.card").filter({ has: page.locator(`a[href="${destination}"]`) });
     await expect(card).toHaveCount(1);
-    await card.scrollIntoViewIfNeeded();
+    await card.evaluate((element) => {
+      window.scrollTo({ top: window.scrollY + element.getBoundingClientRect().top - 100 });
+    });
     const mediaBox = await card.locator(".card-media").boundingBox();
     expect(mediaBox).not.toBeNull();
-    await page.mouse.click(mediaBox!.x + mediaBox!.width / 2, mediaBox!.y + mediaBox!.height / 2);
+    const mediaLink = card.locator(".card-media-link");
+    if (await mediaLink.count()) await mediaLink.click();
+    else await page.mouse.click(mediaBox!.x + mediaBox!.width / 2, mediaBox!.y + mediaBox!.height / 2);
     await expect(page).toHaveURL(new RegExp(`${destination.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
   }
 
@@ -75,7 +79,7 @@ test("course cards open, switch, close, navigate, and keep one map iframe", asyn
   await expect(page).toHaveURL(/\/osanpo\/courses\/koenji-first\/$/);
 });
 
-test("filters, favorites, external walking route, and contact mail link respond", async ({ page }) => {
+test("filters, favorites, external walking route, and contact links respond", async ({ page }) => {
   await page.goto("/osanpo/courses/");
   await page.getByLabel("エリア").selectOption("asakusa");
   await expect(page.getByText("1件のコース", { exact: true })).toBeVisible();
@@ -86,12 +90,17 @@ test("filters, favorites, external walking route, and contact mail link respond"
   await page.getByRole("button", { name: "お気に入りに追加" }).click();
   await expect(page.getByRole("button", { name: "お気に入り済み" })).toBeVisible();
   const popupPromise = page.waitForEvent("popup");
+  await page.context().route("https://www.google.com/maps/dir/**", (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Google Maps route test</title>" }));
   await page.getByRole("link", { name: "コース全体の徒歩ルートを開く" }).click();
   const popup = await popupPromise;
   await expect(popup).toHaveURL(/travelmode=walking/);
   await popup.close();
 
   await page.goto("/osanpo/contact/");
+  const formLink = page.getByRole("link", { name: "お問い合わせフォームを開く" });
+  await expect(formLink).toHaveAttribute("href", "https://docs.google.com/forms/d/e/1FAIpQLSfjBa3cxGBrjEUSLEDY8ZkcvFs4xU5PXzNW6CbpZ_0MQgGYyw/viewform?usp=dialog");
+  await expect(formLink).toHaveAttribute("target", "_blank");
+  await expect(formLink).toHaveAttribute("rel", "noopener noreferrer");
   const mailLink = page.getByRole("link", { name: "メールを作成する" });
   await expect(mailLink).toHaveAttribute("href", /^mailto:osanpo\.contact\.tokyo@gmail\.com\?subject=/);
   await mailLink.click({ noWaitAfter: true });

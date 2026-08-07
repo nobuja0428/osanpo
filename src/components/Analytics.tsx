@@ -14,9 +14,16 @@ declare global {
   }
 }
 
+const allowedParameterNames = new Set([
+  "content_id", "page_type", "area_id", "route_segment", "placement", "contact_type",
+  "duration_range", "budget_range", "audience_type", "mood_type", "result_count", "selected_stop_count",
+  "filter_name", "selected_filter_count", "active",
+]);
+
 export function trackEvent(name: string, parameters: Record<string, string | number | boolean> = {}) {
   if (!enabled || !window.gtag || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return false;
-  window.gtag("event", name, parameters);
+  const safeParameters = Object.fromEntries(Object.entries(parameters).filter(([key]) => allowedParameterNames.has(key)));
+  window.gtag("event", name, safeParameters);
   return true;
 }
 

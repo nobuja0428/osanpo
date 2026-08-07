@@ -19,7 +19,7 @@ const script = `
     if (!link || typeof window.gtag !== "function") return;
     const name = link.dataset.analyticsEvent;
     if (!name || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
-    const parameters = { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", area_id: link.dataset.areaId || "", route_segment: link.dataset.routeSegment || "", placement: link.dataset.placement || "", contact_type: link.dataset.contactType || "" };
+    const parameters = { content_id: link.dataset.contentId || "", page_type: link.dataset.pageType || "", area_id: link.dataset.areaId || "", route_segment: link.dataset.routeSegment || "", placement: link.dataset.placement || "", contact_type: link.dataset.contactType || "", duration_range: link.dataset.durationRange || "", budget_range: link.dataset.budgetRange || "", audience_type: link.dataset.audienceType || "", mood_type: link.dataset.moodType || "", result_count: Number(link.dataset.resultCount || 0), selected_stop_count: Number(link.dataset.selectedStopCount || 0) };
     window.gtag("event", name, parameters);
     const secondaryName = link.dataset.analyticsSecondaryEvent;
     if (secondaryName && /^[a-z][a-z0-9_]{0,39}$/.test(secondaryName)) window.gtag("event", secondaryName, parameters);

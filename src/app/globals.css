@@ -60,6 +60,7 @@ button, select, input { font: inherit; }
 .quick-links strong { font-size: 19px; }
 .quick-links span { color: var(--muted); font-size: 13px; }
 .card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.card-media-link { position: relative; z-index: 2; display: block; text-decoration: none; }
 .card-grid-spaced { margin-top: 28px; }
 .card { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: 0 6px 24px rgba(50,46,35,.05); transition: border-color .18s, transform .18s, background-color .18s; }
 .card:hover { transform: translateY(-2px); border-color: #a9c7aa; }
@@ -373,4 +374,84 @@ button, select, input { font: inherit; }
   .business-process li { min-height: 0; }
   .business-tier-list > div { align-items: flex-start; flex-direction: column; gap: 2px; }
   .business-capabilities { padding: 20px; border-radius: 16px; }
+}
+
+/* Today's plan and route customizer */
+.home-plan-cta { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 42px; padding: 26px; border: 1px solid #b9d3bd; border-radius: 20px; background: linear-gradient(135deg, #eef7ed, #fffdf8); }
+.home-plan-cta h2 { margin: 5px 0 6px; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 28px; }
+.home-plan-cta p { margin: 0; }
+.course-plan-link { margin: 0 0 22px; padding: 15px 18px; border-left: 4px solid var(--green); background: #f1f7ef; }
+.course-plan-link a { color: var(--green-dark); font-weight: 800; }
+.planner-panel, .planner-results { width: 100%; }
+.planner-panel { padding: 34px; border: 1px solid #bfd3c1; border-radius: 24px; background: #f7fbf5; }
+.planner-panel h2, .planner-result-heading h2 { margin: 7px 0 12px; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: clamp(28px, 4vw, 38px); }
+.planner-progress { height: 7px; margin-bottom: 28px; overflow: hidden; border-radius: 999px; background: #dce7dc; }
+.planner-progress span { display: block; height: 100%; border-radius: inherit; background: var(--green); transition: width .15s ease; }
+.planner-current { color: var(--muted); font-size: 14px; }
+.planner-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 24px 0; }
+.planner-options button { min-height: 54px; border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; background: white; color: var(--ink); font-weight: 800; cursor: pointer; }
+.planner-options button.is-selected { border-color: var(--green); background: var(--green); color: white; }
+.planner-options button:focus-visible, .planner-assurances input:focus-visible, .custom-stop-list input:focus-visible, .customizer-controls button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.planner-assurances { display: grid; gap: 10px; margin: 24px 0; padding: 0; border: 0; }
+.planner-assurances legend { margin-bottom: 10px; font-weight: 800; }
+.planner-assurances label { display: flex; min-height: 50px; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: white; cursor: pointer; }
+.planner-assurances input, .custom-stop-list input { width: 20px; height: 20px; accent-color: var(--green); }
+.planner-navigation, .customizer-controls { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 28px; }
+.planner-result-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+.planner-result-heading p { margin: 4px 0; color: var(--muted); }
+.planner-result-list { display: grid; gap: 24px; }
+.planner-result-card { position: relative; display: grid; grid-template-columns: 260px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: 0 6px 24px rgba(50,46,35,.05); }
+.planner-result-rank { position: absolute; z-index: 2; top: 12px; left: 12px; padding: 4px 10px; border-radius: 999px; background: var(--green-dark); color: white; font-size: 12px; font-weight: 800; }
+.planner-result-media { position: relative; min-height: 100%; }
+.planner-result-media img { width: 100%; height: 100%; object-fit: cover; }
+.planner-result-body { min-width: 0; padding: 24px; }
+.planner-result-body h3 { margin: 5px 0 10px; font-size: 24px; line-height: 1.45; }
+.plan-partial-match { padding: 8px 11px; border-left: 4px solid #a15d36; background: #fff5eb; color: #6c3617; font-weight: 800; }
+.planner-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--line); }
+.planner-facts > div { min-width: 0; padding: 10px; background: white; }
+.planner-facts dt { color: var(--muted); font-size: 11px; }
+.planner-facts dd { margin: 2px 0 0; font-size: 13px; font-weight: 800; overflow-wrap: anywhere; }
+.plan-reasons { margin: 18px 0; padding: 16px 18px; border-radius: 14px; background: #f1f7ef; }
+.plan-reasons h4 { margin: 0 0 8px; }
+.plan-reasons ul { margin: 0; padding-left: 1.25em; }
+.plan-verification { color: var(--muted); font-size: 13px; }
+.planner-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.planner-actions .button { min-height: 42px; padding-inline: 14px; font-size: 12px; }
+.course-safety { margin: 22px 0; padding: 20px; border: 1px solid #cfe0d2; border-radius: 16px; background: #f4faf3; }
+.course-safety h3 { margin: 0 0 12px; font-size: 18px; }
+.course-safety dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; margin: 0; }
+.course-safety dl div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid #dfe9df; }
+.course-safety dt { color: var(--muted); font-size: 12px; }
+.course-safety dd { margin: 0; font-size: 12px; font-weight: 800; }
+.course-safety.is-compact { margin: 0 0 14px; padding: 13px; }
+.course-safety.is-compact h3 { font-size: 14px; }
+.course-safety.is-compact dl { grid-template-columns: 1fr; gap: 4px; }
+.route-customizer { margin: 38px 0; padding: 26px; border: 2px solid #b9d3bd; border-radius: 20px; background: #f7fbf5; scroll-margin-top: 100px; }
+.route-customizer h2 { margin: 5px 0 10px; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 28px; }
+.custom-stop-list { display: grid; gap: 9px; margin: 22px 0; padding: 0; list-style: none; }
+.custom-stop-list label { display: grid; grid-template-columns: 24px 66px minmax(0, 1fr); min-height: 52px; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: white; cursor: pointer; }
+.custom-stop-list input:disabled { opacity: 1; cursor: not-allowed; }
+.custom-stop-list small { display: block; color: var(--muted); }
+.custom-stop-list .is-removed { opacity: .52; }
+.custom-stop-stage { display: inline-flex; min-height: 27px; align-items: center; justify-content: center; border-radius: 999px; background: #eff4ef; color: var(--green-dark); font-size: 10px; font-weight: 900; }
+.custom-stop-list .is-start .custom-stop-stage { background: #dff2e7; color: #0b5b38; }
+.custom-stop-list .is-goal .custom-stop-stage { background: #d9e2df; color: #183e34; }
+.custom-route-count, .share-status { color: var(--muted); font-size: 13px; font-weight: 700; }
+.share-status { min-height: 1.75em; }
+
+@media (max-width: 700px) {
+  .home-plan-cta, .planner-result-heading { align-items: stretch; flex-direction: column; }
+  .home-plan-cta .button, .planner-result-heading .button { width: 100%; }
+  .planner-panel { padding: 20px; border-radius: 18px; }
+  .planner-options { grid-template-columns: 1fr; }
+  .planner-navigation { display: grid; grid-template-columns: 1fr 1fr; }
+  .planner-navigation .button { width: 100%; padding-inline: 10px; }
+  .planner-result-card { grid-template-columns: 1fr; }
+  .planner-result-media { aspect-ratio: 16 / 10; }
+  .planner-result-body { padding: 19px; }
+  .planner-facts, .course-safety dl { grid-template-columns: 1fr; }
+  .planner-actions, .customizer-controls, .route-customizer .route-actions { display: grid; }
+  .planner-actions .button, .customizer-controls .button, .route-customizer .route-actions .button { width: 100%; }
+  .route-customizer { padding: 18px; border-radius: 16px; }
+  .custom-stop-list label { grid-template-columns: 22px 58px minmax(0, 1fr); padding-inline: 9px; }
 }

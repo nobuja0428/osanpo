@@ -13,6 +13,7 @@ const staticPaths = [
   "stories/",
   "events/",
   "map/",
+  "plan/",
   "about/",
   "operation/",
   "editorial-policy/",

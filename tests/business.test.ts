@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { businessContact, businessContactEmail, businessListingApplicationEnabled, businessListingFields, businessServices, emailContactHref, resolveBusinessContact } from "@/content/business";
+import { businessContact, businessContactEmail, businessContactFormUrl, businessListingApplicationEnabled, businessListingFields, businessServices, emailContactHref, resolveBusinessContact } from "@/content/business";
 
 describe("business service safety defaults", () => {
-  it("enables the verified production email while keeping direct listing submission disabled", () => {
-    expect(businessContact).toEqual({ kind: "email", href: `mailto:${businessContactEmail}` });
+  it("uses the verified Google form with email as a fallback", () => {
+    expect(businessContact).toEqual({ kind: "form", href: businessContactFormUrl });
+    expect(businessContactFormUrl).toBe("https://docs.google.com/forms/d/e/1FAIpQLSfjBa3cxGBrjEUSLEDY8ZkcvFs4xU5PXzNW6CbpZ_0MQgGYyw/viewform?usp=dialog");
     expect(businessContactEmail).toBe("osanpo.contact.tokyo@gmail.com");
     expect(emailContactHref("listing")).toContain("subject=%E5%BA%97%E8%88%97%E6%8E%B2%E8%BC%89");
     expect(businessListingApplicationEnabled).toBe(false);
@@ -32,5 +33,7 @@ describe("business service safety defaults", () => {
     expect(script).not.toContain('email: link.dataset');
     expect(script).not.toContain('subject: link.dataset');
     expect(script).not.toContain('service_type: link.dataset');
+    expect(script).not.toContain('form_url: link.dataset');
+    expect(script).not.toContain('form_answer: link.dataset');
   });
 });
