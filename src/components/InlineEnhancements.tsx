@@ -29,14 +29,20 @@ const script = `
   const read = () => { try { const value = JSON.parse(localStorage.getItem(storageKey) || "[]"); return Array.isArray(value) ? value.filter((item) => typeof item === "string") : []; } catch { return []; } };
   const render = (button, active) => { button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); button.innerHTML = '<span aria-hidden="true">' + (active ? "\\u2605" : "\\u2606") + "</span> " + (active ? "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u6e08\\u307f" : "\\u304a\\u6c17\\u306b\\u5165\\u308a\\u306b\\u8ffd\\u52a0"); };
   const initialize = () => document.querySelectorAll("[data-favorite-key]").forEach((button) => {
+    if (button.dataset.favoriteReady === "true") return;
     const key = button.dataset.favoriteKey;
     render(button, read().includes(key));
-    button.addEventListener("click", () => {
-      const current = read(); const active = !current.includes(key); const next = active ? [...current, key] : current.filter((item) => item !== key);
-      localStorage.setItem(storageKey, JSON.stringify(next)); render(button, active);
-      if (typeof window.gtag === "function") window.gtag("event", "favorite_change", { content_id: key, active });
-    });
+    button.dataset.favoriteReady = "true";
   });
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-favorite-key]");
+    if (!button) return;
+    const key = button.dataset.favoriteKey;
+    const current = read(); const active = !current.includes(key); const next = active ? [...current, key] : current.filter((item) => item !== key);
+    localStorage.setItem(storageKey, JSON.stringify(next)); render(button, active);
+    if (typeof window.gtag === "function") window.gtag("event", "favorite_change", { content_id: key, active });
+  });
+  new MutationObserver(initialize).observe(document.documentElement, { childList: true, subtree: true });
   const start = () => requestAnimationFrame(() => requestAnimationFrame(initialize));
   if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true });
 })();`;
