@@ -34,7 +34,7 @@ export function Footer() {
           <div className="footer-links">
             <Link href="/business/">サービス案内</Link>
             <Link href="/advertise/">広告掲載</Link>
-            <Link href="/business/contact/">事業者向けお問い合わせ</Link>
+            <Link href="/business/contact/">事業者向け相談窓口</Link>
           </div>
         </div>
       </div>
