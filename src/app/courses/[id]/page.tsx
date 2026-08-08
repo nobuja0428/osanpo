@@ -53,13 +53,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <section className="section">
         <div className="container detail-grid">
           <article>
-            <div className="detail-cover">
-              <Image src={assetUrl(imagePath(course.image))} alt={course.imageAlt} width={800} height={600} sizes="(max-width: 900px) calc(100vw - 40px), 740px" />
-              <span className="image-label">イメージ</span>
-            </div>
-            <FavoriteButton type="course" id={course.id} />
-            <nav className="page-section-nav" aria-label="コース内ナビ"><a href="#course-overview">コース概要</a><a href="#course-map">地図</a><a href="#course-route">徒歩ルート</a><a href="#course-customizer">コース調整</a><a href="#course-stops">立ち寄り地点</a><a href="#course-access">アクセス</a><a href="#course-info">情報確認</a></nav>
-            <dl className="facts" id="course-overview">
+            <dl className="facts course-overview-facts" id="course-overview">
               <div><dt>所要時間</dt><dd>{course.duration}</dd></div>
               <div><dt>距離</dt><dd>{course.distance}</dd></div>
               <div><dt>予算</dt><dd>{course.budget}</dd></div>
@@ -67,6 +61,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <div><dt>スタート</dt><dd>{course.routeStops[0]?.name}</dd></div>
               <div><dt>ゴール</dt><dd>{course.routeStops.at(-1)?.name}</dd></div>
             </dl>
+            <div className="detail-cover">
+              <Image src={assetUrl(imagePath(course.image))} alt={course.imageAlt} width={800} height={600} sizes="(max-width: 900px) calc(100vw - 40px), 740px" />
+              <span className="image-label">イメージ</span>
+            </div>
+            <FavoriteButton type="course" id={course.id} />
+            <nav className="page-section-nav" aria-label="コース内ナビ"><a href="#course-overview">コース概要</a><a href="#course-map">地図</a><a href="#course-route">徒歩ルート</a><a href="#course-customizer">コース調整</a><a href="#course-stops">立ち寄り地点</a><a href="#course-access">アクセス</a><a href="#course-info">情報確認</a></nav>
+            <section className="course-overview-copy" aria-labelledby="course-overview-heading"><p className="eyebrow">OVERVIEW</p><h2 id="course-overview-heading">コース概要</h2><p>{course.summary}</p></section>
             <CourseSafetySummary course={course} />
 
             <section className="course-map-section" id="course-map"><div className="section-title-row"><div><p className="eyebrow">COURSE MAP</p><h2>コースの地図</h2></div></div><MapEmbed query={routeQueries.join(" ")} title={`${course.title}の地図`} contentId={course.id} areaId={course.areaId} placement="course-map" /><div className="route-actions"><a className="button button-primary" href={mapExternalUrl(routeQueries.join(" "))} target="_blank" rel="noopener noreferrer" data-analytics-event="google_map_click" data-page-type="course" data-content-id={course.id} data-area-id={course.areaId} data-placement="course-map">Googleマップで大きく開く <span aria-hidden="true">↗</span></a><a className="button button-secondary" href={wholeRouteUrl} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="course" data-content-id={course.id} data-area-id={course.areaId} data-route-segment="whole" data-placement="course-map">コース全体の徒歩ルートを開く <span aria-hidden="true">↗</span></a></div></section>

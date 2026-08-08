@@ -28,15 +28,15 @@ export default function HomePage() {
     <main id="main">
       <section className="hero hero-complete">
         <div className="container hero-complete-inner">
-          <Image className="hero-background" src={assetUrl("assets/images/hero/hero-tokyo-walk.webp")} width={960} height={540} sizes="100vw" alt="東京の街歩きを表現したイメージ" preload fetchPriority="high" decoding="sync" />
           <div className="hero-overlay">
             <p className="eyebrow">TOKYO SANPO CLUB</p>
             <h1>東京を、もっと歩きたくなる。</h1>
             <p className="hero-lead">歴史・文化・自然・グルメを楽しむ、確認情報つきの散歩コースガイドです。</p>
+            <div className="hero-actions hero-primary-actions"><Link href="/plan/" className="button button-accent">今日のおさんぽを選ぶ</Link><Link href="/courses/" className="button button-secondary">コースから探す</Link></div>
             <HeroSearch />
-            <div className="hero-actions"><Link href="/courses/" className="text-link">詳細な条件から探す</Link><Link href="/about/" className="text-link">はじめての方へ</Link></div>
+            <div className="hero-sub-links"><Link href="/courses/">詳細な条件から探す</Link><Link href="/about/">はじめての方へ</Link></div>
           </div>
-          <span className="image-label">イメージ</span>
+          <div className="hero-visual"><Image className="hero-background" src={assetUrl("assets/images/hero/hero-tokyo-walk.webp")} width={960} height={540} sizes="(max-width: 700px) 100vw, 45vw" alt="東京の街歩きを表現したイメージ" preload fetchPriority="high" decoding="sync" /><span className="image-label">イメージ</span></div>
         </div>
       </section>
 
@@ -46,7 +46,7 @@ export default function HomePage() {
 
       <section className="section home-content"><div className="container home-two-column">
         <div className="home-main">
-          <section className="home-plan-cta"><div><p className="eyebrow">TODAY&apos;S PLAN</p><h2>今日はどこを歩く？</h2><p>時間・予算・気分を選ぶだけで、現在公開中のコースからおすすめを探します。</p></div><Link className="button button-primary" href="/plan/">30秒でコースを選ぶ</Link></section>
+          <section className="home-plan-cta"><div><p className="eyebrow">TODAY&apos;S PLAN</p><h2>今日はどこを歩く？</h2><p>時間・予算・気分を選ぶだけで、あなたに合う散歩コースを提案します。</p></div><Link className="button button-accent" href="/plan/">30秒で選ぶ <span aria-hidden="true">→</span></Link></section>
           <div className="section-heading"><div><p className="eyebrow">COURSES</p><h2>おすすめおさんぽコース</h2></div><Link href="/courses/">すべて見る →</Link></div>
           <CourseCardCollection items={courses} placement="home-recommended-courses" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">AREAS</p><h2>エリアから探す</h2></div><Link href="/areas/">エリア一覧 →</Link></div>
