@@ -1,14 +1,16 @@
 :root {
-  --ink: #26251f;
-  --muted: #69675f;
-  --paper: #fffdf8;
-  --tint: #f3efe5;
-  --line: #dcd5c6;
-  --green: #1f5a45;
-  --green-dark: #154233;
-  --yellow: #f3c95e;
+  --ink: #282b2f;
+  --muted: #66645f;
+  --paper: #fbf8f1;
+  --tint: #eee5d6;
+  --line: #d8d0c2;
+  --green: #25354d;
+  --green-dark: #172338;
+  --terracotta: #c86145;
+  --sage: #e3e9df;
+  --yellow: #e7b94d;
   --white: #ffffff;
-  --shadow: 0 16px 40px rgba(50, 46, 35, 0.09);
+  --shadow: 0 12px 30px rgba(23, 35, 56, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -454,4 +456,144 @@ button, select, input { font: inherit; }
   .planner-actions .button, .customizer-controls .button, .route-customizer .route-actions .button { width: 100%; }
   .route-customizer { padding: 18px; border-radius: 16px; }
   .custom-stop-list label { grid-template-columns: 22px 58px minmax(0, 1fr); padding-inline: 9px; }
+}
+
+/* Final editorial polish: Tokyo street magazine hierarchy and restrained service accents. */
+body { line-height: 1.7; }
+.site-header { border-color: rgba(216,208,194,.84); background: rgba(251,248,241,.96); }
+.header-inner { min-height: 72px; }
+.brand-mark { border-radius: 12px; background: var(--green); }
+.desktop-nav { gap: 19px; }
+.header-plan-cta { min-height: 40px; display: inline-flex; align-items: center; padding: 8px 15px; border-radius: 999px; background: var(--terracotta); color: white !important; }
+.header-plan-cta:hover, .header-plan-cta:focus-visible { background: #a94c36; }
+.button { border-radius: 12px; transition: background-color .18s, border-color .18s, color .18s, transform .18s; }
+.button:hover { transform: translateY(-1px); }
+.button-primary { border-color: var(--green); background: var(--green); }
+.button-secondary { border-color: var(--green); background: white; color: var(--green); }
+.button-secondary:hover { background: var(--sage); }
+.button-accent { border-color: var(--terracotta); background: var(--terracotta); color: white; }
+.button-accent:hover { border-color: #a94c36; background: #a94c36; }
+.eyebrow { color: var(--terracotta); }
+
+.hero-complete { padding: 40px 0 42px; background: var(--paper); color: var(--ink); }
+.hero-complete-inner { min-height: 520px; grid-template-columns: minmax(0, 55fr) minmax(380px, 45fr); gap: 40px; overflow: visible; }
+.hero-overlay { width: auto; padding: 36px 0; text-shadow: none; }
+.hero-overlay::before { display: none; }
+.hero-complete .eyebrow { color: var(--terracotta); }
+.hero-complete h1 { max-width: 9em; margin-bottom: 18px; color: var(--green-dark); font-size: clamp(44px, 5vw, 68px); line-height: 1.22; }
+.hero-complete .hero-lead { max-width: 34rem; color: var(--muted); font-size: 17px; }
+.hero-primary-actions { margin-top: 26px; }
+.hero-primary-actions .button { min-width: 190px; }
+.hero-visual { position: relative; min-height: 430px; overflow: hidden; border-radius: 30px 8px 30px 8px; background: var(--sand, #eee5d6); box-shadow: var(--shadow); }
+.hero-visual .hero-background { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-search { grid-template-columns: minmax(0, 1fr) 138px auto; margin-top: 22px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: none; }
+.hero-search input, .hero-search select { border-color: var(--line); }
+.hero-sub-links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; }
+.hero-sub-links a { color: var(--green); font-size: 13px; font-weight: 800; }
+.summary-strip { margin-top: -18px; }
+.summary-grid { border-radius: 14px; box-shadow: 0 8px 24px rgba(23,35,56,.07); }
+.summary-grid strong { color: var(--green); }
+
+.section-heading { margin-bottom: 22px; }
+.section-heading h2 { color: var(--green-dark); font-size: clamp(28px, 3.5vw, 40px); }
+.card { border-radius: 16px; box-shadow: 0 4px 16px rgba(23,35,56,.045); }
+.card:hover { border-color: #9eabc0; }
+.card-body { padding: 20px; }
+.card h3 { color: var(--green-dark); }
+.pill { background: var(--sage); color: var(--green-dark); }
+.course-card-facts { margin: 12px 0; border-radius: 9px; }
+.course-card-route { padding-top: 2px; }
+.route-label.is-start, .route-stop.is-start .route-stage, .custom-stop-list .is-start .custom-stop-stage { background: #dfe7f2; color: #1e426b; }
+.route-label.is-goal, .route-stop.is-goal .route-stage, .custom-stop-list .is-goal .custom-stop-stage { background: #f4dfd7; color: #8d402b; }
+.course-safety { border-color: #cbd5c7; background: var(--sage); }
+.course-safety dl div { border-color: #cad4c6; }
+.course-safety h3 { color: var(--green-dark); }
+
+.home-content { padding-top: 48px; }
+.home-two-column { grid-template-columns: minmax(0, 1fr) 310px; }
+.home-plan-cta { border-color: var(--green); border-radius: 18px; background: var(--green); color: white; }
+.home-plan-cta .eyebrow { color: #e8b19f; }
+.home-plan-cta h2 { color: white; }
+.home-plan-cta p { color: #e7eaf0; }
+.home-sidebar .sidebar-panel { border-radius: 16px; }
+.map-panel { border-color: #b8c2d1; }
+.map-frame-shell { border-color: #b8c2d1; background: var(--sage); }
+.map-frame, .map-fallback { background: var(--sage); }
+.map-area-links a { background: var(--sage); }
+.partner-panel { border-color: #ddc9aa !important; background: var(--tint) !important; }
+
+.page-hero { background: linear-gradient(180deg, var(--tint), transparent); }
+.page-hero h1 { color: var(--green-dark); }
+.course-overview-facts { grid-template-columns: repeat(3, 1fr); margin-bottom: 24px; }
+.detail-cover { border-radius: 18px; }
+.course-overview-copy { margin: 30px 0 20px; padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.course-overview-copy h2 { margin: 5px 0 8px; color: var(--green-dark); font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; }
+.course-overview-copy p:last-child { margin-bottom: 0; color: var(--muted); }
+.page-section-nav a { background: var(--sage); color: var(--green-dark); }
+.course-map-section, .area-map-section { border-color: #b8c2d1; background: #f7f8f5; }
+.map-embed-panel { background: var(--sage); }
+.map-area-buttons button[aria-selected="true"] { background: var(--green); }
+.map-related-card { border-radius: 12px; }
+.route-customizer { border-color: #b8c2d1; background: var(--sage); }
+.planner-panel { border-color: #b8c2d1; background: var(--sage); }
+.planner-status-row { display: flex; flex-wrap: wrap; gap: 8px; margin: -24px 0 22px; padding: 0; list-style: none; }
+.planner-status-row li { padding: 6px 10px; border: 1px solid #d8bda3; border-radius: 999px; background: #fff8ed; color: #75482f; font-size: 12px; font-weight: 800; }
+.planner-progress { background: #c9d2c7; }
+.planner-progress span, .planner-options button.is-selected { background: var(--terracotta); border-color: var(--terracotta); }
+.plan-reasons, .course-plan-link { background: var(--sage); }
+
+.business-page .page-hero { border-color: var(--line); }
+.business-note, .business-listing, .business-callout { border-color: #ddc9aa; background: var(--tint); }
+.business-card:hover { border-color: #b9a98f; }
+.business-tier-list { border-color: #ddc9aa; background: #ddc9aa; }
+.business-capabilities { background: var(--tint); }
+
+.site-footer { background: var(--green-dark); }
+.footer-grid { grid-template-columns: 1.7fr repeat(3, 1fr); gap: 34px; }
+.footer-grid h2 { color: white; }
+.footer-grid p, .footer-links a { color: #dce1e8; }
+
+@media (max-width: 1024px) {
+  .desktop-nav { gap: 14px; font-size: 13px; }
+  .header-plan-cta { padding-inline: 12px; }
+  .hero-complete-inner { grid-template-columns: minmax(0, 54fr) minmax(340px, 46fr); gap: 28px; }
+  .hero-search { grid-template-columns: 1fr; }
+  .hero-search .button { width: 100%; }
+}
+
+@media (max-width: 900px) {
+  .hero-complete-inner { grid-template-columns: 1fr; min-height: 0; }
+  .hero-overlay { padding: 24px 0 0; }
+  .hero-visual { min-height: 380px; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  .header-inner { min-height: 64px; }
+  .hero-complete { padding: 22px 0 30px; }
+  .hero-complete-inner { min-height: 0; gap: 24px; }
+  .hero-overlay { padding: 10px 0 0; }
+  .hero-complete h1 { font-size: clamp(36px, 11vw, 46px); }
+  .hero-primary-actions { display: grid; }
+  .hero-primary-actions .button { width: 100%; min-width: 0; }
+  .hero-visual { min-height: 260px; border-radius: 20px 6px 20px 6px; }
+  .hero-search { margin-top: 18px; }
+  .summary-strip { margin-top: 0; padding-top: 14px; }
+  .summary-grid strong { font-size: 23px; }
+  .home-content { padding-top: 40px; }
+  .home-plan-cta { padding: 22px 18px; }
+  .course-overview-facts { grid-template-columns: 1fr 1fr; }
+  .page-section-nav { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+  .page-section-nav a { flex: 0 0 auto; }
+  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
+@media (max-width: 340px) {
+  .container, .narrow { width: min(100% - 22px, 1120px); }
+  .brand { gap: 8px; }
+  .brand-mark { width: 38px; height: 38px; }
+  .brand strong { font-size: 13px; }
+  .nav-toggle { padding-inline: 11px; }
+  .hero-complete h1 { font-size: 34px; }
+  .course-overview-facts { grid-template-columns: 1fr; }
 }

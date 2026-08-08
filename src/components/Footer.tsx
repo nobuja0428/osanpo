@@ -20,15 +20,21 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <h2>運営</h2>
+          <h2>サイトについて</h2>
           <div className="footer-links">
             <Link href="/about/">サイトについて</Link>
             <Link href="/editorial-policy/">編集方針</Link>
             <Link href="/operation/">運営情報</Link>
             <Link href="/privacy/">プライバシー</Link>
-            <Link href="/advertise/">広告掲載</Link>
-            <Link href="/business/">事業者向け</Link>
             <Link href="/contact/">お問い合わせ</Link>
+          </div>
+        </div>
+        <div>
+          <h2>事業者向け</h2>
+          <div className="footer-links">
+            <Link href="/business/">サービス案内</Link>
+            <Link href="/advertise/">広告掲載</Link>
+            <Link href="/business/contact/">事業者向けお問い合わせ</Link>
           </div>
         </div>
       </div>

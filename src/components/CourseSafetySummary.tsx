@@ -9,8 +9,8 @@ function countLabel(count: number) {
 export function CourseSafetySummary({ course, compact = false }: { course: Course; compact?: boolean }) {
   const summary = courseSafetySummary(course);
   return (
-    <section className={`course-safety${compact ? " is-compact" : ""}`} aria-label={`${course.title}の安心情報まとめ`}>
-      <h3>{compact ? "安心情報" : "安心情報まとめ"}</h3>
+    <section className={`course-safety${compact ? " is-compact" : ""}`} aria-label={`${course.title}を歩く前の確認情報`}>
+      <h3>歩く前に確認</h3>
       <dl>
         <div><dt>トイレ情報</dt><dd>{countLabel(summary.toiletCount)}</dd></div>
         <div><dt>食事・カフェ・休憩情報</dt><dd>{countLabel(summary.restCount)}</dd></div>

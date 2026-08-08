@@ -48,8 +48,8 @@ export function CourseCard({ course, onMapOpen, selected = false, placement = "c
         <p className="eyebrow">{area?.name}・モデルコース</p>
         <RecheckBadge type="course" id={course.id} />
         <h3><Link className="card-primary-link" href={`/courses/${course.id}/`} data-analytics-event="course_card_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-placement={placement}>{course.title}</Link></h3>
-        <p>{course.summary}</p>
         <dl className="course-card-facts"><div><dt>所要時間</dt><dd>{course.duration}</dd></div><div><dt>距離</dt><dd>{course.distance}</dd></div><div><dt>予算</dt><dd>{course.budget}</dd></div></dl>
+        <p>{course.summary}</p>
         <div className="course-card-route"><p><span className="route-label is-start">START</span><strong>{start?.name}</strong></p><p><span className="route-label is-goal">GOAL</span><strong>{goal?.name}</strong></p></div>
         <CourseSafetySummary course={course} compact />
         <div className="course-card-actions">
