@@ -198,15 +198,25 @@ button, select, input { font: inherit; }
 .compact-list li:last-child { border-bottom: 0; padding-bottom: 0; }
 .compact-list span { color: var(--muted); font-size: 12px; }
 .partner-panel { border-color: #ddc88e !important; background: #fffaf0 !important; }
-.monetization-slot { display: grid; grid-template-columns: minmax(0, 320px) 1fr; gap: 20px; align-items: center; margin: 32px 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: 0 2px 10px rgba(23, 35, 56, .04); }
-.monetization-slot:not(:has(.monetization-image)) { grid-template-columns: 1fr; }
-.monetization-label { justify-self: start; padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
-.monetization-image { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; object-fit: cover; }
-.monetization-copy { display: grid; gap: 8px; }
+.monetization-slot { display: grid; grid-template-columns: minmax(0, 260px) 1fr; gap: 12px 20px; align-items: center; width: min(100%, 970px); min-height: 120px; margin: 48px auto; padding: 20px 24px; border: 1px solid #c8bfae; border-radius: 14px; background: var(--white); box-shadow: 0 2px 8px rgba(23, 35, 56, .035); }
+.monetization-label { grid-column: 1 / -1; justify-self: start; padding: 3px 8px; border: 1px solid #aeb7c4; border-radius: 999px; color: var(--green-dark); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+.monetization-image { grid-column: 1; grid-row: 2; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; object-fit: cover; }
+.monetization-copy { grid-column: 2; grid-row: 2; display: grid; gap: 8px; }
+.monetization-slot:not(:has(.monetization-image)) .monetization-copy, .monetization-slot-adsense .monetization-adsense-frame { grid-column: 1 / -1; }
 .monetization-copy > * { margin: 0; }
 .monetization-title { color: var(--green-dark); font-size: 19px; font-weight: 850; }
 .monetization-headline { font-weight: 750; }
 .monetization-cta { justify-self: start; margin-top: 6px !important; }
+.monetization-slot-house { min-height: 120px; gap-block: 7px; padding: 14px 20px; border-color: #b9ad91; border-left: 4px solid var(--terracotta); background: linear-gradient(105deg, var(--white), #fbf7ed); }
+.monetization-slot-house .monetization-copy { grid-template-columns: minmax(0, 1fr) minmax(230px, auto); column-gap: 24px; }
+.monetization-slot-house .monetization-title, .monetization-slot-house .monetization-copy > p { grid-column: 1; }
+.monetization-slot-house .monetization-title { font-size: 18px; line-height: 1.4; }
+.monetization-slot-house .monetization-copy > p:not(.monetization-title) { font-size: 14px; line-height: 1.55; }
+.monetization-house-actions { grid-column: 2; grid-row: 1 / span 2; display: grid; gap: 7px; align-content: center; justify-items: start; }
+.monetization-house-actions .button { min-height: 42px; padding: 8px 16px; font-size: 14px; }
+.monetization-house-actions small { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.monetization-adsense-frame { min-height: 100px; width: 100%; overflow: hidden; }
+.monetization-adsense-frame .adsbygoogle { min-height: 100px; width: 100%; }
 .page-section-nav, .route-actions, .card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
 .page-section-nav a { padding: 7px 10px; border-radius: 999px; background: var(--tint); font-size: 13px; text-decoration: none; }
 .route-actions .button { min-height: 40px; }
@@ -300,7 +310,12 @@ button, select, input { font: inherit; }
   .summary-grid div:nth-child(2) { border-right: 0; }
   .summary-grid div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .home-main .card-grid, .home-sidebar { grid-template-columns: 1fr; }
-  .monetization-slot { grid-template-columns: 1fr; margin: 24px 0; padding: 16px; }
+  .monetization-slot { grid-template-columns: 1fr; min-height: 100px; margin: 36px 0; padding: 16px; }
+  .monetization-image, .monetization-copy { grid-column: 1; grid-row: auto; }
+  .monetization-slot-house .monetization-copy { grid-template-columns: 1fr; }
+  .monetization-slot-house .monetization-title, .monetization-slot-house .monetization-copy > p, .monetization-house-actions { grid-column: 1; grid-row: auto; }
+  .monetization-house-actions { margin-top: 4px; }
+  .monetization-house-actions .button { width: 100%; }
   .home-sidebar .map-panel, .home-sidebar .partner-panel { grid-column: auto; }
   .home-sidebar { gap: 12px; }
   .map-embed-panel iframe { min-height: 320px; }

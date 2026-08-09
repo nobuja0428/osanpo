@@ -3,10 +3,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { MonetizationSlot } from "@/components/MonetizationSlot";
 import {
+  adsensePlacementIsReady,
   isWithinPublicationWindow,
   monetizationConfig,
   monetizationEvents,
   resolveMonetization,
+  shouldLoadAdsenseScript,
+  type AffiliatePlacement,
   type MonetizationConfig,
   type SponsorAd,
 } from "@/content/monetization";
@@ -24,40 +27,83 @@ const sponsor: SponsorAd = {
   active: true,
 };
 
+const affiliate: AffiliatePlacement = {
+  id: "test-affiliate",
+  label: "テスト用リンク",
+  description: "テスト環境だけのaffiliateです。",
+  href: "https://affiliate.example/item",
+  placements: ["story-end"],
+  active: true,
+};
+
 function sponsorConfig(overrides: Partial<MonetizationConfig> = {}): MonetizationConfig {
   return {
     ...monetizationConfig,
-    enabled: true,
     sponsorEnabled: true,
-    placements: { ...monetizationConfig.placements, "course-detail-after-info": true },
     sponsors: [sponsor],
     ...overrides,
   };
 }
 
-describe("monetization production defaults", () => {
-  it("keeps all types and placements disabled with no production ads", () => {
-    expect(monetizationConfig.enabled).toBe(false);
+function readyAdsenseConfig(overrides: Partial<MonetizationConfig> = {}): MonetizationConfig {
+  return {
+    ...monetizationConfig,
+    adsenseEnabled: true,
+    adsenseProductionReady: true,
+    adsenseConsentReady: true,
+    adsense: {
+      publisherId: "ca-pub-1234567890123456",
+      slots: {
+        ...monetizationConfig.adsense.slots,
+        "home-after-courses": { slotId: "1234567890", format: "auto" },
+      },
+    },
+    ...overrides,
+  };
+}
+
+describe("production House Ad defaults", () => {
+  it("enables only House Ads at the four approved placements", () => {
+    expect(monetizationConfig.enabled).toBe(true);
+    expect(monetizationConfig.houseAdsEnabled).toBe(true);
     expect(monetizationConfig.adsenseEnabled).toBe(false);
+    expect(monetizationConfig.adsenseProductionReady).toBe(false);
+    expect(monetizationConfig.adsenseConsentReady).toBe(false);
     expect(monetizationConfig.sponsorEnabled).toBe(false);
     expect(monetizationConfig.affiliateEnabled).toBe(false);
-    expect(Object.values(monetizationConfig.placements).every((enabled) => !enabled)).toBe(true);
+    expect(monetizationConfig.housePlacements).toEqual({
+      "home-after-courses": true,
+      "courses-after-grid": true,
+      "course-detail-after-info": true,
+      "story-middle": false,
+      "story-end": true,
+    });
     expect(monetizationConfig.sponsors).toEqual([]);
     expect(monetizationConfig.affiliates).toEqual([]);
     expect(monetizationConfig.adsense.publisherId).toBe("");
-    expect(Object.values(monetizationConfig.adsense.slots).every((slot) => !slot.slotId && !slot.format)).toBe(true);
   });
 
-  it("renders no DOM and no empty space while monetization is off", () => {
+  it("renders a clearly disclosed House Ad and no House Ad in story middle", () => {
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home" }));
-    expect(html).toBe("");
+    expect(html).toContain("広告掲載・スポンサー募集");
+    expect(html).toContain("この街の散歩に、お店の魅力を。");
+    expect(html).toContain("スポンサー掲載について相談する");
+    expect(html).toContain("掲載内容・料金は個別にご案内します。");
+    expect(html).toContain('data-monetization-impression="house_ad_impression"');
+    expect(html).toContain('data-analytics-event="house_ad_click"');
+    expect(html).toContain('data-page-type="home"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).not.toContain("sponsored");
+    expect(renderToStaticMarkup(createElement(MonetizationSlot, { placement: "story-middle", contentId: "story" }))).toBe("");
+    expect(resolveMonetization("story-end")?.type).toBe("house");
   });
 });
 
-describe("sponsor eligibility and disclosure", () => {
+describe("sponsor eligibility and priority", () => {
   const activeNow = new Date("2026-08-09T12:00:00+09:00");
 
-  it("renders a clearly disclosed, sponsored external link only for the matching area", () => {
+  it("replaces House Ad with a disclosed sponsor only for the matching area", () => {
     const config = sponsorConfig();
     const html = renderToStaticMarkup(createElement(MonetizationSlot, {
       placement: "course-detail-after-info",
@@ -66,56 +112,70 @@ describe("sponsor eligibility and disclosure", () => {
       config,
       now: activeNow,
     }));
+    expect(resolveMonetization("course-detail-after-info", { areaId: "koenji", now: activeNow }, config)?.type).toBe("sponsor");
     expect(html).toContain("スポンサー");
     expect(html).toContain("テスト用店舗");
-    expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer sponsored"');
     expect(html).toContain('data-monetization-impression="sponsor_impression"');
     expect(html).toContain('data-analytics-event="sponsor_click"');
     expect(html).toContain('data-sponsor-id="test-sponsor"');
-    expect(html).not.toContain("人気");
-    expect(html).not.toContain("ランキング");
+    expect(html).not.toContain("スポンサー掲載について相談する");
   });
 
-  it("does not render for another area or outside the publication window", () => {
+  it("falls back to House Ad for another area or an expired sponsor", () => {
     const config = sponsorConfig();
-    expect(resolveMonetization("course-detail-after-info", { areaId: "asakusa", now: activeNow }, config)).toBeNull();
-    expect(resolveMonetization("course-detail-after-info", { areaId: "koenji", now: new Date("2026-09-01T00:00:00+09:00") }, config)).toBeNull();
+    expect(resolveMonetization("course-detail-after-info", { areaId: "asakusa", now: activeNow }, config)?.type).toBe("house");
+    expect(resolveMonetization("course-detail-after-info", { areaId: "koenji", now: new Date("2026-09-01T00:00:00+09:00") }, config)?.type).toBe("house");
     expect(isWithinPublicationWindow(sponsor.startAt, sponsor.endAt, activeNow)).toBe(true);
     expect(isWithinPublicationWindow(sponsor.startAt, sponsor.endAt, new Date("2026-07-31T23:59:59+09:00"))).toBe(false);
   });
 });
 
-describe("affiliate and adsense readiness", () => {
-  it("renders an affiliate only when its approved link and placement are active", () => {
+describe("affiliate and AdSense readiness", () => {
+  it("uses an active affiliate before House Ad and preserves sponsored rel", () => {
     const config: MonetizationConfig = {
       ...monetizationConfig,
-      enabled: true,
       affiliateEnabled: true,
-      placements: { ...monetizationConfig.placements, "story-end": true },
-      affiliates: [{ id: "test-affiliate", label: "テスト用リンク", href: "https://affiliate.example/item", placements: ["story-end"], active: true }],
+      affiliates: [affiliate],
     };
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "story-end", contentId: "test-story", config }));
+    expect(resolveMonetization("story-end", {}, config)?.type).toBe("affiliate");
     expect(html).toContain("広告");
     expect(html).toContain('data-analytics-event="affiliate_click"');
     expect(html).toContain('rel="noopener noreferrer sponsored"');
+    expect(html).not.toContain("スポンサー掲載について相談する");
   });
 
-  it("never emits an AdSense element or script in this release", () => {
-    const config: MonetizationConfig = {
-      ...monetizationConfig,
-      enabled: true,
-      adsenseEnabled: true,
-      placements: { ...monetizationConfig.placements, "home-after-courses": true },
-      adsense: {
-        publisherId: "ca-pub-test-only",
-        slots: { ...monetizationConfig.adsense.slots, "home-after-courses": { slotId: "test-slot", format: "auto" } },
-      },
-    };
+  it("renders a responsive AdSense slot only when every readiness condition is true", () => {
+    const config = readyAdsenseConfig();
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home", config }));
+    expect(adsensePlacementIsReady(config, "home-after-courses")).toBe(true);
+    expect(shouldLoadAdsenseScript(config)).toBe(true);
     expect(resolveMonetization("home-after-courses", {}, config)?.type).toBe("adsense");
-    expect(monetizationEvents.adsense).toEqual({ impression: "ad_impression", click: "ad_click" });
-    expect(html).toBe("");
+    expect(html).toContain('class="adsbygoogle"');
+    expect(html).toContain('data-ad-client="ca-pub-1234567890123456"');
+    expect(html).toContain('data-ad-slot="1234567890"');
+    expect(html).toContain('data-ad-format="auto"');
+    expect(html).toContain('data-full-width-responsive="true"');
+    expect(html).not.toContain("data-analytics-event");
+  });
+
+  it("never loads or renders AdSense when ID, approval, consent, or slot is missing", () => {
+    const missingConsent = readyAdsenseConfig({ adsenseConsentReady: false });
+    expect(shouldLoadAdsenseScript(monetizationConfig)).toBe(false);
+    expect(shouldLoadAdsenseScript(missingConsent)).toBe(false);
+    expect(resolveMonetization("home-after-courses", {}, missingConsent)?.type).toBe("house");
+    const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home", config: missingConsent }));
+    expect(html).toContain("広告掲載・スポンサー募集");
     expect(html).not.toContain("adsbygoogle");
+  });
+
+  it("keeps the required analytics event names without AdSense click interception", () => {
+    expect(monetizationEvents).toEqual({
+      adsense: { impression: "ad_impression", click: "ad_click" },
+      sponsor: { impression: "sponsor_impression", click: "sponsor_click" },
+      affiliate: { impression: "ad_impression", click: "affiliate_click" },
+      house: { impression: "house_ad_impression", click: "house_ad_click" },
+    });
   });
 });
