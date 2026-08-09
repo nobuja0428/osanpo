@@ -3,7 +3,9 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { InlineEnhancements } from "@/components/InlineEnhancements";
 import { Analytics } from "@/components/Analytics";
+import { AdSenseScript } from "@/components/AdSenseScript";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { monetizationConfig, shouldLoadAdsenseScript } from "@/content/monetization";
 import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -45,6 +47,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const adsenseEnabled = shouldLoadAdsenseScript(monetizationConfig);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -58,6 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
         {measurementId ? <Analytics /> : null}
+        {adsenseEnabled ? <AdSenseScript publisherId={monetizationConfig.adsense.publisherId} /> : null}
         <a className="skip-link" href="#main">本文へ移動</a>
         <Header />
         {children}

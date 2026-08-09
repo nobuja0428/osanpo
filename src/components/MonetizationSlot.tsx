@@ -1,7 +1,10 @@
+import { AdSenseSlot } from "@/components/AdSenseSlot";
 import {
+  houseAdForPlacement,
   monetizationConfig,
   monetizationEvents,
   resolveMonetization,
+  type HouseAdConfig,
   type MonetizationConfig,
   type MonetizationPlacement,
 } from "@/content/monetization";
@@ -14,6 +17,60 @@ type MonetizationSlotProps = {
   now?: Date;
 };
 
+const pageTypeByPlacement: Record<MonetizationPlacement, string> = {
+  "home-after-courses": "home",
+  "courses-after-grid": "courses",
+  "course-detail-after-info": "course",
+  "story-middle": "story",
+  "story-end": "story",
+};
+
+type HouseAdSlotProps = {
+  item: HouseAdConfig;
+  placement: MonetizationPlacement;
+  contentId: string;
+  areaId?: string;
+};
+
+function HouseAdSlot({ item, placement, contentId, areaId }: HouseAdSlotProps) {
+  const pageType = pageTypeByPlacement[placement];
+  return (
+    <aside
+      className="monetization-slot monetization-slot-house"
+      aria-label="広告掲載・スポンサー募集"
+      data-monetization-impression={monetizationEvents.house.impression}
+      data-ad-type="house"
+      data-page-type={pageType}
+      data-content-id={contentId}
+      data-area-id={areaId ?? ""}
+      data-placement={placement}
+    >
+      <span className="monetization-label">{item.label}</span>
+      <div className="monetization-copy">
+        <p className="monetization-title">{item.headline}</p>
+        <p>{item.description}</p>
+        <div className="monetization-house-actions">
+          <a
+            className="button button-accent monetization-cta"
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-analytics-event={monetizationEvents.house.click}
+            data-ad-type="house"
+            data-page-type={pageType}
+            data-content-id={contentId}
+            data-area-id={areaId ?? ""}
+            data-placement={placement}
+          >
+            {item.ctaLabel} <span aria-hidden="true">→</span>
+          </a>
+          <small>{item.footnote}</small>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 export function MonetizationSlot({
   placement,
   contentId,
@@ -24,9 +81,21 @@ export function MonetizationSlot({
   const resolved = resolveMonetization(placement, { areaId, now }, config);
   if (!resolved) return null;
 
-  // AdSense script and ad-unit rendering are deliberately excluded from this release.
-  // The resolved configuration keeps future Google-specific work inside this component.
-  if (resolved.type === "adsense") return null;
+  if (resolved.type === "house") {
+    return <HouseAdSlot item={resolved.item} placement={placement} contentId={contentId} areaId={areaId} />;
+  }
+
+  if (resolved.type === "adsense") {
+    const houseFallback = houseAdForPlacement(placement, config);
+    return (
+      <AdSenseSlot
+        publisherId={resolved.publisherId}
+        slot={resolved.slot}
+        placement={placement}
+        fallback={houseFallback ? <HouseAdSlot item={houseFallback.item} placement={placement} contentId={contentId} areaId={areaId} /> : null}
+      />
+    );
+  }
 
   const sponsorItem = resolved.type === "sponsor" ? resolved.item : null;
   const affiliateItem = resolved.type === "affiliate" ? resolved.item : null;
@@ -39,6 +108,7 @@ export function MonetizationSlot({
   const description = item.description;
   const startAt = item.startAt ?? "";
   const endAt = item.endAt ?? "";
+  const pageType = pageTypeByPlacement[placement];
 
   return (
     <aside
@@ -47,6 +117,7 @@ export function MonetizationSlot({
       data-monetization-impression={impressionEvent}
       data-ad-type={resolved.type}
       data-sponsor-id={sponsorId}
+      data-page-type={pageType}
       data-content-id={contentId}
       data-area-id={areaId ?? ""}
       data-placement={placement}
@@ -71,6 +142,7 @@ export function MonetizationSlot({
           data-analytics-event={clickEvent}
           data-ad-type={resolved.type}
           data-sponsor-id={sponsorId}
+          data-page-type={pageType}
           data-content-id={contentId}
           data-area-id={areaId ?? ""}
           data-placement={placement}

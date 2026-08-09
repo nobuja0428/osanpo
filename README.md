@@ -109,20 +109,23 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 - 問い合わせ先：公開Googleフォームと補助メールを設定済み
 - スポンサー相談：事業者向けページから同じGoogleフォームへ案内
-- 実広告、スポンサー、アフィリエイトリンク：0件
-- AdSense publisher ID、slot ID、script：未設定
+- House Ad（自社の地域スポンサー募集）：4 placementで表示
+- 実スポンサー、アフィリエイトリンク、AdSense実広告：0件
+- AdSense publisher ID、slot ID：未設定（scriptは読み込みません）
 
-広告基盤は `src/content/monetization.ts` の1か所で管理します。`enabled`、広告種別、placementのすべてが有効で、承認済みデータと必須値がそろうまで `MonetizationSlot` はDOMを出力しません。現在のplacementは次の5つです。
+広告基盤は `src/content/monetization.ts` の1か所で管理します。表示優先度は「有効な直接スポンサー → affiliate → 承認・同意設定済みAdSense → House Ad → 非表示」です。現在のplacementは次の5つです。
 
-- `home-after-courses`
-- `courses-after-grid`
-- `course-detail-after-info`
-- `story-middle`（長い記事のみ）
-- `story-end`
+- `home-after-courses`：House Ad ON
+- `courses-after-grid`：House Ad ON
+- `course-detail-after-info`：House Ad ON
+- `story-middle`：House Ad OFF（長い記事の実広告・スポンサー用）
+- `story-end`：House Ad ON
 
-スポンサーはエリアと掲載期間を照合し、静的ビルド時に期間内のものだけを書き出します。公開後に期限を過ぎた表示はブラウザ側でも除外します。開始時は必ず設定変更後に再ビルド・公開し、終了時も次回ビルドでデータを整理してください。表示された場合だけIntersectionObserverで50%以上の表示を確認し、GA4が有効なら `ad_impression` または `sponsor_impression` を送ります。クリックは `ad_click`、`sponsor_click`、`affiliate_click` 用の安全な属性に限定し、外部URL全文や個人情報は送りません。
+スポンサーはエリアと掲載期間を照合し、静的ビルド時に期間内のものだけを書き出します。公開後に期限を過ぎた表示はブラウザ側でも除外します。開始時は必ず設定変更後に再ビルド・公開し、終了時も次回ビルドでデータを整理してください。表示された場合だけIntersectionObserverで50%以上の表示を確認し、GA4が有効なら種別別のimpressionを送ります。House Adは `house_ad_impression` と `house_ad_click`、スポンサーは `sponsor_impression` と `sponsor_click`、affiliateは `ad_impression` と `affiliate_click` を使用します。外部URL全文や個人情報は送りません。
 
-AdSenseの実コードとAuto Adsは未実装です。実在するpublisher ID・slot IDを取得し、ポリシー確認と別リリースのテストを完了するまでscriptを追加しないでください。未設定の広告枠、架空の広告主、料金、アクセス数、収益実績は表示しません。
+AdSenseはレスポンシブslotとサイト全体で1回だけのscript読み込みに対応済みです。ただし `enabled`、`adsenseEnabled`、対象placement、`adsenseProductionReady`、`adsenseConsentReady` がすべてONで、実在するpublisher IDとslot IDが設定された場合だけ有効になります。未承認・未設定・no-fill・script失敗時はHouse Adへ戻し、AdSense内部のクリックを独自計測しません。Auto Adsは使用しません。架空の広告主、料金、アクセス数、収益実績は表示しません。
+
+AdSense開始前に、アカウント審査、Privacy & messaging、必要なconsent、ポリシー、広告配置を運営者が確認してください。`ads.txt` はpublisher ID取得後にAdSenseの指定内容で用意します。このサイトは `/osanpo/` 配下のプロジェクトPagesのため、ルートドメイン要件を満たさない `/osanpo/ads.txt` を誤って追加しないでください。必要な公開先を確認してから、ルートの `https://nobuja0428.github.io/ads.txt` または将来の独自ドメインで対応します。
 
 ## GitHub Actions
 

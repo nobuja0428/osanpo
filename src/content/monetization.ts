@@ -1,9 +1,14 @@
-export type MonetizationType = "adsense" | "sponsor" | "affiliate";
+import { businessContactFormUrl } from "@/content/business";
+
+export type MonetizationType = "adsense" | "sponsor" | "affiliate" | "house";
 
 export const monetizationEvents = {
+  // ad_click remains part of the shared event vocabulary, but AdSenseSlot never
+  // attaches it to Google's iframe or intercepts AdSense clicks.
   adsense: { impression: "ad_impression", click: "ad_click" },
   sponsor: { impression: "sponsor_impression", click: "sponsor_click" },
   affiliate: { impression: "ad_impression", click: "affiliate_click" },
+  house: { impression: "house_ad_impression", click: "house_ad_click" },
 } as const;
 
 export type MonetizationPlacement =
@@ -45,35 +50,59 @@ export type AdsenseSlotConfig = {
   format: string;
 };
 
+export type HouseAdConfig = {
+  label: string;
+  headline: string;
+  description: string;
+  ctaLabel: string;
+  footnote: string;
+  href: string;
+};
+
 export type MonetizationConfig = {
   enabled: boolean;
   adsenseEnabled: boolean;
+  adsenseProductionReady: boolean;
+  adsenseConsentReady: boolean;
   sponsorEnabled: boolean;
   affiliateEnabled: boolean;
+  houseAdsEnabled: boolean;
   placements: Record<MonetizationPlacement, boolean>;
+  housePlacements: Record<MonetizationPlacement, boolean>;
   adsense: {
     publisherId: string;
     slots: Record<MonetizationPlacement, AdsenseSlotConfig>;
   };
+  houseAd: HouseAdConfig;
   sponsors: SponsorAd[];
   affiliates: AffiliatePlacement[];
 };
 
 const emptyAdsenseSlot = (): AdsenseSlotConfig => ({ slotId: "", format: "" });
 
-// Production defaults are intentionally empty and disabled. Enabling a placement alone
-// never renders anything without an approved, active item and its required values.
+// House Ads are the only production ads enabled in this release. Real sponsors,
+// affiliate links, AdSense IDs and AdSense readiness flags intentionally remain empty/off.
 export const monetizationConfig: MonetizationConfig = {
-  enabled: false,
+  enabled: true,
   adsenseEnabled: false,
+  adsenseProductionReady: false,
+  adsenseConsentReady: false,
   sponsorEnabled: false,
   affiliateEnabled: false,
+  houseAdsEnabled: true,
   placements: {
-    "home-after-courses": false,
-    "courses-after-grid": false,
-    "course-detail-after-info": false,
+    "home-after-courses": true,
+    "courses-after-grid": true,
+    "course-detail-after-info": true,
+    "story-middle": true,
+    "story-end": true,
+  },
+  housePlacements: {
+    "home-after-courses": true,
+    "courses-after-grid": true,
+    "course-detail-after-info": true,
     "story-middle": false,
-    "story-end": false,
+    "story-end": true,
   },
   adsense: {
     publisherId: "",
@@ -85,6 +114,14 @@ export const monetizationConfig: MonetizationConfig = {
       "story-end": emptyAdsenseSlot(),
     },
   },
+  houseAd: {
+    label: "広告掲載・スポンサー募集",
+    headline: "この街の散歩に、お店の魅力を。",
+    description: "おさんぽクラブ東京では、高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。",
+    ctaLabel: "スポンサー掲載について相談する",
+    footnote: "掲載内容・料金は個別にご案内します。",
+    href: businessContactFormUrl,
+  },
   sponsors: [],
   affiliates: [],
 };
@@ -92,7 +129,8 @@ export const monetizationConfig: MonetizationConfig = {
 export type ResolvedSponsor = { type: "sponsor"; item: SponsorAd };
 export type ResolvedAffiliate = { type: "affiliate"; item: AffiliatePlacement };
 export type ResolvedAdsense = { type: "adsense"; publisherId: string; slot: AdsenseSlotConfig };
-export type ResolvedMonetization = ResolvedSponsor | ResolvedAffiliate | ResolvedAdsense;
+export type ResolvedHouse = { type: "house"; item: HouseAdConfig };
+export type ResolvedMonetization = ResolvedSponsor | ResolvedAffiliate | ResolvedAdsense | ResolvedHouse;
 
 function validDate(value: string | undefined) {
   if (!value) return undefined;
@@ -111,6 +149,39 @@ export function isWithinPublicationWindow(startAt: string | undefined, endAt: st
 
 function areaMatches(itemAreaId: string | undefined, pageAreaId: string | undefined) {
   return !itemAreaId || itemAreaId === pageAreaId;
+}
+
+export function validAdsensePublisherId(value: string) {
+  return /^ca-pub-\d{16}$/.test(value.trim());
+}
+
+export function validAdsenseSlot(slot: AdsenseSlotConfig) {
+  return /^\d+$/.test(slot.slotId.trim()) && slot.format.trim().length > 0;
+}
+
+export function adsensePlacementIsReady(config: MonetizationConfig, placement: MonetizationPlacement) {
+  return config.enabled
+    && config.adsenseEnabled
+    && config.adsenseProductionReady
+    && config.adsenseConsentReady
+    && config.placements[placement]
+    && validAdsensePublisherId(config.adsense.publisherId)
+    && validAdsenseSlot(config.adsense.slots[placement]);
+}
+
+export function shouldLoadAdsenseScript(config: MonetizationConfig = monetizationConfig) {
+  return validAdsensePublisherId(config.adsense.publisherId)
+    && Object.keys(config.placements).some((placement) => adsensePlacementIsReady(config, placement as MonetizationPlacement));
+}
+
+export function houseAdForPlacement(
+  placement: MonetizationPlacement,
+  config: MonetizationConfig = monetizationConfig,
+): ResolvedHouse | null {
+  const item = config.houseAd;
+  if (!config.enabled || !config.placements[placement] || !config.houseAdsEnabled || !config.housePlacements[placement]) return null;
+  if (!item.label.trim() || !item.headline.trim() || !item.description.trim() || !item.ctaLabel.trim() || !item.href.trim()) return null;
+  return { type: "house", item };
 }
 
 export function resolveMonetization(
@@ -143,12 +214,9 @@ export function resolveMonetization(
     if (affiliate) return { type: "affiliate", item: affiliate };
   }
 
-  if (config.adsenseEnabled) {
-    const slot = config.adsense.slots[placement];
-    if (config.adsense.publisherId.trim() && slot.slotId.trim() && slot.format.trim()) {
-      return { type: "adsense", publisherId: config.adsense.publisherId, slot };
-    }
+  if (adsensePlacementIsReady(config, placement)) {
+    return { type: "adsense", publisherId: config.adsense.publisherId, slot: config.adsense.slots[placement] };
   }
 
-  return null;
+  return houseAdForPlacement(placement, config);
 }

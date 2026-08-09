@@ -46,7 +46,7 @@ const script = `
     if (impressionSent.has(element) || ratio < 0.5 || typeof window.gtag !== "function") return;
     const name = element.dataset.monetizationImpression;
     if (!name || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
-    window.gtag("event", name, { ad_type: element.dataset.adType || "", placement: element.dataset.placement || "", sponsor_id: element.dataset.sponsorId || "", content_id: element.dataset.contentId || "", area_id: element.dataset.areaId || "" });
+    window.gtag("event", name, { ad_type: element.dataset.adType || "", placement: element.dataset.placement || "", sponsor_id: element.dataset.sponsorId || "", page_type: element.dataset.pageType || "", content_id: element.dataset.contentId || "", area_id: element.dataset.areaId || "" });
     impressionSent.add(element);
     impressionObservers.get(element)?.disconnect();
   };

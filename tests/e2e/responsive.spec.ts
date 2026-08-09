@@ -14,9 +14,11 @@ for (const width of [320, 375, 390, 768, 1024, 1440]) {
     for (const route of routes) {
       await page.goto(route);
       await expect(page.getByRole("banner")).toBeVisible();
-      const layout = await page.locator("html").evaluate((html) => ({ scrollWidth: html.scrollWidth, clientWidth: html.clientWidth, imagesLoaded: [...document.images].filter((image) => image.getBoundingClientRect().top < window.innerHeight).every((image) => image.complete && image.naturalWidth > 0) }));
+      const layout = await page.locator("html").evaluate((html) => ({ scrollWidth: html.scrollWidth, clientWidth: html.clientWidth }));
       expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
-      expect(layout.imagesLoaded).toBe(true);
+      await expect.poll(() => page.locator("html").evaluate(() => [...document.images]
+        .filter((image) => image.getBoundingClientRect().top < window.innerHeight)
+        .every((image) => image.complete && image.naturalWidth > 0))).toBe(true);
     }
   });
 }
