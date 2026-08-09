@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
-import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, areas, courses, imagePath } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
@@ -62,7 +61,6 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             <CourseCardCollection items={relatedCourses} placement={`area-${area.id}-courses`} />
           </article>
           <aside className="sidebar-panel">
-            <MonetizationSlot page="area" placement="sidebar" />
             <h2>情報について</h2>
             <p>情報確認日：{area.informationCheckedAt || "未記録"}</p>
             <p>現地取材：{area.fieldResearch ? "あり" : "なし"}</p>

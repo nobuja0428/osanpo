@@ -18,6 +18,7 @@ const allowedParameterNames = new Set([
   "content_id", "page_type", "area_id", "route_segment", "placement", "contact_type",
   "duration_range", "budget_range", "audience_type", "mood_type", "result_count", "selected_stop_count",
   "filter_name", "selected_filter_count", "active",
+  "ad_type", "sponsor_id",
 ]);
 
 export function trackEvent(name: string, parameters: Record<string, string | number | boolean> = {}) {
@@ -47,7 +48,7 @@ export function Analytics() {
     <>
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`} strategy="afterInteractive" />
       <Script id="osanpo-ga4" strategy="afterInteractive">
-        {`window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};window.gtag('js',new Date());window.gtag('config','${measurementId}',{send_page_view:false,allow_google_signals:false,allow_ad_personalization_signals:false});`}
+        {`window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};window.gtag('js',new Date());window.gtag('config','${measurementId}',{send_page_view:false,allow_google_signals:false,allow_ad_personalization_signals:false});window.dispatchEvent(new Event('osanpo:analytics-ready'));`}
       </Script>
     </>
   );

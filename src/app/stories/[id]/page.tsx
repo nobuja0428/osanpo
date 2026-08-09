@@ -10,6 +10,7 @@ import { areaById, imagePath, officialSourcesFor, stories, storyById } from "@/l
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
+import { Fragment } from "react";
 
 export function generateStaticParams() {
   return stories.map((story) => ({ id: story.id }));
@@ -36,6 +37,9 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
   const verification = verificationFor("story", story.id);
   if (!verification) notFound();
   const sources = officialSourcesFor(story.areaId);
+  const storyCharacterCount = story.intro.length + story.sections.reduce((total, section) => total + section.heading.length + section.body.length, 0);
+  const showMiddlePlacement = story.sections.length >= 5 || storyCharacterCount >= 1200;
+  const middleSectionIndex = Math.ceil(story.sections.length / 2) - 1;
 
   return (
     <main id="main">
@@ -51,8 +55,8 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
             <FavoriteButton type="story" id={story.id} />
             <TrustPanel verification={verification} />
             <p>{story.intro}</p>
-            {story.sections.map((section) => <section key={section.heading}><h2>{section.heading}</h2><p>{section.body}</p></section>)}
-            <MonetizationSlot page="story" placement="article-end" />
+            {story.sections.map((section, index) => <Fragment key={section.heading}><section><h2>{section.heading}</h2><p>{section.body}</p></section>{showMiddlePlacement && index === middleSectionIndex ? <MonetizationSlot placement="story-middle" contentId={story.id} areaId={story.areaId} /> : null}</Fragment>)}
+            <MonetizationSlot placement="story-end" contentId={story.id} areaId={story.areaId} />
             <p><Link className="button button-primary" href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
           </article>
           <aside className="sidebar-panel">

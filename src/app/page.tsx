@@ -49,6 +49,7 @@ export default function HomePage() {
           <section className="home-plan-cta"><div><p className="eyebrow">TODAY&apos;S PLAN</p><h2>今日はどこを歩く？</h2><p>時間・予算・気分を選ぶだけで、あなたに合う散歩コースを提案します。</p></div><Link className="button button-accent" href="/plan/">30秒で選ぶ <span aria-hidden="true">→</span></Link></section>
           <div className="section-heading"><div><p className="eyebrow">COURSES</p><h2>おすすめおさんぽコース</h2></div><Link href="/courses/">すべて見る →</Link></div>
           <CourseCardCollection items={courses} placement="home-recommended-courses" />
+          <MonetizationSlot placement="home-after-courses" contentId="home" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">AREAS</p><h2>エリアから探す</h2></div><Link href="/areas/">エリア一覧 →</Link></div>
           <p className="availability-note">現在は<strong>{areas.length}エリア公開中</strong>です。東京40エリアのうち、残り{40 - areas.length}エリアは公開情報を確認でき次第、順次追加します。</p>
           <div className="card-grid">{areas.map((area) => <AreaCard area={area} key={area.id} />)}</div>
@@ -65,7 +66,6 @@ export default function HomePage() {
           <section className="sidebar-panel partner-panel business-panel"><p className="eyebrow">FOR BUSINESSES</p><h2>地域のお店・事業者の方へ</h2><p>地図とWebで、お店の魅力を伝えるサービスです。</p><Link href="/business/" data-analytics-event="business_cta_click" data-page-type="home" data-content-id="business-home" data-placement="home-sidebar-business">サービスを見る →</Link><Link className="external-text-link" href="/business/contact/">Googleフォームで相談できます</Link></section>
         </aside>
       </div></section>
-      <MonetizationSlot page="home" placement="before-related-content" />
     </main>
   );
 }
