@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
-import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { areaById, imagePath, officialSourcesFor, spotById, spots } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
@@ -56,7 +55,6 @@ export default async function SpotDetailPage({ params }: { params: Promise<{ id:
               {" "}
               {spot.officialUrl ? <a className="button button-secondary" href={spot.officialUrl} target="_blank" rel="noreferrer">公式情報</a> : null}
             </p>
-            <MonetizationSlot page="spot" placement="near-map-action" />
             <p><Link href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
           </article>
           <aside className="sidebar-panel">

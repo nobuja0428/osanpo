@@ -107,12 +107,22 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 ## 問い合わせ・広告・アフィリエイト
 
-- 問い合わせ先：未設定
-- 広告申込先：未設定
-- アフィリエイトリンク：未設定
-- AdSenseコード：未設定
+- 問い合わせ先：公開Googleフォームと補助メールを設定済み
+- スポンサー相談：事業者向けページから同じGoogleフォームへ案内
+- 実広告、スポンサー、アフィリエイトリンク：0件
+- AdSense publisher ID、slot ID、script：未設定
 
-未設定の申込ボタン、架空の広告主、料金、アクセス数、収益実績は表示しません。
+広告基盤は `src/content/monetization.ts` の1か所で管理します。`enabled`、広告種別、placementのすべてが有効で、承認済みデータと必須値がそろうまで `MonetizationSlot` はDOMを出力しません。現在のplacementは次の5つです。
+
+- `home-after-courses`
+- `courses-after-grid`
+- `course-detail-after-info`
+- `story-middle`（長い記事のみ）
+- `story-end`
+
+スポンサーはエリアと掲載期間を照合し、静的ビルド時に期間内のものだけを書き出します。公開後に期限を過ぎた表示はブラウザ側でも除外します。開始時は必ず設定変更後に再ビルド・公開し、終了時も次回ビルドでデータを整理してください。表示された場合だけIntersectionObserverで50%以上の表示を確認し、GA4が有効なら `ad_impression` または `sponsor_impression` を送ります。クリックは `ad_click`、`sponsor_click`、`affiliate_click` 用の安全な属性に限定し、外部URL全文や個人情報は送りません。
+
+AdSenseの実コードとAuto Adsは未実装です。実在するpublisher ID・slot IDを取得し、ポリシー確認と別リリースのテストを完了するまでscriptを追加しないでください。未設定の広告枠、架空の広告主、料金、アクセス数、収益実績は表示しません。
 
 ## GitHub Actions
 
@@ -134,9 +144,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 - GA4測定ID
 - Google Search Console
-- 公開用メールまたは問い合わせフォーム
 - アフィリエイト提供元
-- スポンサー申込先
 - 公式RSS・API・オープンデータの自動取得
 
 秘密鍵やAPIキーはコードへ直接書かず、必要になった Phase で GitHub Secrets を使用します。

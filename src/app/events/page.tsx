@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
-import { MonetizationSlot } from "@/components/MonetizationSlot";
 import { events } from "@/lib/content";
 import { eventState, eventStateLabels } from "@/lib/events";
 import { absoluteUrl } from "@/lib/site";
@@ -56,7 +55,6 @@ export default function EventsPage() {
           <EventList stateFilter={["needs-update"]} />
           <h2>過去のイベント</h2>
           <EventList stateFilter={["ended", "cancelled", "postponed"]} />
-          <MonetizationSlot page="event" placement="article-end" />
         </div>
       </section>
     </main>
