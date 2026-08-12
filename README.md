@@ -109,17 +109,28 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 - 問い合わせ先：公開Googleフォームと補助メールを設定済み
 - スポンサー相談：事業者向けページから同じGoogleフォームへ案内
-- House Ad（自社の地域スポンサー募集）：4 placementで表示
+- House Ad（自社の「広告募集中」枠）：6 placementで表示
 - 実スポンサー、アフィリエイトリンク、AdSense実広告：0件
 - AdSense publisher ID、slot ID：未設定（scriptは読み込みません）
 
-広告基盤は `src/content/monetization.ts` の1か所で管理します。表示優先度は「有効な直接スポンサー → affiliate → 承認・同意設定済みAdSense → House Ad → 非表示」です。現在のplacementは次の5つです。
+広告基盤は `src/content/monetization.ts` の1か所で管理します。表示優先度は「有効な直接スポンサー → affiliate → 承認・同意設定済みAdSense → House Ad → 非表示」です。現在のplacementは次の7つです。
 
 - `home-after-courses`：House Ad ON
 - `courses-after-grid`：House Ad ON
 - `course-detail-after-info`：House Ad ON
+- `area-detail-after-courses`：House Ad ON
+- `spot-detail-end`：House Ad ON
 - `story-middle`：House Ad OFF（長い記事の実広告・スポンサー用）
 - `story-end`：House Ad ON
+
+### 後から実広告へ差し替える手順
+
+1. 広告主から、実在する広告主名、見出し、説明、リンク先、掲載位置、対象エリア、掲載期間、画像と掲載許可を確認します。
+2. `src/content/monetization.ts` の `sponsors` に確認済みデータを追加します。画像を使う場合は `public/assets/` 配下へ置き、altも設定します。
+3. `sponsorEnabled` と対象広告の `active` を `true` にします。有効な直接スポンサーがある位置だけ「広告募集中」枠からスポンサー表示へ自動で差し替わります。
+4. `npm run test:all` で期間、対象エリア、リンク、スマホ表示、アクセシビリティを確認してから公開します。
+
+契約前の広告、架空の広告主、未確認のリンクは追加しません。終了日を過ぎたスポンサーや `active: false` のスポンサーは表示せず、「広告募集中」枠へ戻します。
 
 スポンサーはエリアと掲載期間を照合し、静的ビルド時に期間内のものだけを書き出します。公開後に期限を過ぎた表示はブラウザ側でも除外します。開始時は必ず設定変更後に再ビルド・公開し、終了時も次回ビルドでデータを整理してください。表示された場合だけIntersectionObserverで50%以上の表示を確認し、GA4が有効なら種別別のimpressionを送ります。House Adは `house_ad_impression` と `house_ad_click`、スポンサーは `sponsor_impression` と `sponsor_click`、affiliateは `ad_impression` と `affiliate_click` を使用します。外部URL全文や個人情報は送りません。
 

@@ -63,7 +63,7 @@ function readyAdsenseConfig(overrides: Partial<MonetizationConfig> = {}): Moneti
 }
 
 describe("production House Ad defaults", () => {
-  it("enables only House Ads at the four approved placements", () => {
+  it("enables only House Ads at the six approved placements", () => {
     expect(monetizationConfig.enabled).toBe(true);
     expect(monetizationConfig.houseAdsEnabled).toBe(true);
     expect(monetizationConfig.adsenseEnabled).toBe(false);
@@ -75,6 +75,8 @@ describe("production House Ad defaults", () => {
       "home-after-courses": true,
       "courses-after-grid": true,
       "course-detail-after-info": true,
+      "area-detail-after-courses": true,
+      "spot-detail-end": true,
       "story-middle": false,
       "story-end": true,
     });
@@ -85,14 +87,19 @@ describe("production House Ad defaults", () => {
 
   it("renders a clearly disclosed House Ad and no House Ad in story middle", () => {
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home" }));
-    expect(html).toContain("広告掲載・スポンサー募集");
-    expect(html).toContain("この街を歩く人に、お店の魅力を。");
-    expect(html).toContain("高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。");
-    expect(html).toContain("スポンサー掲載について相談する");
-    expect(html).toContain("掲載内容・期間・料金は個別にご案内します。");
+    expect(html).toContain("広告募集中");
+    expect(html).toContain("この広告枠に、地域のお店・サービスを掲載できます。");
+    expect(html).toContain("高円寺・吉祥寺・浅草を歩く人へ、店舗・商品・サービスの魅力を伝える地域スポンサーを募集しています。");
+    expect(html).toContain("広告掲載を相談する");
+    expect(html).toContain("広告枠・掲載内容を見る");
+    expect(html).toContain("実広告の掲載時は「広告」または「スポンサー」と明示します。");
     expect(html).toContain('data-monetization-impression="house_ad_impression"');
     expect(html).toContain('data-analytics-event="house_ad_click"');
     expect(html).toContain('data-page-type="home"');
+    expect(html).toContain('data-slot-status="recruiting"');
+    expect(html).toContain('data-slot-format="responsive"');
+    expect(html).toContain('data-contact-type="sponsor-inquiry"');
+    expect(html).toContain('data-contact-type="advertise-details"');
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).not.toContain("sponsored");
@@ -120,7 +127,7 @@ describe("sponsor eligibility and priority", () => {
     expect(html).toContain('data-monetization-impression="sponsor_impression"');
     expect(html).toContain('data-analytics-event="sponsor_click"');
     expect(html).toContain('data-sponsor-id="test-sponsor"');
-    expect(html).not.toContain("スポンサー掲載について相談する");
+    expect(html).not.toContain("広告掲載を相談する");
   });
 
   it("falls back to House Ad for another area or an expired sponsor", () => {
@@ -144,7 +151,7 @@ describe("affiliate and AdSense readiness", () => {
     expect(html).toContain("広告");
     expect(html).toContain('data-analytics-event="affiliate_click"');
     expect(html).toContain('rel="noopener noreferrer sponsored"');
-    expect(html).not.toContain("スポンサー掲載について相談する");
+    expect(html).not.toContain("広告掲載を相談する");
   });
 
   it("renders a responsive AdSense slot only when every readiness condition is true", () => {
@@ -167,7 +174,7 @@ describe("affiliate and AdSense readiness", () => {
     expect(shouldLoadAdsenseScript(missingConsent)).toBe(false);
     expect(resolveMonetization("home-after-courses", {}, missingConsent)?.type).toBe("house");
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home", config: missingConsent }));
-    expect(html).toContain("広告掲載・スポンサー募集");
+    expect(html).toContain("広告募集中");
     expect(html).not.toContain("adsbygoogle");
   });
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AdSenseSlot } from "@/components/AdSenseSlot";
 import {
   houseAdForPlacement,
@@ -21,6 +22,8 @@ const pageTypeByPlacement: Record<MonetizationPlacement, string> = {
   "home-after-courses": "home",
   "courses-after-grid": "courses",
   "course-detail-after-info": "course",
+  "area-detail-after-courses": "area",
+  "spot-detail-end": "spot",
   "story-middle": "story",
   "story-end": "story",
 };
@@ -37,15 +40,22 @@ function HouseAdSlot({ item, placement, contentId, areaId }: HouseAdSlotProps) {
   return (
     <aside
       className="monetization-slot monetization-slot-house"
-      aria-label="広告掲載・スポンサー募集"
+      aria-label="広告募集中"
       data-monetization-impression={monetizationEvents.house.impression}
       data-ad-type="house"
       data-page-type={pageType}
       data-content-id={contentId}
       data-area-id={areaId ?? ""}
       data-placement={placement}
+      data-slot-status="recruiting"
+      data-slot-format="responsive"
     >
       <span className="monetization-label">{item.label}</span>
+      <div className="monetization-recruitment-mark" aria-hidden="true">
+        <span>AD SPACE</span>
+        <strong>地域スポンサー枠</strong>
+        <small>広告掲載後に差し替え</small>
+      </div>
       <div className="monetization-copy">
         <p className="monetization-title">{item.headline}</p>
         <p>{item.description}</p>
@@ -55,15 +65,30 @@ function HouseAdSlot({ item, placement, contentId, areaId }: HouseAdSlotProps) {
             href={item.href}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={`${item.ctaLabel}（新しいタブで開く）`}
             data-analytics-event={monetizationEvents.house.click}
             data-ad-type="house"
             data-page-type={pageType}
             data-content-id={contentId}
             data-area-id={areaId ?? ""}
             data-placement={placement}
+            data-contact-type="sponsor-inquiry"
           >
-            {item.ctaLabel} <span aria-hidden="true">→</span>
+            {item.ctaLabel} <span aria-hidden="true">↗</span>
           </a>
+          <Link
+            className="monetization-details-link"
+            href="/advertise/"
+            data-analytics-event={monetizationEvents.house.click}
+            data-ad-type="house"
+            data-page-type={pageType}
+            data-content-id={contentId}
+            data-area-id={areaId ?? ""}
+            data-placement={placement}
+            data-contact-type="advertise-details"
+          >
+            広告枠・掲載内容を見る <span aria-hidden="true">→</span>
+          </Link>
           <small>{item.footnote}</small>
         </div>
       </div>

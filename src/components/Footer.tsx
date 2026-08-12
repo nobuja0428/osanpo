@@ -33,7 +33,7 @@ export function Footer() {
           <h2>事業者向け</h2>
           <div className="footer-links">
             <Link href="/business/">サービス案内</Link>
-            <Link href="/advertise/">広告掲載</Link>
+            <Link href="/advertise/">広告掲載・スポンサー募集</Link>
             <Link href="/business/contact/">事業者向け相談窓口</Link>
           </div>
         </div>

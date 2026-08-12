@@ -15,6 +15,8 @@ export type MonetizationPlacement =
   | "home-after-courses"
   | "courses-after-grid"
   | "course-detail-after-info"
+  | "area-detail-after-courses"
+  | "spot-detail-end"
   | "story-middle"
   | "story-end";
 
@@ -94,6 +96,8 @@ export const monetizationConfig: MonetizationConfig = {
     "home-after-courses": true,
     "courses-after-grid": true,
     "course-detail-after-info": true,
+    "area-detail-after-courses": true,
+    "spot-detail-end": true,
     "story-middle": true,
     "story-end": true,
   },
@@ -101,6 +105,8 @@ export const monetizationConfig: MonetizationConfig = {
     "home-after-courses": true,
     "courses-after-grid": true,
     "course-detail-after-info": true,
+    "area-detail-after-courses": true,
+    "spot-detail-end": true,
     "story-middle": false,
     "story-end": true,
   },
@@ -110,16 +116,18 @@ export const monetizationConfig: MonetizationConfig = {
       "home-after-courses": emptyAdsenseSlot(),
       "courses-after-grid": emptyAdsenseSlot(),
       "course-detail-after-info": emptyAdsenseSlot(),
+      "area-detail-after-courses": emptyAdsenseSlot(),
+      "spot-detail-end": emptyAdsenseSlot(),
       "story-middle": emptyAdsenseSlot(),
       "story-end": emptyAdsenseSlot(),
     },
   },
   houseAd: {
-    label: "広告掲載・スポンサー募集",
-    headline: "この街を歩く人に、お店の魅力を。",
-    description: "高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。",
-    ctaLabel: "スポンサー掲載について相談する",
-    footnote: "掲載内容・期間・料金は個別にご案内します。",
+    label: "広告募集中",
+    headline: "この広告枠に、地域のお店・サービスを掲載できます。",
+    description: "高円寺・吉祥寺・浅草を歩く人へ、店舗・商品・サービスの魅力を伝える地域スポンサーを募集しています。",
+    ctaLabel: "広告掲載を相談する",
+    footnote: "掲載内容・期間・料金は個別にご案内します。実広告の掲載時は「広告」または「スポンサー」と明示します。",
     href: businessContactFormUrl,
   },
   sponsors: [],

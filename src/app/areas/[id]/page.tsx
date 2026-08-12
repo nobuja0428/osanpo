@@ -12,6 +12,7 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { mapDirectionsUrl, mapExternalUrl } from "@/lib/maps";
 import { CourseCardCollection } from "@/components/CourseCardCollection";
 import { RelatedContent } from "@/components/RelatedContent";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 
 export function generateStaticParams() {
   return areas.map((area) => ({ id: area.id }));
@@ -65,6 +66,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             <section className="area-map-section"><p className="eyebrow">AREA MAP</p><h2>{area.name}の地図</h2><MapEmbed query={area.mapQuery} title={`${area.name}の地図`} contentId={area.id} areaId={area.id} placement="area-detail" /><div className="route-actions"><a className="button button-primary" href={mapExternalUrl(area.mapQuery)} target="_blank" rel="noopener noreferrer" data-analytics-event="google_map_click" data-page-type="area" data-content-id={area.id} data-area-id={area.id} data-placement="area-detail">Googleマップで大きく開く <span aria-hidden="true">↗</span></a>{representativeCourse ? <a className="button button-secondary" href={mapDirectionsUrl(representativeCourse.routeStops.map((stop) => stop.query))} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="area" data-content-id={representativeCourse.id} data-area-id={area.id} data-route-segment="whole" data-placement="area-detail">代表コースの徒歩ルートを開く <span aria-hidden="true">↗</span></a> : null}</div></section>
             <h2>このエリアのコース</h2>
             <CourseCardCollection items={relatedCourses} placement={`area-${area.id}-courses`} />
+            <MonetizationSlot placement="area-detail-after-courses" contentId={area.id} areaId={area.id} />
             <RelatedContent
               eyebrow="AREA STORIES"
               title={`${area.name}をもっと知る`}

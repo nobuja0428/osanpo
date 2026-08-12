@@ -9,6 +9,7 @@ import { areaById, imagePath, officialSourcesFor, spotById, spots } from "@/lib/
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 
 export function generateStaticParams() {
   return spots.map((spot) => ({ id: spot.id }));
@@ -56,6 +57,7 @@ export default async function SpotDetailPage({ params }: { params: Promise<{ id:
               {spot.officialUrl ? <a className="button button-secondary" href={spot.officialUrl} target="_blank" rel="noreferrer">公式情報</a> : null}
             </p>
             <p><Link href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
+            <MonetizationSlot placement="spot-detail-end" contentId={spot.id} areaId={spot.areaId} />
           </article>
           <aside className="sidebar-panel">
             <h2>掲載情報について</h2>
