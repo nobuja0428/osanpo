@@ -9,6 +9,7 @@ import { areaById, imagePath, officialSourcesFor, spotById, spots } from "@/lib/
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 
 export function generateStaticParams() {
   return spots.map((spot) => ({ id: spot.id }));
@@ -64,6 +65,7 @@ export default async function SpotDetailPage({ params }: { params: Promise<{ id:
             <ul className="source-list">{sources.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label}</a></li>)}</ul>
           </aside>
         </div>
+        <div className="container detail-monetization"><MonetizationSlot placement="spot-detail-end" contentId={spot.id} areaId={spot.areaId} /></div>
       </section>
     </main>
   );

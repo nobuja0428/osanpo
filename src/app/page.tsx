@@ -77,10 +77,10 @@ export default function HomePage() {
         <div className="home-main">
           <div className="section-heading"><div><p className="eyebrow">COURSES</p><h2>今歩けるコースを選ぶ</h2><p>公開情報と確認日を掲載した3つのモデルコースです。</p></div><Link href="/courses/">すべて見る →</Link></div>
           <CourseCardCollection items={courses} placement="home-recommended-courses" />
-          <MonetizationSlot placement="home-after-courses" contentId="home" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">AREAS</p><h2>エリアから探す</h2></div><Link href="/areas/">エリア一覧 →</Link></div>
           <p className="availability-note">現在は<strong>{areas.length}エリア公開中</strong>です。東京40エリアのうち、残り{40 - areas.length}エリアは公開情報を確認でき次第、順次追加します。</p>
           <div className="card-grid">{areas.map((area) => <AreaCard area={area} key={area.id} />)}</div>
+          <MonetizationSlot placement="home-after-courses" contentId="home" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">BY INTEREST</p><h2>テーマから探す</h2><p>公開中コースの登録テーマから選べます。</p></div></div>
           <nav className="theme-link-grid" aria-label="テーマ別コース">{themes.map((theme) => <Link href={`/courses/?mood=${theme.key}`} key={theme.key}><span className="eyebrow">{theme.count} COURSE</span><strong>{theme.label}</strong><span>{theme.description}</span></Link>)}</nav>
           <section className="home-map-feature"><div className="section-heading"><div><p className="eyebrow">MAP</p><h2>地図から探す</h2><p>高円寺・吉祥寺・浅草の位置を見ながら、歩きたい街を選べます。</p></div><Link href="/map/">地図ページへ →</Link></div><MapEmbed query={areas.map((area) => area.mapQuery).join(" ")} title="高円寺・吉祥寺・浅草の地図" contentId="tokyo-areas" placement="home-main-map" /><div className="map-area-links" aria-label="エリア別の地図">{areas.map((area) => <Link href={`/areas/${area.id}/`} key={area.id}>{area.name}</Link>)}</div></section>

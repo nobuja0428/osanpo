@@ -12,6 +12,7 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { mapDirectionsUrl, mapExternalUrl } from "@/lib/maps";
 import { CourseCardCollection } from "@/components/CourseCardCollection";
 import { RelatedContent } from "@/components/RelatedContent";
+import { MonetizationSlot } from "@/components/MonetizationSlot";
 
 export function generateStaticParams() {
   return areas.map((area) => ({ id: area.id }));
@@ -93,6 +94,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
             <a className="button button-secondary" href={mapExternalUrl(area.mapQuery)} target="_blank" rel="noopener noreferrer" data-analytics-event="google_map_click" data-page-type="area" data-content-id={area.id} data-area-id={area.id} data-placement="area-sidebar">地図で見る <span aria-hidden="true">↗</span></a>
           </aside>
         </div>
+        <div className="container detail-monetization"><MonetizationSlot placement="area-detail-after-courses" contentId={area.id} areaId={area.id} /></div>
       </section>
     </main>
   );

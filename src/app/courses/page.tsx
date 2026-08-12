@@ -15,7 +15,8 @@ export default function CoursesPage() {
   return (
     <main id="main">
       <PageHero eyebrow="COURSE FINDER" title="条件から散歩コースを探す" lead="時間、予算、同行者、気分を組み合わせて、今日に合うコースを選べます。" crumbs={[{ label: "コース" }]} />
-      <section className="section"><div className="container"><p className="course-plan-link">条件を順番に選びたい方は、<Link href="/plan/">今日のおさんぽプランへ</Link></p><CourseExplorer /><MonetizationSlot placement="courses-after-grid" contentId="courses" /></div></section>
+      <section className="section"><div className="container"><p className="course-plan-link">条件を順番に選びたい方は、<Link href="/plan/">今日のおさんぽプランへ</Link></p><CourseExplorer /></div></section>
+      <section className="section section-tint monetization-section" aria-label="広告掲載案内"><div className="container"><MonetizationSlot placement="courses-after-grid" contentId="courses" /></div></section>
     </main>
   );
 }
