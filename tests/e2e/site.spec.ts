@@ -48,6 +48,17 @@ test("favorites persist and can be removed", async ({ page }) => {
   await expect(page.getByRole("button", { name: "お気に入りに追加" })).toBeVisible();
 });
 
+test("saved favorites hydrate without React mismatch errors", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => localStorage.setItem("osanpoClubFavoritesV1", JSON.stringify(["course:koenji-first"])));
+  await page.goto("/osanpo/courses/koenji-first/");
+  await expect(page.getByRole("button", { name: "お気に入り済み" })).toHaveAttribute("aria-pressed", "true");
+  await page.waitForTimeout(100);
+  expect(errors.filter((error) => /Hydration|React error #418/i.test(error))).toEqual([]);
+});
+
 test("event detail keeps its official and map actions visible", async ({ page }) => {
   await page.goto("/osanpo/events/kagurazaka-festival-2026/");
   await expect(page.getByRole("heading", { name: "第52回 神楽坂まつり" })).toBeVisible();
