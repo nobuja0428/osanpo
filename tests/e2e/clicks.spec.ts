@@ -81,7 +81,7 @@ test("course cards open, switch, close, navigate, and keep one map iframe", asyn
 
 test("filters, favorites, external walking route, and contact links respond", async ({ page }) => {
   await page.goto("/osanpo/courses/");
-  await page.getByLabel("エリア").selectOption("asakusa");
+  await page.getByLabel("エリアから").selectOption("asakusa");
   await expect(page.getByText("1件のコース", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "浅草 を解除" }).click();
   await expect(page.getByText("3件のコース", { exact: true })).toBeVisible();

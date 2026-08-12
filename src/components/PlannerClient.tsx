@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { trackEvent } from "@/components/Analytics";
 import { areas, courses, imagePath } from "@/lib/content";
@@ -25,6 +25,7 @@ function hasAnyCondition(criteria: PlanCriteria) {
 export function PlannerClient() {
   const [criteria, setCriteria] = useState<PlanCriteria>(emptyPlanCriteria());
   const [step, setStep] = useState(0);
+  const completedSignature = useRef<string | null>(null);
   const recommendations = useMemo(() => rankCourses(courses, criteria).slice(0, 3), [criteria]);
 
   useEffect(() => {
@@ -43,7 +44,13 @@ export function PlannerClient() {
 
   useEffect(() => {
     if (step !== questions.length) return;
-    trackEvent("plan_result_view", { result_count: recommendations.length, duration_range: criteria.duration ?? "", budget_range: criteria.budget ?? "", audience_type: criteria.audience ?? "", mood_type: criteria.mood ?? "", placement: "plan-results" });
+    const parameters = { result_count: recommendations.length, duration_range: criteria.duration ?? "", budget_range: criteria.budget ?? "", audience_type: criteria.audience ?? "", mood_type: criteria.mood ?? "", placement: "plan-results" };
+    trackEvent("plan_result_view", parameters);
+    const signature = planCriteriaSearch(criteria);
+    if (completedSignature.current !== signature) {
+      completedSignature.current = signature;
+      trackEvent("plan_complete", parameters);
+    }
   }, [criteria, recommendations.length, step]);
 
   function write(next: PlanCriteria) {
@@ -64,6 +71,7 @@ export function PlannerClient() {
 
   function reset() {
     const next = emptyPlanCriteria();
+    completedSignature.current = null;
     setCriteria(next);
     setStep(0);
     window.history.pushState({ planStep: 0 }, "", window.location.pathname);

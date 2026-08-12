@@ -63,31 +63,31 @@ export function CourseExplorer() {
   return (
     <>
       <form className="filter-panel filter-panel-complete" onSubmit={(event) => event.preventDefault()} aria-label="コースを絞り込む">
-        <label className="filter-keyword">キーワード
+        <label className="filter-keyword">キーワードから
           <input value={filters.keyword ?? ""} onChange={(event) => update("keyword", event.target.value)} placeholder="街、商店街、歴史、カフェから探す" />
         </label>
-        <label>エリア
+        <label>エリアから
           <select value={filters.area ?? ""} onChange={(event) => update("area", event.target.value)}>
             <option value="">すべて</option>
             {areas.map((area) => <option value={area.id} key={area.id}>{area.name}</option>)}
           </select>
         </label>
-        <label>所要時間
+        <label>時間から
           <select value={filters.duration ?? ""} onChange={(event) => update("duration", event.target.value)}>
             <option value="">指定なし</option><option value="60">60分以内</option><option value="90">90分以内</option><option value="120">2時間以内</option><option value="180">3時間以内</option>
           </select>
         </label>
-        <label>予算
+        <label>予算から
           <select value={filters.budget ?? ""} onChange={(event) => update("budget", event.target.value)}>
             <option value="">指定なし</option><option value="1000">1,000円以内</option><option value="3000">3,000円以内</option><option value="5000">5,000円以内</option>
           </select>
         </label>
-        <label>同行者
+        <label>誰と歩く？
           <select value={filters.audience ?? ""} onChange={(event) => update("audience", event.target.value)}>
             <option value="">指定なし</option><option value="solo">ひとり</option><option value="friends">友人と</option><option value="date">デート</option><option value="family">家族と</option>
           </select>
         </label>
-        <label>気分・テーマ
+        <label>気分から
           <select value={filters.mood ?? ""} onChange={(event) => update("mood", event.target.value)}>
             <option value="">指定なし</option><option value="history">歴史</option><option value="shopping">買い物</option><option value="vintage">古着</option><option value="nature">自然</option><option value="cafe">カフェ</option>
           </select>
