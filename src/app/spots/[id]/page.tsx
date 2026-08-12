@@ -57,7 +57,6 @@ export default async function SpotDetailPage({ params }: { params: Promise<{ id:
               {spot.officialUrl ? <a className="button button-secondary" href={spot.officialUrl} target="_blank" rel="noreferrer">公式情報</a> : null}
             </p>
             <p><Link href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
-            <MonetizationSlot placement="spot-detail-end" contentId={spot.id} areaId={spot.areaId} />
           </article>
           <aside className="sidebar-panel">
             <h2>掲載情報について</h2>
@@ -66,6 +65,7 @@ export default async function SpotDetailPage({ params }: { params: Promise<{ id:
             <ul className="source-list">{sources.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label}</a></li>)}</ul>
           </aside>
         </div>
+        <div className="container detail-monetization"><MonetizationSlot placement="spot-detail-end" contentId={spot.id} areaId={spot.areaId} /></div>
       </section>
     </main>
   );

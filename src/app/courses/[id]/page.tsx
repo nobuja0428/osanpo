@@ -134,7 +134,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </section>
             ))}
             <TrustPanel verification={verification} />
-            <MonetizationSlot placement="course-detail-after-info" contentId={course.id} areaId={course.areaId} />
             <div id="course-related">
               <RelatedContent
                 eyebrow="NEXT WALK"
@@ -163,6 +162,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </ul>
           </aside>
         </div>
+        <div className="container detail-monetization"><MonetizationSlot placement="course-detail-after-info" contentId={course.id} areaId={course.areaId} /></div>
       </section>
     </main>
   );

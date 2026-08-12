@@ -224,6 +224,10 @@ button, select, input { font: inherit; }
 .monetization-house-actions small { color: var(--muted); font-size: 11px; line-height: 1.45; }
 .monetization-adsense-frame { min-height: 100px; width: 100%; overflow: hidden; }
 .monetization-adsense-frame .adsbygoogle { min-height: 100px; width: 100%; }
+.monetization-section { padding-block: 56px; border-top: 1px solid var(--line); }
+.monetization-section .monetization-slot { margin-block: 0; }
+.detail-monetization { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); }
+.detail-monetization .monetization-slot { margin-block: 0; }
 .page-section-nav, .route-actions, .card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
 .page-section-nav a { padding: 7px 10px; border-radius: 999px; background: var(--tint); font-size: 13px; text-decoration: none; }
 .route-actions .button { min-height: 40px; }

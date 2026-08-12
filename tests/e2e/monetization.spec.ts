@@ -36,6 +36,34 @@ test("production shows one House Ad at each approved placement and no AdSense sc
   await expect(page.locator('.monetization-slot[data-placement="story-end"]')).toHaveCount(1);
 });
 
+test("recruitment slots are isolated from maps, walking routes, planner, and contact actions", async ({ page }) => {
+  const detailCases = [
+    { path: "courses/koenji-first/", placement: "course-detail-after-info" },
+    { path: "areas/koenji/", placement: "area-detail-after-courses" },
+    { path: "spots/koenji-junjo/", placement: "spot-detail-end" },
+  ];
+
+  for (const item of detailCases) {
+    await page.goto(item.path);
+    const slot = page.locator(`.monetization-slot[data-placement="${item.placement}"]`);
+    await expect(slot).toHaveCount(1);
+    await expect(slot.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' detail-grid ')]")).toHaveCount(0);
+    await expect(slot.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' route-actions ')]")).toHaveCount(0);
+    await expect(slot.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' map-frame-shell ')]")).toHaveCount(0);
+    await expect(slot.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' planner-panel ')]")).toHaveCount(0);
+    await expect(slot.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' advertise-contact ')]")).toHaveCount(0);
+    await expect(slot.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' detail-monetization ')]")).toHaveCount(1);
+  }
+
+  await page.goto("courses/");
+  await expect(page.locator('.monetization-section .monetization-slot[data-placement="courses-after-grid"]')).toHaveCount(1);
+
+  await page.goto("");
+  const topSlot = page.locator('.monetization-slot[data-placement="home-after-courses"]');
+  await expect(topSlot).toHaveCount(1);
+  expect(await topSlot.evaluate((slot) => slot.previousElementSibling?.classList.contains("card-grid"))).toBe(true);
+});
+
 test("House Ad impression and click fire once with safe GA4 fields", async ({ page }) => {
   await page.addInitScript(() => {
     const testWindow = window as typeof window & { monetizationEvents: unknown[][] };
