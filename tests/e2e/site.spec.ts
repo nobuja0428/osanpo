@@ -27,9 +27,9 @@ test("search, filtering, individual clear, and empty state work", async ({ page 
   await page.getByRole("button", { name: "検索する" }).click();
   await expect(page.getByRole("heading", { name: "一致する情報がありません" })).toBeVisible();
   await page.goto("/osanpo/courses/");
-  await page.getByLabel("エリア").selectOption("asakusa");
+  await page.getByLabel("エリアから").selectOption("asakusa");
   await expect(page.getByText("浅草：雷門からかっぱ橋へ、門前町の歴史を歩く", { exact: true })).toBeVisible();
-  await page.getByLabel("同行者").selectOption("date");
+  await page.getByLabel("誰と歩く？").selectOption("date");
   await expect(page.getByRole("heading", { name: "条件に合うコースがありません" })).toBeVisible();
   await page.getByRole("button", { name: "デート を解除" }).click();
   await expect(page.getByText("1件のコース", { exact: true })).toBeVisible();
@@ -91,4 +91,22 @@ test("official links are HTTPS external links", async ({ page }) => {
   await expect(links).not.toHaveCount(0);
   const hrefs = await links.evaluateAll((items) => items.map((item) => item.getAttribute("href")));
   expect(hrefs.every((href) => href?.startsWith("https://"))).toBe(true);
+});
+
+test("top, area, course, and story pages form a real internal circulation path", async ({ page }) => {
+  await page.goto("/osanpo/");
+  await page.getByRole("link", { name: "初めての高円寺：商店街と路地を2時間で歩く" }).first().click();
+  await expect(page.getByRole("heading", { name: "次に歩くなら" })).toBeVisible();
+  await page.locator("#course-related").getByRole("link", { name: /吉祥寺/ }).first().click();
+  await expect(page).toHaveURL(/\/osanpo\/courses\/kichijoji-park\/$/);
+
+  await page.goto("/osanpo/stories/koenji-shopping-streets/");
+  await expect(page.getByRole("heading", { name: "この記事の目次" })).toBeVisible();
+  await page.getByRole("link", { name: "初めての高円寺：商店街と路地を2時間で歩く" }).click();
+  await expect(page).toHaveURL(/\/osanpo\/courses\/koenji-first\/$/);
+
+  await page.goto("/osanpo/areas/koenji/");
+  await expect(page.getByText("公開中コース", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "初めての高円寺：商店街と路地を2時間で歩く" }).first().click();
+  await expect(page).toHaveURL(/\/osanpo\/courses\/koenji-first\/$/);
 });

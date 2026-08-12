@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Area, Course, Spot, Story } from "@/lib/content";
-import { areaById, imagePath } from "@/lib/content";
+import { areaById, courses, imagePath } from "@/lib/content";
 import { assetUrl } from "@/lib/site";
 import { courseRouteQueries, mapDirectionsUrl } from "@/lib/maps";
 import { isExpired, verificationFor, type ContentType } from "@/lib/verification";
@@ -22,15 +22,18 @@ function CardImage({ imageKey, alt }: { imageKey: string; alt: string }) {
 }
 
 export function AreaCard({ area }: { area: Area }) {
+  const courseCount = courses.filter((course) => course.areaId === area.id).length;
   return (
-    <article className="card">
+    <article className="card area-card">
       <Link className="card-media-link" href={`/areas/${area.id}/`}><CardImage imageKey={area.image} alt={area.imageAlt} /></Link>
       <div className="card-body">
         <p className="eyebrow">{area.ward}</p>
         <RecheckBadge type="area" id={area.id} />
         <h3><Link className="card-primary-link" href={`/areas/${area.id}/`}>{area.name}</Link></h3>
         <p>{area.lead}</p>
+        <p className="area-card-meta"><strong>{courseCount}</strong>件の公開コース</p>
         <div className="pills">{area.tags.map((tag) => <span className="pill" key={tag}>{tag}</span>)}</div>
+        <Link className="card-text-cta" href={`/areas/${area.id}/`}>この街を歩く <span aria-hidden="true">→</span></Link>
       </div>
     </article>
   );
@@ -49,12 +52,16 @@ export function CourseCard({ course, onMapOpen, selected = false, placement = "c
         <RecheckBadge type="course" id={course.id} />
         <h3><Link className="card-primary-link" href={`/courses/${course.id}/`} data-analytics-event="course_card_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-placement={placement}>{course.title}</Link></h3>
         <dl className="course-card-facts"><div><dt>所要時間</dt><dd>{course.duration}</dd></div><div><dt>距離</dt><dd>{course.distance}</dd></div><div><dt>予算</dt><dd>{course.budget}</dd></div></dl>
+        <p className="course-card-audience"><span>向いている人</span><strong>{course.audience}</strong></p>
         <p>{course.summary}</p>
         <div className="course-card-route"><p><span className="route-label is-start">START</span><strong>{start?.name}</strong></p><p><span className="route-label is-goal">GOAL</span><strong>{goal?.name}</strong></p></div>
         <CourseSafetySummary course={course} compact />
         <div className="course-card-actions">
-          {onMapOpen ? <button className="button button-primary" type="button" aria-label={`${course.title}の地図を見る`} aria-expanded={selected} onClick={() => onMapOpen(course.id)}>地図を見る</button> : null}
-          <a className="button button-secondary" href={mapDirectionsUrl(routeQueries)} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-route-segment="whole" data-placement={placement}>徒歩ルートを開く <span aria-hidden="true">↗</span></a>
+          <Link className="button button-primary" href={`/courses/${course.id}/`} data-analytics-event="course_card_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-placement={`${placement}-cta`}>コースを見る</Link>
+          <div className="course-card-secondary-actions">
+            {onMapOpen ? <button className="button button-secondary" type="button" aria-label={`${course.title}の地図を見る`} aria-expanded={selected} onClick={() => onMapOpen(course.id)}>地図を見る</button> : null}
+            <a className="button button-secondary" href={mapDirectionsUrl(routeQueries)} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="course-list" data-content-id={course.id} data-area-id={course.areaId} data-route-segment="whole" data-placement={placement}>徒歩ルート <span aria-hidden="true">↗</span></a>
+          </div>
         </div>
       </div>
     </article>

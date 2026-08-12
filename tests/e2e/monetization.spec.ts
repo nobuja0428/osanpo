@@ -17,8 +17,9 @@ test("production shows one House Ad at each approved placement and no AdSense sc
     await expect(slot).toHaveCount(1);
     await expect(page.locator(".monetization-slot-house")).toHaveCount(1);
     await expect(slot.getByText("広告掲載・スポンサー募集", { exact: true })).toBeVisible();
-    await expect(slot.getByText("この街の散歩に、お店の魅力を。", { exact: true })).toBeVisible();
-    await expect(slot.getByText("掲載内容・料金は個別にご案内します。", { exact: true })).toBeVisible();
+    await expect(slot.getByText("この街を歩く人に、お店の魅力を。", { exact: true })).toBeVisible();
+    await expect(slot.getByText("高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。", { exact: true })).toBeVisible();
+    await expect(slot.getByText("掲載内容・期間・料金は個別にご案内します。", { exact: true })).toBeVisible();
     const cta = slot.getByRole("link", { name: /スポンサー掲載について相談する/ });
     await expect(cta).toHaveAttribute("href", formUrl);
     await expect(cta).toHaveAttribute("target", "_blank");
@@ -74,8 +75,8 @@ test("business and advertising pages expose the real sponsor form without invent
   await expect(page.getByRole("link", { name: /スポンサー掲載について相談する/ })).toHaveAttribute("href", formUrl);
   await expect(page.getByText("掲載による成果、検索順位、来店数、売上などを保証するものではありません。", { exact: true })).toBeVisible();
   await page.goto("advertise/");
-  await expect(page.getByText("地域スポンサーを募集中です。", { exact: false })).toBeVisible();
-  await expect(page.getByText("掲載内容・掲載期間を確認したうえで個別にご案内します。", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "スポンサー表示例" })).toBeVisible();
+  await expect(page.getByText("掲載内容・位置・期間を確認したうえで個別にご案内します。", { exact: false })).toHaveCount(1);
   await expect(page.getByRole("link", { name: /スポンサー掲載について相談する/ })).toHaveAttribute("href", formUrl);
   await expect(page.getByText(/月額|初期費用|PV|CTR|売上効果/)).toHaveCount(0);
 });

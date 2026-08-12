@@ -116,10 +116,10 @@ export const monetizationConfig: MonetizationConfig = {
   },
   houseAd: {
     label: "広告掲載・スポンサー募集",
-    headline: "この街の散歩に、お店の魅力を。",
-    description: "おさんぽクラブ東京では、高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。",
+    headline: "この街を歩く人に、お店の魅力を。",
+    description: "高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。",
     ctaLabel: "スポンサー掲載について相談する",
-    footnote: "掲載内容・料金は個別にご案内します。",
+    footnote: "掲載内容・期間・料金は個別にご案内します。",
     href: businessContactFormUrl,
   },
   sponsors: [],

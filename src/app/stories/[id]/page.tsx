@@ -6,11 +6,12 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
 import { MonetizationSlot } from "@/components/MonetizationSlot";
-import { areaById, imagePath, officialSourcesFor, stories, storyById } from "@/lib/content";
+import { areaById, courses, imagePath, officialSourcesFor, stories, storyById } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
-import { verificationFor } from "@/lib/verification";
+import { dateLabel, verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
 import { Fragment } from "react";
+import { RelatedContent } from "@/components/RelatedContent";
 
 export function generateStaticParams() {
   return stories.map((story) => ({ id: story.id }));
@@ -40,6 +41,8 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
   const storyCharacterCount = story.intro.length + story.sections.reduce((total, section) => total + section.heading.length + section.body.length, 0);
   const showMiddlePlacement = story.sections.length >= 5 || storyCharacterCount >= 1200;
   const middleSectionIndex = Math.ceil(story.sections.length / 2) - 1;
+  const relatedCourses = courses.filter((course) => course.areaId === story.areaId).slice(0, 1);
+  const relatedStories = stories.filter((item) => item.id !== story.id).slice(0, 2);
 
   return (
     <main id="main">
@@ -53,11 +56,27 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="story" id={story.id} />
-            <TrustPanel verification={verification} />
+            <dl className="article-meta" aria-label="記事の更新・確認情報"><div><dt>読了目安</dt><dd>{story.readTime}</dd></div><div><dt>情報確認日</dt><dd>{dateLabel(verification.informationCheckedAt)}</dd></div><div><dt>最終更新日</dt><dd>{dateLabel(verification.lastUpdatedAt)}</dd></div><div><dt>現地取材</dt><dd>{verification.fieldResearch ? "あり" : "実施していません"}</dd></div></dl>
             <p>{story.intro}</p>
-            {story.sections.map((section, index) => <Fragment key={section.heading}><section><h2>{section.heading}</h2><p>{section.body}</p></section>{showMiddlePlacement && index === middleSectionIndex ? <MonetizationSlot placement="story-middle" contentId={story.id} areaId={story.areaId} /> : null}</Fragment>)}
+            <nav className="article-toc" aria-labelledby="story-toc-heading"><p className="eyebrow">CONTENTS</p><h2 id="story-toc-heading">この記事の目次</h2><ol>{story.sections.map((section, index) => <li key={section.heading}><a href={`#story-section-${index + 1}`}>{section.heading}</a></li>)}</ol></nav>
+            {story.sections.map((section, index) => <Fragment key={section.heading}><section id={`story-section-${index + 1}`} className="story-section"><p className="story-section-number">0{index + 1}</p><h2>{section.heading}</h2><p>{section.body}</p></section>{showMiddlePlacement && index === middleSectionIndex ? <MonetizationSlot placement="story-middle" contentId={story.id} areaId={story.areaId} /> : null}</Fragment>)}
+            <TrustPanel verification={verification} />
             <MonetizationSlot placement="story-end" contentId={story.id} areaId={story.areaId} />
-            <p><Link className="button button-primary" href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
+            <RelatedContent
+              eyebrow="WALK THIS STORY"
+              title="この街を実際に歩く"
+              items={relatedCourses.map((course) => ({ href: `/courses/${course.id}/`, eyebrow: `${area.name}・モデルコース`, title: course.title, description: `${course.duration}・${course.distance}・${course.budget}`, contentId: course.id, areaId: course.areaId }))}
+              pageType="story"
+              placement="story-related-course"
+            />
+            <RelatedContent
+              eyebrow="KEEP READING"
+              title="関連する読み物"
+              items={relatedStories.map((item) => ({ href: `/stories/${item.id}/`, eyebrow: areaById(item.areaId)?.name ?? item.category, title: item.title, description: item.excerpt, contentId: item.id, areaId: item.areaId }))}
+              pageType="story"
+              placement="story-related-stories"
+            />
+            <p><Link className="button button-secondary" href={`/areas/${area.id}/`}>{area.name}のエリアガイドへ</Link></p>
           </article>
           <aside className="sidebar-panel">
             <h2>この記事について</h2>

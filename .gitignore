@@ -8,6 +8,7 @@ out/
 coverage/
 pre-release/
 *.tsbuildinfo
+debug.log
 _audit_osanpo_main/
 _audit_osanpo_source/
 osanpo-main.zip

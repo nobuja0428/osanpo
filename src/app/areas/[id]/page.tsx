@@ -4,13 +4,14 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
-import { areaById, areas, courses, imagePath } from "@/lib/content";
+import { areaById, areas, courses, imagePath, spots, stories } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
 import { MapEmbed } from "@/components/MapEmbed";
 import { mapDirectionsUrl, mapExternalUrl } from "@/lib/maps";
 import { CourseCardCollection } from "@/components/CourseCardCollection";
+import { RelatedContent } from "@/components/RelatedContent";
 
 export function generateStaticParams() {
   return areas.map((area) => ({ id: area.id }));
@@ -36,6 +37,9 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
   if (!verification) notFound();
   const relatedCourses = courses.filter((course) => course.areaId === area.id);
   const representativeCourse = relatedCourses[0];
+  const relatedStories = stories.filter((story) => story.areaId === area.id);
+  const relatedSpots = spots.filter((spot) => spot.areaId === area.id).slice(0, 3);
+  const themes = [...new Set(relatedCourses.flatMap((course) => course.moodKeys))];
 
   return (
     <main id="main">
@@ -49,16 +53,33 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
               <span className="image-label">イメージ</span>
             </div>
             <FavoriteButton type="area" id={area.id} />
-            <TrustPanel verification={verification} />
-            <dl className="facts">
+            <dl className="facts area-overview-facts">
               <div><dt>最寄り駅</dt><dd>{area.stations.join("・")}</dd></div>
               <div><dt>散歩時間の目安</dt><dd>{area.duration}</dd></div>
               <div><dt>予算の目安</dt><dd>{area.budget}</dd></div>
+              <div><dt>公開中コース</dt><dd>{relatedCourses.length}件</dd></div>
+              <div><dt>代表テーマ</dt><dd>{area.tags.join("・")}</dd></div>
               <div><dt>掲載状態</dt><dd>{area.publicationStatus}</dd></div>
             </dl>
+            <section className="area-intro-panel"><p className="eyebrow">START HERE</p><h2>{area.name}の歩き方</h2><p>{area.lead}</p>{themes.length ? <p>公開中コースのテーマ：{area.tags.join("・")}</p> : null}</section>
             <section className="area-map-section"><p className="eyebrow">AREA MAP</p><h2>{area.name}の地図</h2><MapEmbed query={area.mapQuery} title={`${area.name}の地図`} contentId={area.id} areaId={area.id} placement="area-detail" /><div className="route-actions"><a className="button button-primary" href={mapExternalUrl(area.mapQuery)} target="_blank" rel="noopener noreferrer" data-analytics-event="google_map_click" data-page-type="area" data-content-id={area.id} data-area-id={area.id} data-placement="area-detail">Googleマップで大きく開く <span aria-hidden="true">↗</span></a>{representativeCourse ? <a className="button button-secondary" href={mapDirectionsUrl(representativeCourse.routeStops.map((stop) => stop.query))} target="_blank" rel="noopener noreferrer" data-analytics-event="walking_route_click" data-page-type="area" data-content-id={representativeCourse.id} data-area-id={area.id} data-route-segment="whole" data-placement="area-detail">代表コースの徒歩ルートを開く <span aria-hidden="true">↗</span></a> : null}</div></section>
             <h2>このエリアのコース</h2>
             <CourseCardCollection items={relatedCourses} placement={`area-${area.id}-courses`} />
+            <RelatedContent
+              eyebrow="AREA STORIES"
+              title={`${area.name}をもっと知る`}
+              items={relatedStories.map((story) => ({ href: `/stories/${story.id}/`, eyebrow: story.category, title: story.title, description: story.excerpt, contentId: story.id, areaId: story.areaId }))}
+              pageType="area"
+              placement="area-related-stories"
+            />
+            <RelatedContent
+              eyebrow="AREA SPOTS"
+              title="この街の立ち寄り地点"
+              items={relatedSpots.map((spot) => ({ href: `/spots/${spot.id}/`, eyebrow: spot.category, title: spot.name, description: spot.excerpt, contentId: spot.id, areaId: spot.areaId }))}
+              pageType="area"
+              placement="area-related-spots"
+            />
+            <TrustPanel verification={verification} />
           </article>
           <aside className="sidebar-panel">
             <h2>情報について</h2>

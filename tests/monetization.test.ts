@@ -86,9 +86,10 @@ describe("production House Ad defaults", () => {
   it("renders a clearly disclosed House Ad and no House Ad in story middle", () => {
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home" }));
     expect(html).toContain("広告掲載・スポンサー募集");
-    expect(html).toContain("この街の散歩に、お店の魅力を。");
+    expect(html).toContain("この街を歩く人に、お店の魅力を。");
+    expect(html).toContain("高円寺・吉祥寺・浅草を中心に、地域のお店・サービスのスポンサー掲載を受け付けています。");
     expect(html).toContain("スポンサー掲載について相談する");
-    expect(html).toContain("掲載内容・料金は個別にご案内します。");
+    expect(html).toContain("掲載内容・期間・料金は個別にご案内します。");
     expect(html).toContain('data-monetization-impression="house_ad_impression"');
     expect(html).toContain('data-analytics-event="house_ad_click"');
     expect(html).toContain('data-page-type="home"');

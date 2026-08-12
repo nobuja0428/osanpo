@@ -10,12 +10,13 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "quality:check": "node scripts/content-quality.mjs",
+    "test:integrity": "node scripts/site-integrity.mjs",
     "images:optimize": "node scripts/optimize-images.mjs",
     "test:e2e": "npm run build && playwright test --project=chromium",
     "test:a11y": "npm run build && playwright test --project=a11y",
     "lighthouse": "node scripts/lighthouse.mjs",
     "test:lighthouse": "npm run build && npm run lighthouse",
-    "test:all": "npm run lint && npm run typecheck && npm run test && npm run build && playwright test --project=chromium && playwright test --project=a11y && npm run lighthouse"
+    "test:all": "npm run lint && npm run typecheck && npm run test && npm run build && npm run test:integrity && playwright test --project=chromium && playwright test --project=a11y && npm run lighthouse"
   },
   "dependencies": {
     "next": "16.2.12",
