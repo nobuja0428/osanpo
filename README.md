@@ -26,6 +26,17 @@
 - GA4の安全な任意設定
 - Vitest、ESLint、TypeScript検査、GitHub Actions
 
+## 収益化・回遊アップデート
+
+- 30秒診断をトップの主導線として維持し、診断ロジック・URL復元・お気に入り・地図を変更せずに回遊を強化
+- 実データが2件以上あり、結果集合も重複しない条件だけを `/courses/conditions/` 配下へ公開（ひとり、商店街）。近似条件は一覧フィルターと30秒診断で扱います。
+- コース・エリア・スポット・読み物の末尾に、同じエリアの実データだけを使う関連リンクを表示
+- House Adを「広告掲載・スポンサー募集」として明示し、成果・来店数・売上を保証しない文言を追加
+- `/advertise/` に利用者行動、掲載位置、スポンサー種別、編集記事との区別、掲載基準、流れ、FAQ、媒体実績蓄積中の表示を追加
+- サイト全体・各エリア・各コースのスポンサーは各1社を上限とする設定検証を追加
+- 実スポンサー、Affiliate、AdSenseは引き続きOFF。公開料金は運営者承認まで個別案内
+- 競合調査、料金仮説、KPI、独立レビュー結果は `reports/` に保存
+
 ## 必要環境
 
 - Node.js 22
@@ -70,6 +81,8 @@ npm run preview
 
 主なデータは `src/content/site-data.ts` にあります。既存IDはURLとお気に入りデータに使われるため、理由なく変更しないでください。
 
+追加時に必要な共通項目と種類別項目は `src/content/templates.ts` にまとめています。記事を自動生成するものではなく、運営者が確認済みデータを追加するときの型・チェックリストです。
+
 更新時は次を確認します。
 
 1. 公式情報源がある
@@ -95,21 +108,15 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 `G-`形式でない値や空欄では GA4 を読み込みません。`send_page_view: false` で初期化し、アプリ側がページ表示を1回だけ送信します。
 
-実装済みイベント：
+主な実装済みイベント：`page_view`、`course_view`、`area_view`、`spot_view`、`story_view`、`related_content_click`、`plan_start`、`plan_condition_change`、`plan_result_view`、`plan_course_click`、`google_map_click`、`walking_route_click`、`house_ad_impression`、`house_ad_click`、`sponsor_impression`、`sponsor_click`、`affiliate_click`、`advertise_view`、`sponsor_contact_click`、`business_cta_click`、`contact_form_open`。
 
-- `page_view`
-- `search_submit`
-- `filter_apply`
-- `filter_clear`
-- `favorite_change`
-
-個人情報、生のメールアドレス、問い合わせ本文は送信しません。その他の成果イベントは該当機能を実装する Phase で追加します。
+個人情報、生の検索語、メールアドレス、問い合わせ本文、外部URL全文は送信しません。`page_location` からもクエリ文字列とハッシュを除外します。
 
 ## 問い合わせ・広告・アフィリエイト
 
 - 問い合わせ先：公開Googleフォームと補助メールを設定済み
 - スポンサー相談：事業者向けページから同じGoogleフォームへ案内
-- House Ad（自社の「広告募集中」枠）：6 placementで表示
+- House Ad（自社の「広告掲載・スポンサー募集」枠）：6 placementで表示
 - 実スポンサー、アフィリエイトリンク、AdSense実広告：0件
 - AdSense publisher ID、slot ID：未設定（scriptは読み込みません）
 
@@ -127,10 +134,10 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 1. 広告主から、実在する広告主名、見出し、説明、リンク先、掲載位置、対象エリア、掲載期間、画像と掲載許可を確認します。
 2. `src/content/monetization.ts` の `sponsors` に確認済みデータを追加します。画像を使う場合は `public/assets/` 配下へ置き、altも設定します。
-3. `sponsorEnabled` と対象広告の `active` を `true` にします。有効な直接スポンサーがある位置だけ「広告募集中」枠からスポンサー表示へ自動で差し替わります。
+3. `sponsorEnabled` と対象広告の `active` を `true` にします。有効な直接スポンサーがある位置だけ募集枠からスポンサー表示へ自動で差し替わります。サイト全体、各エリア、各コースはそれぞれ1社を上限とします。
 4. `npm run test:all` で期間、対象エリア、リンク、スマホ表示、アクセシビリティを確認してから公開します。
 
-契約前の広告、架空の広告主、未確認のリンクは追加しません。終了日を過ぎたスポンサーや `active: false` のスポンサーは表示せず、「広告募集中」枠へ戻します。
+契約前の広告、架空の広告主、未確認のリンクは追加しません。終了日を過ぎたスポンサーや `active: false` のスポンサーは表示せず、募集枠へ戻します。
 
 スポンサーはエリアと掲載期間を照合し、静的ビルド時に期間内のものだけを書き出します。公開後に期限を過ぎた表示はブラウザ側でも除外します。開始時は必ず設定変更後に再ビルド・公開し、終了時も次回ビルドでデータを整理してください。表示された場合だけIntersectionObserverで50%以上の表示を確認し、GA4が有効なら種別別のimpressionを送ります。House Adは `house_ad_impression` と `house_ad_click`、スポンサーは `sponsor_impression` と `sponsor_click`、affiliateは `ad_impression` と `affiliate_click` を使用します。外部URL全文や個人情報は送りません。
 

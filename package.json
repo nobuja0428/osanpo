@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "quality:check": "node scripts/content-quality.mjs",
+    "quality:check": "node scripts/content-quality.mjs && node scripts/revenue-quality.mjs",
     "test:integrity": "node scripts/site-integrity.mjs",
     "images:optimize": "node scripts/optimize-images.mjs",
     "test:e2e": "npm run build && playwright test --project=chromium",

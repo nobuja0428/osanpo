@@ -1,4 +1,6 @@
 import { businessContactFormUrl } from "@/content/business";
+import inventory from "@/content/monetization-inventory.json";
+import { validateMonetizationInventory } from "../lib/monetization-validation.mjs";
 
 export type MonetizationType = "adsense" | "sponsor" | "affiliate" | "house";
 
@@ -30,6 +32,8 @@ export type SponsorAd = {
   href: string;
   placements: MonetizationPlacement[];
   areaId?: string;
+  contentId?: string;
+  scopeType?: "site" | "area" | "course" | "story";
   startAt?: string;
   endAt?: string;
   active: boolean;
@@ -42,6 +46,7 @@ export type AffiliatePlacement = {
   href: string;
   placements: MonetizationPlacement[];
   areaId?: string;
+  contentId?: string;
   startAt?: string;
   endAt?: string;
   active: boolean;
@@ -123,15 +128,15 @@ export const monetizationConfig: MonetizationConfig = {
     },
   },
   houseAd: {
-    label: "広告募集中",
-    headline: "この広告枠に、地域のお店・サービスを掲載できます。",
-    description: "高円寺・吉祥寺・浅草を歩く人へ、店舗・商品・サービスの魅力を伝える地域スポンサーを募集しています。",
+    label: "広告掲載・スポンサー募集",
+    headline: "この街を歩く人に、お店の魅力を。",
+    description: "高円寺・吉祥寺・浅草を中心に、地域のお店・商品・サービスの掲載相談を受け付けています。",
     ctaLabel: "広告掲載を相談する",
-    footnote: "掲載内容・期間・料金は個別にご案内します。実広告の掲載時は「広告」または「スポンサー」と明示します。",
+    footnote: "掲載内容・期間・料金は個別にご案内します。成果・来店数・売上等を保証するものではありません。実広告は「広告」または「スポンサー」と明示します。",
     href: businessContactFormUrl,
   },
-  sponsors: [],
-  affiliates: [],
+  sponsors: inventory.sponsors as SponsorAd[],
+  affiliates: inventory.affiliates as AffiliatePlacement[],
 };
 
 export type ResolvedSponsor = { type: "sponsor"; item: SponsorAd };
@@ -157,6 +162,20 @@ export function isWithinPublicationWindow(startAt: string | undefined, endAt: st
 
 function areaMatches(itemAreaId: string | undefined, pageAreaId: string | undefined) {
   return !itemAreaId || itemAreaId === pageAreaId;
+}
+
+function contentMatches(itemContentId: string | undefined, pageContentId: string | undefined) {
+  return !itemContentId || itemContentId === pageContentId;
+}
+
+export type MonetizationConfigIssue = { level: "error" | "warning"; code: string; message: string };
+
+export function validateMonetizationConfig(config: MonetizationConfig, now = new Date()): MonetizationConfigIssue[] {
+  const pageTypeByPlacement: Record<MonetizationPlacement, string> = {
+    "home-after-courses": "home", "courses-after-grid": "courses", "course-detail-after-info": "course",
+    "area-detail-after-courses": "area", "spot-detail-end": "spot", "story-middle": "story", "story-end": "story",
+  };
+  return validateMonetizationInventory({ sponsors: config.sponsors, affiliates: config.affiliates, housePlacements: config.housePlacements, pageTypeByPlacement }, now) as MonetizationConfigIssue[];
 }
 
 export function validAdsensePublisherId(value: string) {
@@ -194,7 +213,7 @@ export function houseAdForPlacement(
 
 export function resolveMonetization(
   placement: MonetizationPlacement,
-  options: { areaId?: string; now?: Date } = {},
+  options: { areaId?: string; contentId?: string; now?: Date } = {},
   config: MonetizationConfig = monetizationConfig,
 ): ResolvedMonetization | null {
   if (!config.enabled || !config.placements[placement]) return null;
@@ -205,6 +224,7 @@ export function resolveMonetization(
       item.active
       && item.placements.includes(placement)
       && areaMatches(item.areaId, options.areaId)
+      && contentMatches(item.contentId, options.contentId)
       && isWithinPublicationWindow(item.startAt, item.endAt, now)
       && Boolean(item.name.trim() && item.headline.trim() && item.href.trim()),
     );
@@ -216,6 +236,7 @@ export function resolveMonetization(
       item.active
       && item.placements.includes(placement)
       && areaMatches(item.areaId, options.areaId)
+      && contentMatches(item.contentId, options.contentId)
       && isWithinPublicationWindow(item.startAt, item.endAt, now)
       && Boolean(item.label.trim() && item.href.trim()),
     );

@@ -27,6 +27,10 @@ const themeDefinitions = [
   { key: "cafe", label: "カフェのある散歩", description: "休憩を挟んでゆっくり歩く" },
 ] as const;
 
+const conditionLandingByTheme: Partial<Record<(typeof themeDefinitions)[number]["key"], string>> = {
+  shopping: "/courses/conditions/shopping/",
+};
+
 const contentNames = new Map<string, string>([
   ...areas.map((item): [string, string] => [`area:${item.id}`, item.name]),
   ...courses.map((item): [string, string] => [`course:${item.id}`, item.title]),
@@ -82,7 +86,7 @@ export default function HomePage() {
           <div className="card-grid">{areas.map((area) => <AreaCard area={area} key={area.id} />)}</div>
           <MonetizationSlot placement="home-after-courses" contentId="home" />
           <div className="section-heading spaced-heading"><div><p className="eyebrow">BY INTEREST</p><h2>テーマから探す</h2><p>公開中コースの登録テーマから選べます。</p></div></div>
-          <nav className="theme-link-grid" aria-label="テーマ別コース">{themes.map((theme) => <Link href={`/courses/?mood=${theme.key}`} key={theme.key}><span className="eyebrow">{theme.count} COURSE</span><strong>{theme.label}</strong><span>{theme.description}</span></Link>)}</nav>
+          <nav className="theme-link-grid" aria-label="テーマ別コース">{themes.map((theme) => <Link href={conditionLandingByTheme[theme.key] ?? `/courses/?mood=${theme.key}`} key={theme.key}><span className="eyebrow">{theme.count} COURSE</span><strong>{theme.label}</strong><span>{theme.description}</span></Link>)}</nav>
           <section className="home-map-feature"><div className="section-heading"><div><p className="eyebrow">MAP</p><h2>地図から探す</h2><p>高円寺・吉祥寺・浅草の位置を見ながら、歩きたい街を選べます。</p></div><Link href="/map/">地図ページへ →</Link></div><MapEmbed query={areas.map((area) => area.mapQuery).join(" ")} title="高円寺・吉祥寺・浅草の地図" contentId="tokyo-areas" placement="home-main-map" /><div className="map-area-links" aria-label="エリア別の地図">{areas.map((area) => <Link href={`/areas/${area.id}/`} key={area.id}>{area.name}</Link>)}</div></section>
           <div className="section-heading spaced-heading"><div><p className="eyebrow">EVENTS</p><h2>現在・今後のイベント</h2></div><Link href="/events/">イベント一覧 →</Link></div>
           {currentEvents.length ? <ul className="home-event-list">{currentEvents.map((event) => <li key={event.id}><Link href={`/events/${event.id}/`}><strong>{event.title}</strong><span>{event.venue}</span></Link></li>)}</ul> : <p className="empty-inline-note">現在、確認済みの開催予定イベントはありません。過去の掲載情報はイベント一覧で確認できます。</p>}

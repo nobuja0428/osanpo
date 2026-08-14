@@ -40,7 +40,7 @@ function HouseAdSlot({ item, placement, contentId, areaId }: HouseAdSlotProps) {
   return (
     <aside
       className="monetization-slot monetization-slot-house"
-      aria-label="広告募集中"
+      aria-label={item.label}
       data-monetization-impression={monetizationEvents.house.impression}
       data-ad-type="house"
       data-page-type={pageType}
@@ -67,12 +67,13 @@ function HouseAdSlot({ item, placement, contentId, areaId }: HouseAdSlotProps) {
             rel="noopener noreferrer"
             aria-label={`${item.ctaLabel}（新しいタブで開く）`}
             data-analytics-event={monetizationEvents.house.click}
+            data-analytics-secondary-event="sponsor_contact_click"
             data-ad-type="house"
             data-page-type={pageType}
             data-content-id={contentId}
             data-area-id={areaId ?? ""}
             data-placement={placement}
-            data-contact-type="sponsor-inquiry"
+            data-contact-type="sponsor"
           >
             {item.ctaLabel} <span aria-hidden="true">↗</span>
           </a>
@@ -103,7 +104,7 @@ export function MonetizationSlot({
   config = monetizationConfig,
   now,
 }: MonetizationSlotProps) {
-  const resolved = resolveMonetization(placement, { areaId, now }, config);
+  const resolved = resolveMonetization(placement, { areaId, contentId, now }, config);
   if (!resolved) return null;
 
   if (resolved.type === "house") {

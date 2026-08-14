@@ -3,10 +3,13 @@ import { expect, test } from "@playwright/test";
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfjBa3cxGBrjEUSLEDY8ZkcvFs4xU5PXzNW6CbpZ_0MQgGYyw/viewform?usp=dialog";
 
 test("planner completes five questions, explains results, restores URL, and supports history", async ({ page }) => {
+  const hydrationErrors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error" && /hydration|418/i.test(message.text())) hydrationErrors.push(message.text()); });
   await page.goto("/osanpo/plan/");
   await expect(page.getByRole("heading", { name: "質問1：使える時間" })).toBeVisible();
   await page.getByRole("button", { name: "2時間以内" }).click();
   await page.getByRole("button", { name: "次へ" }).click();
+  await expect(page.getByRole("heading", { name: "質問2：予算" })).toBeFocused();
   await page.getByRole("button", { name: "3,000円以内" }).click();
   await page.getByRole("button", { name: "次へ" }).click();
   await page.getByRole("button", { name: "ひとり" }).click();
@@ -16,6 +19,8 @@ test("planner completes five questions, explains results, restores URL, and supp
   await page.getByLabel("トイレ情報がある").check();
   await page.getByRole("button", { name: "結果を見る" }).click();
   await expect(page.getByRole("heading", { name: "今日のおさんぽ候補" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "今日のおさんぽ候補" })).toBeFocused();
+  expect(hydrationErrors).toEqual([]);
   await expect(page.locator(".planner-result-card")).toHaveCount(3);
   const favorite = page.locator(".planner-result-card [data-favorite-key]").first();
   await favorite.click();

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { areas, courses, spots, stories } from "@/lib/content";
 import { absoluteUrl } from "@/lib/site";
 import { isExpired, verificationFor } from "@/lib/verification";
+import { courseLandings, coursesForLanding } from "@/lib/course-landings";
 
 export const dynamic = "force-static";
 
@@ -35,5 +36,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...courses.filter((course) => !isExpired(verificationFor("course", course.id)!)).map((course) => ({ url: absoluteUrl(`courses/${course.id}/`) })),
     ...spots.filter((spot) => !isExpired(verificationFor("spot", spot.id)!)).map((spot) => ({ url: absoluteUrl(`spots/${spot.id}/`) })),
     ...stories.filter((story) => !isExpired(verificationFor("story", story.id)!)).map((story) => ({ url: absoluteUrl(`stories/${story.id}/`) })),
+    ...courseLandings.filter((landing) => coursesForLanding(landing, courses).length >= 2).map((landing) => ({ url: absoluteUrl(`courses/conditions/${landing.slug}/`) })),
   ];
 }
