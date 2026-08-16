@@ -5,7 +5,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
 import { MonetizationSlot } from "@/components/MonetizationSlot";
-import { areaById, courseById, courses, foodBreaks, imagePath, officialSourcesFor, stories, toilets, transitAccess } from "@/lib/content";
+import { areaById, courseById, courses, foodBreaks, imagePath, officialSourcesFor, spots, stories, toilets, transitAccess } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
@@ -15,6 +15,7 @@ import { CourseSafetySummary } from "@/components/CourseSafetySummary";
 import { RouteCustomizer } from "@/components/RouteCustomizer";
 import { RelatedContent } from "@/components/RelatedContent";
 import { moodLabels } from "@/lib/planner";
+import { PublicStructuredData } from "@/components/PublicStructuredData";
 
 export function generateStaticParams() {
   return courses.map((course) => ({ id: course.id }));
@@ -47,11 +48,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const sources = officialSourcesFor(course.areaId);
   const routeQueries = course.routeStops.map((stop) => stop.query);
   const wholeRouteUrl = mapDirectionsUrl(routeQueries);
-  const relatedCourses = courses.filter((item) => item.id !== course.id).slice(0, 2);
+  const relatedCourses = courses.filter((item) => item.id !== course.id && item.areaId === course.areaId).slice(0, 2);
+  const relatedSpots = spots.filter((spot) => spot.areaId === course.areaId).slice(0, 3);
   const relatedStories = stories.filter((story) => story.areaId === course.areaId).slice(0, 1);
 
   return (
     <main id="main">
+      <PublicStructuredData type="TouristTrip" name={course.title} description={course.summary} path={`courses/${course.id}/`} parent={{ name: "コース", path: "courses/" }} image={imagePath(course.image)} dateModified={verification.lastUpdatedAt} />
       <ContentViewTracker type="course" id={course.id} areaId={course.areaId} />
       <PageHero eyebrow={`${area.name}・モデルコース`} title={course.title} lead={course.summary} crumbs={[{ href: "/courses/", label: "コース" }, { label: course.title }]} />
       <section className="section">
@@ -136,12 +139,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <TrustPanel verification={verification} />
             <div id="course-related">
               <RelatedContent
-                eyebrow="NEXT WALK"
-                title="次に歩くなら"
-                intro="いま見ているコースとは違う街の、公開中モデルコースです。"
+                eyebrow="SAME AREA COURSES"
+                title="同じエリアの別コース"
+                intro="同じ街で公開中の別コースがある場合だけ表示します。"
                 items={relatedCourses.map((item) => ({ href: `/courses/${item.id}/`, eyebrow: areaById(item.areaId)?.name ?? "東京", title: item.title, description: `${item.duration}・${item.distance}・${item.budget}`, contentId: item.id, areaId: item.areaId }))}
                 pageType="course"
                 placement="course-related-courses"
+              />
+              <RelatedContent
+                eyebrow="ROUTE AREA SPOTS"
+                title={`${area.name}の立ち寄りスポット`}
+                items={relatedSpots.map((spot) => ({ href: `/spots/${spot.id}/`, eyebrow: spot.category, title: spot.name, description: spot.excerpt, contentId: spot.id, areaId: spot.areaId }))}
+                pageType="course"
+                placement="course-related-spots"
               />
               <RelatedContent
                 eyebrow="RELATED STORY"
@@ -150,6 +160,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 pageType="course"
                 placement="course-related-stories"
               />
+              <RelatedContent eyebrow="AREA GUIDE" title="この街の歩き方" items={[{ href: `/areas/${area.id}/`, eyebrow: area.ward, title: `${area.name}のエリアガイド`, description: area.description, contentId: area.id, areaId: area.id }]} pageType="course" placement="course-related-area" />
             </div>
           </article>
           <aside className="sidebar-panel" id="course-info">

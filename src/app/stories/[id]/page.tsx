@@ -6,12 +6,13 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { PageHero } from "@/components/PageHero";
 import { TrustPanel } from "@/components/TrustPanel";
 import { MonetizationSlot } from "@/components/MonetizationSlot";
-import { areaById, courses, imagePath, officialSourcesFor, stories, storyById } from "@/lib/content";
+import { areaById, courses, imagePath, officialSourcesFor, spots, stories, storyById } from "@/lib/content";
 import { absoluteUrl, assetUrl } from "@/lib/site";
 import { dateLabel, verificationFor } from "@/lib/verification";
 import { ContentViewTracker } from "@/components/ContentViewTracker";
 import { Fragment } from "react";
 import { RelatedContent } from "@/components/RelatedContent";
+import { PublicStructuredData } from "@/components/PublicStructuredData";
 
 export function generateStaticParams() {
   return stories.map((story) => ({ id: story.id }));
@@ -42,10 +43,12 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
   const showMiddlePlacement = story.sections.length >= 5 || storyCharacterCount >= 1200;
   const middleSectionIndex = Math.ceil(story.sections.length / 2) - 1;
   const relatedCourses = courses.filter((course) => course.areaId === story.areaId).slice(0, 1);
-  const relatedStories = stories.filter((item) => item.id !== story.id).slice(0, 2);
+  const relatedSpots = spots.filter((spot) => spot.areaId === story.areaId).slice(0, 2);
+  const relatedStories = stories.filter((item) => item.id !== story.id && item.areaId === story.areaId).slice(0, 2);
 
   return (
     <main id="main">
+      <PublicStructuredData type="Article" name={story.title} description={story.excerpt} path={`stories/${story.id}/`} parent={{ name: "読み物", path: "stories/" }} image={imagePath(story.image)} dateModified={verification.lastUpdatedAt} />
       <ContentViewTracker type="story" id={story.id} areaId={story.areaId} />
       <PageHero eyebrow={`${area.name}・${story.category}・${story.readTime}`} title={story.title} lead={story.excerpt} crumbs={[{ href: "/stories/", label: "読み物" }, { label: story.title }]} />
       <section className="section">
@@ -70,8 +73,15 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ id
               placement="story-related-course"
             />
             <RelatedContent
+              eyebrow="STOPS IN THIS STORY AREA"
+              title={`${area.name}の関連スポット`}
+              items={relatedSpots.map((spot) => ({ href: `/spots/${spot.id}/`, eyebrow: spot.category, title: spot.name, description: spot.excerpt, contentId: spot.id, areaId: spot.areaId }))}
+              pageType="story"
+              placement="story-related-spots"
+            />
+            <RelatedContent
               eyebrow="KEEP READING"
-              title="関連する読み物"
+              title="同じエリアの読み物"
               items={relatedStories.map((item) => ({ href: `/stories/${item.id}/`, eyebrow: areaById(item.areaId)?.name ?? item.category, title: item.title, description: item.excerpt, contentId: item.id, areaId: item.areaId }))}
               pageType="story"
               placement="story-related-stories"

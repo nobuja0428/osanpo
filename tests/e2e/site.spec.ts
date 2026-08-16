@@ -107,9 +107,11 @@ test("official links are HTTPS external links", async ({ page }) => {
 test("top, area, course, and story pages form a real internal circulation path", async ({ page }) => {
   await page.goto("/osanpo/");
   await page.getByRole("link", { name: "初めての高円寺：商店街と路地を2時間で歩く" }).first().click();
-  await expect(page.getByRole("heading", { name: "次に歩くなら" })).toBeVisible();
-  await page.locator("#course-related").getByRole("link", { name: /吉祥寺/ }).first().click();
-  await expect(page).toHaveURL(/\/osanpo\/courses\/kichijoji-park\/$/);
+  await expect(page.getByRole("heading", { name: "高円寺の立ち寄りスポット" })).toBeVisible();
+  await page.locator("#course-related").getByRole("link", { name: /高円寺純情商店街/ }).click();
+  await expect(page).toHaveURL(/\/osanpo\/spots\/koenji-junjo\/$/);
+  await page.getByRole("link", { name: /初めての高円寺/ }).click();
+  await expect(page).toHaveURL(/\/osanpo\/courses\/koenji-first\/$/);
 
   await page.goto("/osanpo/stories/koenji-shopping-streets/");
   await expect(page.getByRole("heading", { name: "この記事の目次" })).toBeVisible();
@@ -120,4 +122,22 @@ test("top, area, course, and story pages form a real internal circulation path",
   await expect(page.getByText("公開中コース", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "初めての高円寺：商店街と路地を2時間で歩く" }).first().click();
   await expect(page).toHaveURL(/\/osanpo\/courses\/koenji-first\/$/);
+});
+
+test("condition landing pages are unique, useful, and linked to the planner", async ({ page }) => {
+  const cases = [
+    ["solo", "ひとりで楽しむ東京散歩", "3件"],
+    ["shopping", "商店街を楽しむ東京散歩", "2件"],
+  ];
+  for (const [slug, title, count] of cases) {
+    await page.goto(`/osanpo/courses/conditions/${slug}/`);
+    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+    await expect(page.getByText(new RegExp(`${count}$`)).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "30秒診断で条件を組み合わせる" })).toHaveAttribute("href", "/osanpo/plan/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://nobuja0428.github.io/osanpo/courses/conditions/${slug}/`);
+    const structuredData = await page.locator('main script[type="application/ld+json"]').evaluate((element) => element.textContent ?? "");
+    expect(structuredData).toContain("BreadcrumbList");
+    expect(structuredData).toContain("ItemList");
+    await expect(page.locator(".monetization-slot")).toHaveCount(0);
+  }
 });

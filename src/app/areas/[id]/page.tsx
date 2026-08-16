@@ -13,6 +13,7 @@ import { mapDirectionsUrl, mapExternalUrl } from "@/lib/maps";
 import { CourseCardCollection } from "@/components/CourseCardCollection";
 import { RelatedContent } from "@/components/RelatedContent";
 import { MonetizationSlot } from "@/components/MonetizationSlot";
+import { PublicStructuredData } from "@/components/PublicStructuredData";
 
 export function generateStaticParams() {
   return areas.map((area) => ({ id: area.id }));
@@ -44,6 +45,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <main id="main">
+      <PublicStructuredData type="TouristDestination" name={`${area.name}の散歩ガイド`} description={area.description} path={`areas/${area.id}/`} parent={{ name: "エリア", path: "areas/" }} image={imagePath(area.image)} dateModified={verification.lastUpdatedAt} />
       <ContentViewTracker type="area" id={area.id} areaId={area.id} />
       <PageHero eyebrow={area.ward} title={`${area.name}を歩く`} lead={area.description} crumbs={[{ href: "/areas/", label: "エリア" }, { label: area.name }]} />
       <section className="section">

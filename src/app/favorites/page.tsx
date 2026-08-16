@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { FavoritesClient } from "@/components/FavoritesClient";
 import { PageHero } from "@/components/PageHero";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "お気に入り",
+  description: "このブラウザに保存した東京の散歩コース、エリア、スポット、読み物をまとめて確認できます。",
+  alternates: { canonical: absoluteUrl("favorites/") },
   robots: { index: false, follow: true },
 };
 

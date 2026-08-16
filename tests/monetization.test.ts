@@ -22,6 +22,7 @@ const sponsor: SponsorAd = {
   href: "https://sponsor.example/landing",
   placements: ["course-detail-after-info"],
   areaId: "koenji",
+  scopeType: "area",
   startAt: "2026-08-01T00:00:00+09:00",
   endAt: "2026-08-31T23:59:59+09:00",
   active: true,
@@ -33,6 +34,7 @@ const affiliate: AffiliatePlacement = {
   description: "テスト環境だけのaffiliateです。",
   href: "https://affiliate.example/item",
   placements: ["story-end"],
+  contentId: "test-story",
   active: true,
 };
 
@@ -87,18 +89,19 @@ describe("production House Ad defaults", () => {
 
   it("renders a clearly disclosed House Ad and no House Ad in story middle", () => {
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home" }));
-    expect(html).toContain("広告募集中");
-    expect(html).toContain("この広告枠に、地域のお店・サービスを掲載できます。");
-    expect(html).toContain("高円寺・吉祥寺・浅草を歩く人へ、店舗・商品・サービスの魅力を伝える地域スポンサーを募集しています。");
+    expect(html).toContain("広告掲載・スポンサー募集");
+    expect(html).toContain("この街を歩く人に、お店の魅力を。");
+    expect(html).toContain("高円寺・吉祥寺・浅草を中心に、地域のお店・商品・サービスの掲載相談を受け付けています。");
     expect(html).toContain("広告掲載を相談する");
     expect(html).toContain("広告枠・掲載内容を見る");
-    expect(html).toContain("実広告の掲載時は「広告」または「スポンサー」と明示します。");
+    expect(html).toContain("成果・来店数・売上等を保証するものではありません。");
     expect(html).toContain('data-monetization-impression="house_ad_impression"');
     expect(html).toContain('data-analytics-event="house_ad_click"');
+    expect(html).toContain('data-analytics-secondary-event="sponsor_contact_click"');
     expect(html).toContain('data-page-type="home"');
     expect(html).toContain('data-slot-status="recruiting"');
     expect(html).toContain('data-slot-format="responsive"');
-    expect(html).toContain('data-contact-type="sponsor-inquiry"');
+    expect(html).toContain('data-contact-type="sponsor"');
     expect(html).toContain('data-contact-type="advertise-details"');
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
@@ -147,7 +150,8 @@ describe("affiliate and AdSense readiness", () => {
       affiliates: [affiliate],
     };
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "story-end", contentId: "test-story", config }));
-    expect(resolveMonetization("story-end", {}, config)?.type).toBe("affiliate");
+    expect(resolveMonetization("story-end", { contentId: "test-story" }, config)?.type).toBe("affiliate");
+    expect(resolveMonetization("story-end", { contentId: "other-story" }, config)?.type).toBe("house");
     expect(html).toContain("広告");
     expect(html).toContain('data-analytics-event="affiliate_click"');
     expect(html).toContain('rel="noopener noreferrer sponsored"');
@@ -174,7 +178,7 @@ describe("affiliate and AdSense readiness", () => {
     expect(shouldLoadAdsenseScript(missingConsent)).toBe(false);
     expect(resolveMonetization("home-after-courses", {}, missingConsent)?.type).toBe("house");
     const html = renderToStaticMarkup(createElement(MonetizationSlot, { placement: "home-after-courses", contentId: "home", config: missingConsent }));
-    expect(html).toContain("広告募集中");
+    expect(html).toContain("広告掲載・スポンサー募集");
     expect(html).not.toContain("adsbygoogle");
   });
 

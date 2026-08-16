@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 const routes = [
   "/osanpo/", "/osanpo/areas/", "/osanpo/areas/koenji/", "/osanpo/areas/kichijoji/", "/osanpo/areas/asakusa/",
   "/osanpo/courses/", "/osanpo/courses/koenji-first/", "/osanpo/courses/kichijoji-park/", "/osanpo/courses/asakusa-history/",
+  "/osanpo/courses/conditions/solo/", "/osanpo/courses/conditions/shopping/",
   "/osanpo/spots/", "/osanpo/spots/koenji-junjo/", "/osanpo/stories/", "/osanpo/stories/koenji-shopping-streets/", "/osanpo/stories/inokashira-short-walk/", "/osanpo/stories/asakusa-first-hour/",
   "/osanpo/events/", "/osanpo/map/", "/osanpo/plan/", "/osanpo/search/", "/osanpo/favorites/", "/osanpo/editorial-policy/", "/osanpo/operation/", "/osanpo/advertise/", "/osanpo/contact/", "/osanpo/missing-page/",
   "/osanpo/business/", "/osanpo/business/store-page/", "/osanpo/business/website/", "/osanpo/business/support/", "/osanpo/business/examples/", "/osanpo/business/contact/",

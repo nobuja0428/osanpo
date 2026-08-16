@@ -128,6 +128,7 @@ export const businessContact = resolveBusinessContact({
 export const contactSubjects = {
   general: "おさんぽクラブ東京への問い合わせ",
   listing: "店舗掲載についての相談",
+  sponsor: "地域スポンサーについての相談",
   website: "Web・LP制作についての相談",
   support: "サイト更新支援についての相談",
 } as const;

@@ -28,6 +28,15 @@ export function trackEvent(name: string, parameters: Record<string, string | num
   return true;
 }
 
+export function safeAnalyticsLocation(href: string) {
+  try {
+    const url = new URL(href);
+    return `${url.origin}${url.pathname}`;
+  } catch {
+    return "";
+  }
+}
+
 export function Analytics() {
   const pathname = usePathname();
   const lastPath = useRef("");
@@ -38,7 +47,7 @@ export function Analytics() {
     window.gtag("event", "page_view", {
       page_path: pathname,
       page_title: document.title,
-      page_location: window.location.href.split("#")[0],
+      page_location: safeAnalyticsLocation(window.location.href),
     });
   }, [pathname]);
 

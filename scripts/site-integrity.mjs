@@ -6,6 +6,11 @@ const basePath = "/osanpo";
 const publicOrigin = "https://nobuja0428.github.io/osanpo/";
 const failures = [];
 const checkedReferences = new Set();
+const conditionResultSets = new Map();
+const verificationCatalog = JSON.parse(readFileSync(resolve("src/content/verification-data.json"), "utf8"));
+const canonicalOwners = new Map();
+const titleOwners = new Map();
+const descriptionOwners = new Map();
 
 function walk(directory) {
   return readdirSync(directory).flatMap((name) => {
@@ -44,6 +49,42 @@ for (const file of htmlFiles) {
     const canonicalMatches = [...html.matchAll(/<link[^>]+rel=["']canonical["'][^>]*href=["']([^"']+)["']/gi)];
     if (canonicalMatches.length !== 1) fail(`${displayPath}: canonical が1件ではありません (${canonicalMatches.length})`);
     else if (!canonicalMatches[0][1].startsWith(publicOrigin)) fail(`${displayPath}: canonical が正式URLではありません`);
+    else {
+      const canonical = canonicalMatches[0][1];
+      const expected = displayPath === "index.html" ? publicOrigin : `${publicOrigin}${displayPath.replace(/index\.html$/, "")}`;
+      if (canonical !== expected) fail(`${displayPath}: canonical が自己URLではありません (${canonical})`);
+      if (canonicalOwners.has(canonical)) fail(`${displayPath}: canonical が ${canonicalOwners.get(canonical)} と重複しています`);
+      else canonicalOwners.set(canonical, displayPath);
+    }
+    const title = html.match(/<title>([^<]+)<\/title>/i)?.[1]?.trim();
+    const description = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)?.[1]?.trim();
+    if (!title) fail(`${displayPath}: title がありません`);
+    else if (titleOwners.has(title)) fail(`${displayPath}: title が ${titleOwners.get(title)} と重複しています`);
+    else titleOwners.set(title, displayPath);
+    if (!description) fail(`${displayPath}: description がありません`);
+    else if (descriptionOwners.has(description)) fail(`${displayPath}: description が ${descriptionOwners.get(description)} と重複しています`);
+    else descriptionOwners.set(description, displayPath);
+  }
+
+  const publicDetail = /^(?:areas|courses|spots|stories|events)\/[^/]+\/index\.html$/.test(displayPath);
+  const conditionDetail = /^courses\/conditions\/[^/]+\/index\.html$/.test(displayPath);
+  if ((publicDetail || conditionDetail) && !html.includes('"BreadcrumbList"')) fail(`${displayPath}: BreadcrumbList JSON-LD がありません`);
+  if (conditionDetail) {
+    if (!html.includes('"ItemList"')) fail(`${displayPath}: ItemList JSON-LD がありません`);
+    const courseLinks = [...html.matchAll(/href=["'][^"']*\/courses\/([^/"']+)\/["']/g)].map((match) => match[1]).filter((id) => id !== "conditions");
+    const resultSet = [...new Set(courseLinks)].sort();
+    if (resultSet.length < 2) fail(`${displayPath}: 条件LPの実コースが2件未満です`);
+    const signature = resultSet.join(",");
+    if (conditionResultSets.has(signature)) fail(`${displayPath}: ${conditionResultSets.get(signature)} と結果集合が重複しています`);
+    else conditionResultSets.set(signature, displayPath);
+  }
+  const eventMatch = displayPath.match(/^events\/([^/]+)\/index\.html$/);
+  if (eventMatch) {
+    const verification = verificationCatalog[`event:${eventMatch[1]}`];
+    const expired = verification?.expiresAt && new Date(`${verification.expiresAt}T23:59:59+09:00`).getTime() < Date.now();
+    const noindex = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html);
+    if (expired && !noindex) fail(`${displayPath}: 期限切れイベントがnoindexではありません`);
+    if (!expired && noindex) fail(`${displayPath}: 確認期限内イベントがnoindexです`);
   }
 
   const references = [...html.matchAll(/\b(?:href|src)=["']([^"']+)["']/gi)].map((match) => match[1]);

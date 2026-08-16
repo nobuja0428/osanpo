@@ -23,6 +23,8 @@ const script = `
     window.gtag("event", name, parameters);
     const secondaryName = link.dataset.analyticsSecondaryEvent;
     if (secondaryName && /^[a-z][a-z0-9_]{0,39}$/.test(secondaryName)) window.gtag("event", secondaryName, parameters);
+    const tertiaryName = link.dataset.analyticsTertiaryEvent;
+    if (tertiaryName && /^[a-z][a-z0-9_]{0,39}$/.test(tertiaryName)) window.gtag("event", tertiaryName, parameters);
   });
 
   const impressionSent = new WeakSet();

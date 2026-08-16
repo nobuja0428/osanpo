@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "quality:check": "node scripts/content-quality.mjs",
+    "quality:check": "node scripts/content-quality.mjs && node scripts/revenue-quality.mjs",
     "test:integrity": "node scripts/site-integrity.mjs",
     "images:optimize": "node scripts/optimize-images.mjs",
     "test:e2e": "npm run build && playwright test --project=chromium",
@@ -31,7 +31,7 @@
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.5",
     "eslint-config-next": "16.2.12",
-    "lighthouse": "12.6.0",
+    "lighthouse": "13.4.1",
     "typescript": "5.9.3",
     "vitest": "3.2.7"
   },

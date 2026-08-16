@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 import { SearchClient } from "@/components/SearchClient";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "サイト内検索",
   description: "エリア、コース、スポット、読み物を横断検索します。",
+  alternates: { canonical: absoluteUrl("search/") },
   robots: { index: false, follow: true },
 };
 

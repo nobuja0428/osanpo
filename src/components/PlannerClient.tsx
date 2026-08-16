@@ -26,6 +26,8 @@ export function PlannerClient() {
   const [criteria, setCriteria] = useState<PlanCriteria>(emptyPlanCriteria());
   const [step, setStep] = useState(0);
   const completedSignature = useRef<string | null>(null);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const initializedFocus = useRef(false);
   const recommendations = useMemo(() => rankCourses(courses, criteria).slice(0, 3), [criteria]);
 
   useEffect(() => {
@@ -52,6 +54,14 @@ export function PlannerClient() {
       trackEvent("plan_complete", parameters);
     }
   }, [criteria, recommendations.length, step]);
+
+  useEffect(() => {
+    if (!initializedFocus.current) {
+      initializedFocus.current = true;
+      return;
+    }
+    stepHeading.current?.focus();
+  }, [step]);
 
   function write(next: PlanCriteria) {
     setCriteria(next);
@@ -93,7 +103,7 @@ export function PlannerClient() {
 
   if (step === questions.length) return (
     <div className="planner-results">
-      <div className="planner-result-heading"><div><p className="eyebrow">YOUR SANPO PLAN</p><h2>今日のおさんぽ候補</h2><p>{selectedSummary.length ? `選択中：${selectedSummary.join("・")}` : "条件を指定せず、公開中のコースをご案内しています。"}</p></div><button className="button button-secondary" type="button" onClick={reset}>最初からやり直す</button></div>
+      <div className="planner-result-heading"><div><p className="eyebrow">YOUR SANPO PLAN</p><h2 ref={stepHeading} tabIndex={-1}>今日のおさんぽ候補</h2><p aria-live="polite">{selectedSummary.length ? `選択中：${selectedSummary.join("・")}` : "条件を指定せず、公開中のコースをご案内しています。"}</p></div><button className="button button-secondary" type="button" onClick={reset}>最初からやり直す</button></div>
       <div className="planner-result-list">{recommendations.map(({ course, completeMatch, reasons, safety }, index) => {
         const area = areas.find((item) => item.id === course.areaId);
         const routeQueries = course.routeStops.map((stop) => stop.query);
@@ -117,7 +127,7 @@ export function PlannerClient() {
   return (
     <section className="planner-panel" aria-labelledby="planner-question">
       <div className="planner-progress" role="progressbar" aria-label="コース診断の進捗" aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={step + 1} aria-valuetext={`5問中${step + 1}問目`}><span style={{ width: `${((step + 1) / questions.length) * 100}%` }} /></div>
-      <p className="eyebrow">30秒コース診断・{step + 1}/5</p><h2 id="planner-question">質問{step + 1}：{questions[step]}</h2>
+      <p className="eyebrow">30秒コース診断・{step + 1}/5</p><h2 id="planner-question" ref={stepHeading} tabIndex={-1}>質問{step + 1}：{questions[step]}</h2>
       {selectedSummary.length ? <p className="planner-current">現在の選択：{selectedSummary.join("・")}</p> : <p className="planner-current">まだ条件を選択していません。</p>}
       {step === 0 ? optionGroup("duration", durationOptions) : null}
       {step === 1 ? optionGroup("budget", budgetOptions) : null}

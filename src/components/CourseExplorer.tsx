@@ -42,13 +42,13 @@ export function CourseExplorer() {
     return () => window.removeEventListener("popstate", restore);
   }, []);
 
-  function write(next: CourseFilters, action: "apply" | "remove" | "clear", changed = "") {
+  function write(next: CourseFilters, action: "apply" | "remove" | "clear", changed = "", replace = false) {
     setFilters(next);
     const params = new URLSearchParams();
     Object.entries(next).forEach(([key, value]) => {
       if (value) params.set(key, value);
     });
-    window.history.pushState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+    window.history[replace ? "replaceState" : "pushState"](null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
     trackEvent(`course_filter_${action}`, {
       filter_name: changed,
       selected_filter_count: Object.values(next).filter(Boolean).length,
@@ -64,7 +64,7 @@ export function CourseExplorer() {
     <>
       <form className="filter-panel filter-panel-complete" onSubmit={(event) => event.preventDefault()} aria-label="コースを絞り込む">
         <label className="filter-keyword">キーワードから
-          <input value={filters.keyword ?? ""} onChange={(event) => update("keyword", event.target.value)} placeholder="街、商店街、歴史、カフェから探す" />
+          <input value={filters.keyword ?? ""} onChange={(event) => write({ ...filters, keyword: event.target.value }, event.target.value ? "apply" : "remove", "keyword", true)} placeholder="街、商店街、歴史、カフェから探す" />
         </label>
         <label>エリアから
           <select value={filters.area ?? ""} onChange={(event) => update("area", event.target.value)}>

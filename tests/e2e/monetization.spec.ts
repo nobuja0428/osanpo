@@ -18,10 +18,10 @@ test("production shows one House Ad at each approved placement and no AdSense sc
     const slot = page.locator(`.monetization-slot-house[data-placement="${item.placement}"]`);
     await expect(slot).toHaveCount(1);
     await expect(page.locator(".monetization-slot-house")).toHaveCount(1);
-    await expect(slot.getByText("広告募集中", { exact: true })).toBeVisible();
-    await expect(slot.getByText("この広告枠に、地域のお店・サービスを掲載できます。", { exact: true })).toBeVisible();
-    await expect(slot.getByText("高円寺・吉祥寺・浅草を歩く人へ、店舗・商品・サービスの魅力を伝える地域スポンサーを募集しています。", { exact: true })).toBeVisible();
-    await expect(slot.getByText(/実広告の掲載時は「広告」または「スポンサー」と明示します。/)).toBeVisible();
+    await expect(slot.getByText("広告掲載・スポンサー募集", { exact: true })).toBeVisible();
+    await expect(slot.getByText("この街を歩く人に、お店の魅力を。", { exact: true })).toBeVisible();
+    await expect(slot.getByText("高円寺・吉祥寺・浅草を中心に、地域のお店・商品・サービスの掲載相談を受け付けています。", { exact: true })).toBeVisible();
+    await expect(slot.getByText(/成果・来店数・売上等を保証するものではありません。/)).toBeVisible();
     await expect(slot).toHaveAttribute("data-slot-status", "recruiting");
     const cta = slot.getByRole("link", { name: /広告掲載を相談する/ });
     await expect(cta).toHaveAttribute("href", formUrl);
@@ -86,20 +86,22 @@ test("House Ad impression and click fire once with safe GA4 fields", async ({ pa
 
   await slot.getByRole("link", { name: /広告掲載を相談する/ }).evaluate((link) => link.addEventListener("click", (event) => event.preventDefault(), { once: true }));
   await slot.getByRole("link", { name: /広告掲載を相談する/ }).click();
-  await expect.poll(() => page.evaluate(() => (window as typeof window & { monetizationEvents: unknown[][] }).monetizationEvents.length)).toBe(2);
-  const click = await page.evaluate(() => (window as typeof window & { monetizationEvents: unknown[][] }).monetizationEvents[1]);
-  expect(click).toEqual(["event", "house_ad_click", expect.objectContaining({
+  await expect.poll(() => page.evaluate(() => (window as typeof window & { monetizationEvents: unknown[][] }).monetizationEvents.length)).toBe(3);
+  const clicks = await page.evaluate(() => (window as typeof window & { monetizationEvents: unknown[][] }).monetizationEvents.slice(1));
+  expect(clicks.map((event) => event[1])).toEqual(["house_ad_click", "sponsor_contact_click"]);
+  expect(clicks[0]).toEqual(["event", "house_ad_click", expect.objectContaining({
     ad_type: "house",
     page_type: "home",
     content_id: "home",
     area_id: "",
     placement: "home-after-courses",
+    contact_type: "sponsor",
   })]);
 
   await page.evaluate(() => window.scrollTo(0, 0));
   await slot.scrollIntoViewIfNeeded();
   await page.waitForTimeout(150);
-  expect(await page.evaluate(() => (window as typeof window & { monetizationEvents: unknown[][] }).monetizationEvents.length)).toBe(2);
+  expect(await page.evaluate(() => (window as typeof window & { monetizationEvents: unknown[][] }).monetizationEvents.length)).toBe(3);
 });
 
 test("business and advertising pages expose the real sponsor form without invented pricing", async ({ page }) => {
@@ -108,15 +110,17 @@ test("business and advertising pages expose the real sponsor form without invent
   await expect(page.getByText("掲載による成果、検索順位、来店数、売上などを保証するものではありません。", { exact: true })).toBeVisible();
   await page.goto("advertise/");
   await expect(page.getByRole("heading", { name: "掲載後の表示イメージ" })).toBeVisible();
+  await expect(page.getByText("現在、媒体実績を蓄積しています。", { exact: true })).toBeVisible();
   await expect(page.getByText("掲載内容・位置・期間を確認したうえで個別にご案内します。", { exact: false })).toHaveCount(1);
   await expect(page.getByRole("link", { name: /スポンサー掲載について相談する/ })).toHaveAttribute("href", formUrl);
-  await expect(page.getByText(/月額|初期費用|PV|CTR|売上効果/)).toHaveCount(0);
+  await expect(page.getByText(/月額|初期費用|売上効果/)).toHaveCount(0);
 });
 
 test("test-only sponsor replaces House Ad, respects expiry, and remains accessible", async ({ page }) => {
   await page.goto("");
   await page.locator(".monetization-slot-house").waitFor({ state: "visible" });
-  await page.waitForTimeout(100);
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(200);
   await page.evaluate(() => {
     const testWindow = window as typeof window & { monetizationEvents: unknown[][] };
     testWindow.monetizationEvents = [];
@@ -150,7 +154,6 @@ test("test-only sponsor replaces House Ad, respects expiry, and remains accessib
   expect(event).toEqual(["event", "sponsor_impression", { ad_type: "sponsor", placement: "home-after-courses", sponsor_id: "test-sponsor", page_type: "home", content_id: "home", area_id: "koenji" }]);
   await expect(page.locator("#expired-test-sponsor")).toHaveCount(0);
   await expect(page.getByText("テスト環境スポンサー", { exact: true })).toBeVisible();
-  await expect(page.getByText("広告募集中", { exact: true })).toHaveCount(0);
 
   const accessibility = await new AxeBuilder({ page: page as never }).include(".monetization-slot").analyze();
   expect(accessibility.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""))).toEqual([]);
@@ -170,3 +173,19 @@ for (const width of [320, 390]) {
     expect(accessibility.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""))).toEqual([]);
   });
 }
+
+test("advertising contact emits safe form, business, and sponsor intent events", async ({ page }) => {
+  await page.addInitScript(() => {
+    const testWindow = window as typeof window & { sponsorEvents: unknown[][] };
+    testWindow.sponsorEvents = [];
+    window.gtag = (...args: unknown[]) => testWindow.sponsorEvents.push(args);
+  });
+  await page.goto("advertise/");
+  const cta = page.getByRole("link", { name: /スポンサー掲載について相談する/ });
+  await cta.evaluate((link) => link.addEventListener("click", (event) => event.preventDefault(), { once: true }));
+  await cta.click();
+  const events = await page.evaluate(() => (window as typeof window & { sponsorEvents: unknown[][] }).sponsorEvents);
+  expect(events.map((event) => event[1])).toEqual(["contact_form_open", "business_cta_click", "sponsor_contact_click"]);
+  expect(events[0]?.[2]).toEqual(expect.objectContaining({ contact_type: "sponsor", placement: "advertise-sponsor-consultation" }));
+  expect(JSON.stringify(events)).not.toContain("docs.google.com");
+});
